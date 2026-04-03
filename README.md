@@ -38,8 +38,8 @@ O projeto segue o padrão MVVM + Clean Architecture:
  ├── ui (Compose)
  ├── viewmodel
 
- 📦 presentation
- ├── di (Hilt)
+ 📦 di
+ ├── (Hilt)
 
 ✔ Separação clara de responsabilidades
 ✔ Código escalável e testável
