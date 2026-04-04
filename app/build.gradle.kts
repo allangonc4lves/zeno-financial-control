@@ -2,9 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 
-    // Add the Google services Gradle plugin
-    id("com.google.gms.google-services")
-
 }
 
 android {
@@ -14,10 +11,9 @@ android {
             minorApiLevel = 1
         }
     }
-
     defaultConfig {
         applicationId = "br.dev.allan.controlefinanceiro"
-        minSdk = 24
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -60,51 +56,43 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.11.0"))
-
-
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
-    implementation("com.google.firebase:firebase-analytics")
-
-    // Hilt dependencies
-    implementation ("com.google.dagger:hilt-android:2.51.1")
-    annotationProcessor("com.google.dagger:hilt-compiler:2.51.1")
-
-    // Room runtime
-    implementation("androidx.room:room-runtime:2.6.1")
-
-    // Room compiler
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    //Hilt
+    //implementation("com.google.dagger:hilt-android:2.59.2")
+    //ksp("com.google.dagger:hilt-compiler:2.59.2")
+    //implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 
     // Room with coroutines
-    implementation("androidx.room:room-ktx:2.6.1")
+    ////implementation("androidx.room:room-ktx:2.6.1")
+    //ksp("androidx.room:room-compiler:2.5.0")
 
-    // Coroutines Core
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
 
-    // Coroutines Android (para usar com Dispatchers.Main)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    // Lifecycle
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 
-    // Lifecycle ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
+    // Firebase (BOM + libs)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.analytics)
 
-    // Lifecycle Runtime (necessário para coroutines)
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    // Compose
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
 
-    // LiveData (se for usar)
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.4")
-
-    // Firebase BOM (Bill of Materials) para gerenciar versões
-    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
-
-    // Firebase Auth
-    implementation("com.google.firebase:firebase-auth")
-
-    // Cloud Firestore
-    implementation("com.google.firebase:firebase-firestore")
-
-    // Analytics
-    implementation("com.google.firebase:firebase-analytics")
+    // Testes
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
