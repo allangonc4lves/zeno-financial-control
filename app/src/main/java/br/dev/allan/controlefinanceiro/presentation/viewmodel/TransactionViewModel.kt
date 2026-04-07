@@ -14,7 +14,6 @@ import javax.inject.Inject
 class TransactionViewModel @Inject constructor(
     private val repository: TransactionRepository
 ) : ViewModel() {
-
     val transactions = repository.getExpenses()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
