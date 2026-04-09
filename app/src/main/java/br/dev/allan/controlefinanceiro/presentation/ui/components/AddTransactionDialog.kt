@@ -1,15 +1,14 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,12 +19,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,8 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
+import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.TransactionINorEX
-import br.dev.allan.controlefinanceiro.presentation.ui.state.AddTransactionINorEX
 import br.dev.allan.controlefinanceiro.presentation.ui.state.AddTransactionType
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,18 +48,20 @@ fun AddTransactionDialog(
     // Estados básicos
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var instinstallmentCount by remember { mutableStateOf("") }
+    //var instinstallmentCount by remember { mutableStateOf("") }
     var checkTransactionType by remember { mutableStateOf(AddTransactionType.DEFAULT) }
-    var selectedIncomeOrExpense by remember { mutableStateOf(0) }
 
     // Configuração do DatePicker
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
     var showDatePicker by remember { mutableStateOf(false) }
 
     // Configuração do Dropdown de Categorias
-    val categories = listOf("Salario","Alimentação", "Cartão de Crédito", "Transporte", "Lazer", "Saúde", "Outros")
-    var expanded by remember { mutableStateOf(false) }
-    var selectedCategory by remember { mutableStateOf(categories[0]) }
+    var selectedType by remember { mutableStateOf(TransactionINorEX.EXPENSE) }
+    var selectedCategory by remember { mutableStateOf<TransactionCategory?>(null) }
+
+    // Configuração múmero de parcelas
+    var installmentCount by remember { mutableIntStateOf(2) }
+    var showinstallmentCount by remember { mutableStateOf(false) }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -119,15 +119,26 @@ fun AddTransactionDialog(
                 TextTitle("Tipo de transação", MaterialTheme.colorScheme.primary)
 
                 CustomSingleChoiceSegmentedButton(
-                    selectedIncomeOrExpense = selectedIncomeOrExpense,
-                    onSelectionChange = {
-                        selectedIncomeOrExpense = it
+                    selectedIncomeOrExpense = selectedType.ordinal,
+                    onSelectionChange = { index ->
+                        // 1. Atualiza o tipo (Entrada ou Saída) baseado no índice (0 ou 1)
+                        selectedType = TransactionINorEX.entries[index]
+
+                        // 2. Reseta a categoria para null
+                        // Isso é importante para que o Dropdown volte a exibir "Selecione a Categoria"
+                        // e obrigue o usuário a escolher uma categoria válida para o novo tipo selecionado.
+                        selectedCategory = null
                     }
                 )
 
                 //Verifica se está marcado como fixo
                 CustomSwitch(
                     text = "Fixa",
+                    quantityValue = 0,
+                    onQuantityChange = { newCount ->
+                        installmentCount = newCount
+                    },
+                    showQuantity = false,
                     checked = checkTransactionType == AddTransactionType.FIXED,
                     onCheckedChange = { isChecked ->
                         // Se marcar este, automaticamente o outro desmarca porque o estado muda
@@ -135,58 +146,33 @@ fun AddTransactionDialog(
                             if (isChecked) AddTransactionType.FIXED else AddTransactionType.DEFAULT
                     }
                 )
+                Log.i("teste", checkTransactionType.toString())
 
-                if(selectedIncomeOrExpense == 1){
+                if(selectedType.ordinal == 1){
                     CustomSwitch(
                         text = "Parcelado",
+                        quantityValue = installmentCount,
+                        onQuantityChange = { newCount ->
+                            installmentCount = newCount
+                        },
+                        showQuantity = if (checkTransactionType == AddTransactionType.INSTALLMENT) true else false,
+                        //checked = checkTransactionType == AddTransactionType.INSTALLMENT,)
                         checked = checkTransactionType == AddTransactionType.INSTALLMENT,
                         onCheckedChange = { isChecked ->
                             checkTransactionType =
                                 if (isChecked) AddTransactionType.INSTALLMENT else AddTransactionType.DEFAULT
                         }
                     )
-
-                    if (checkTransactionType == AddTransactionType.INSTALLMENT) {
-                        OutlinedTextField(
-                            value = instinstallmentCount,
-                            onValueChange = { instinstallmentCount = it },
-                            label = { Text("Quantidade de parcelas") },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
                 }
 
                 // --- DROPDOWN DE CATEGORIA ---
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCategory,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Categoria") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        categories.forEach { category ->
-                            DropdownMenuItem(
-                                text = { Text(category) },
-                                onClick = {
-                                    selectedCategory = category
-                                    expanded = false
-                                }
-                            )
-                        }
+                CategoryDropdown(
+                    selectedType = selectedType,
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = { category ->
+                        selectedCategory = category
                     }
-                }
+                )
             }
         },
         confirmButton = {
@@ -197,11 +183,11 @@ fun AddTransactionDialog(
                             title = title,
                             amount = amount.toDoubleOrNull() ?: 0.0,
                             date = datePickerState.selectedDateMillis ?: System.currentTimeMillis(),
-                            category = selectedCategory,
+                            category = selectedCategory?.displayName,
                             type = TransactionINorEX.entries[checkTransactionType.ordinal],
-                            isFixed = checkTransactionType == AddTransactionType.FIXED,
+                            isFixed = false,
                             isInstallment = checkTransactionType == AddTransactionType.INSTALLMENT,
-                            installmentCount = instinstallmentCount.toIntOrNull() ?: 0
+                            installmentCount = installmentCount ?: 0
                         )
                     )
                 }

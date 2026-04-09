@@ -36,9 +36,7 @@ import androidx.compose.material.icons.outlined.TheaterComedy
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.ui.graphics.vector.ImageVector
 
-enum class TransactionCategory (val type: TransactionINorEX, val displayName: String, icon: ImageVector) {
-
-
+enum class TransactionCategory (val type: TransactionINorEX, val displayName: String, val icon: ImageVector) {
 
     // --- EXPENSES (Saídas) ---
     CREDIT_CARD_PAYMENT(TransactionINorEX.EXPENSE, "Credit Card", Icons.Outlined.CreditCard),
