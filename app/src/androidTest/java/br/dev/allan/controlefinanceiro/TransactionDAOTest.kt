@@ -36,37 +36,37 @@ class TransactionDaoTest {
     }
 
     @Test
-    fun insertExpense_andReadItBack() = runBlocking {
+    fun insertTransaction_andReadItBack() = runBlocking {
         val expense = TransactionEntity(title = "Teste", amount = 100.0, date = System.currentTimeMillis())
-        dao.insertExpense(expense)
+        dao.insertTransaction(expense)
 
-        val allExpenses = dao.getAllExpenses().first()
+        val allExpenses = dao.getAllTransactions().first()
         assertTrue(allExpenses.isNotEmpty())
         assertEquals("Teste", allExpenses[0].title)
     }
 
     @Test
-    fun updateExpense_changesPersisted() = runBlocking {
+    fun updateTransaction_changesPersisted() = runBlocking {
         val expense = TransactionEntity(title = "Original", amount = 50.0, date = System.currentTimeMillis())
-        dao.insertExpense(expense)
+        dao.insertTransaction(expense)
 
-        val inserted = dao.getAllExpenses().first().first()
+        val inserted = dao.getAllTransactions().first().first()
         val updated = inserted.copy(title = "Atualizado")
-        dao.updateExpense(updated)
+        dao.updateTransaction(updated)
 
-        val allExpenses = dao.getAllExpenses().first()
+        val allExpenses = dao.getAllTransactions().first()
         assertEquals("Atualizado", allExpenses[0].title)
     }
 
     @Test
-    fun deleteExpense_removesFromDatabase() = runBlocking {
+    fun deleteTransaction_removesFromDatabase() = runBlocking {
         val expense = TransactionEntity(title = "Apagar", amount = 10.0, date = System.currentTimeMillis())
-        dao.insertExpense(expense)
+        dao.insertTransaction(expense)
 
-        val inserted = dao.getAllExpenses().first().first()
-        dao.deleteExpense(inserted)
+        val inserted = dao.getAllTransactions().first().first()
+        dao.deleteTransaction(inserted)
 
-        val allExpenses = dao.getAllExpenses().first()
+        val allExpenses = dao.getAllTransactions().first()
         assertTrue(allExpenses.isEmpty())
     }
 }

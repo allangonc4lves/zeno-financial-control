@@ -11,14 +11,14 @@ import javax.inject.Inject
 class TransactionRepository @Inject constructor(private val dao: TransactionDao) {
 
     fun getTransactions(): Flow<List<Transaction>> =
-        dao.getAllExpenses().map { list -> list.map { it.toDomain() } }
+        dao.getAllTransactions().map { list -> list.map { it.toDomain() } }
 
     suspend fun insertTransaction(transaction: Transaction) =
-        dao.insertExpense(transaction.toEntity())
+        dao.insertTransaction(transaction.toEntity())
 
     suspend fun updateTransaction(transaction: Transaction) =
-        dao.updateExpense(transaction.toEntity())
+        dao.updateTransaction(transaction.toEntity())
 
     suspend fun deleteTransaction(transaction: Transaction) =
-        dao.deleteExpense(transaction.toEntity())
+        dao.deleteTransaction(transaction.toEntity())
 }

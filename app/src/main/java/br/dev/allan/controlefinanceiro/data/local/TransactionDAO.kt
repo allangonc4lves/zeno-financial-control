@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY date DESC")
-    fun getAllExpenses(): Flow<List<TransactionEntity>>
+    fun getAllTransactions(): Flow<List<TransactionEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertExpense(transaction: TransactionEntity)
+    suspend fun insertTransaction(transaction: TransactionEntity)
 
     @Update
-    suspend fun updateExpense(transaction: TransactionEntity)
+    suspend fun updateTransaction(transaction: TransactionEntity)
 
     @Delete
-    suspend fun deleteExpense(transaction: TransactionEntity)
+    suspend fun deleteTransaction(transaction: TransactionEntity)
 }
