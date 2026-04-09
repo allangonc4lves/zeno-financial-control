@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.data.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.model.TransactionINorEX
-import br.dev.allan.controlefinanceiro.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -16,8 +15,9 @@ import javax.inject.Inject
 class TransactionViewModel @Inject constructor(
     private val repository: TransactionRepository
 ) : ViewModel() {
-    val transactions = repository.getExpenses()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val transactions = repository.getTransactions()
+        .stateIn(viewModelScope, SharingStarted
+        .WhileSubscribed(5000), emptyList())
 
     fun addTransaction(
         title: String,

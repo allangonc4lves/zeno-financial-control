@@ -133,7 +133,7 @@ fun AddTransactionDialog(
 
                 //Verifica se está marcado como fixo
                 CustomSwitch(
-                    text = "Fixa",
+                    text = "Transação Fixa",
                     quantityValue = 0,
                     onQuantityChange = { newCount ->
                         installmentCount = newCount
@@ -150,7 +150,7 @@ fun AddTransactionDialog(
 
                 if(selectedType.ordinal == 1){
                     CustomSwitch(
-                        text = "Parcelado",
+                        text = "Parceladas",
                         quantityValue = installmentCount,
                         onQuantityChange = { newCount ->
                             installmentCount = newCount
@@ -189,6 +189,7 @@ fun AddTransactionDialog(
                             isInstallment = checkTransactionType == AddTransactionType.INSTALLMENT,
                             installmentCount = installmentCount ?: 0
                         )
+
                     )
                 }
             ) {

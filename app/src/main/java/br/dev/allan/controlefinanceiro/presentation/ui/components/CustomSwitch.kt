@@ -2,7 +2,9 @@ package br.dev.allan.controlefinanceiro.presentation.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,7 +57,7 @@ fun CustomSwitch(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = text, color = MaterialTheme.colorScheme.primary)
+        TextContent(text = text, color = MaterialTheme.colorScheme.primary)
 
         if (showQuantity) {
             OutlinedTextField(
@@ -67,21 +69,27 @@ fun CustomSwitch(
                         newValue.toIntOrNull()?.let { onQuantityChange(it) }
                     }
                 },
-                modifier = Modifier.fillMaxWidth(0.6f),
-                    //.padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.6f),
                 leadingIcon = {
                     IconButton(onClick = { if (quantityValue > 2) onQuantityChange(quantityValue - 1) }) {
-                        Icon(Icons.Default.Remove, contentDescription = "Diminuir")
+                        Icon(
+                            Icons.Default.Remove,
+                            contentDescription = "Diminuir",
+                            modifier = Modifier.size(14.dp))
                     }
                 },
                 trailingIcon = {
                     IconButton(onClick = { onQuantityChange(quantityValue + 1) }) {
-                        Icon(Icons.Default.Add, contentDescription = "Aumentar")
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Aumentar",
+                            modifier = Modifier.size(14.dp))
                     }
                 },
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(32.dp),
                 singleLine = true
             )
         }

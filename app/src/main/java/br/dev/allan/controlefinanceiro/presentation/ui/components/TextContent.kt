@@ -6,11 +6,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TexContent(
+fun TextContent(
     text: String,
     color: Color,
     startPadding: Int = 0
@@ -20,5 +21,5 @@ fun TexContent(
     color = color,
     maxLines = 1,
     overflow = TextOverflow.Ellipsis,
-    style = MaterialTheme.typography.bodySmall)
+    style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
 }

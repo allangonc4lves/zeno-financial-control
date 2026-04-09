@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class TransactionRepository @Inject constructor(private val dao: TransactionDao) {
 
-    fun getExpenses(): Flow<List<Transaction>> =
+    fun getTransactions(): Flow<List<Transaction>> =
         dao.getAllExpenses().map { list -> list.map { it.toDomain() } }
 
     suspend fun insertTransaction(transaction: Transaction) =
