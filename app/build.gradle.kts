@@ -75,6 +75,9 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
 
+    // DataStore
+    implementation(libs.datastore.preferences)
+
     // Firebase (BOM + libs)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)

@@ -18,6 +18,7 @@ googleServices = "4.4.4"
 hiltNavigationCompose = "1.2.0"
 compose-material = "1.10.6"
 compose-icons = "1.7.8"
+datastore = "1.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +30,9 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# DataStore
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 
 # Lifecycle
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
