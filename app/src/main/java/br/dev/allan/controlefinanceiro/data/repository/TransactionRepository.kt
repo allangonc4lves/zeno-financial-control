@@ -10,6 +10,9 @@ import javax.inject.Inject
 
 class TransactionRepository @Inject constructor(private val dao: TransactionDao) {
 
+    fun getTotalExpensesByMonth(start: Long, end: Long) = dao.getTotalExpensesByMonth(start, end)
+    fun getTotalIncomesByMonth(start: Long, end: Long) = dao.getTotalIncomesByMonth(start, end)
+
     fun getTransactions(): Flow<List<Transaction>> =
         dao.getAllTransactions().map { list -> list.map { it.toDomain() } }
 
