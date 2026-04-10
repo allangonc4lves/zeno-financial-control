@@ -57,88 +57,82 @@ fun MonthSelector(
 
     Row(
         modifier = Modifier
-            .fillMaxWidth(1f)
+            .fillMaxWidth()
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable { expanded = true }
+        // 1. Removido o fillMaxWidth daqui para o container não ocupar a tela toda
+        // e o menu não se perder na esquerda.
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // Aqui usamos o year do selectedMonth para o display principal ser sempre o real
-            CustomTextTitle(
-                text = "$currentMonthName ${selectedMonth.year}",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier
-        ) {
-            // 1. CABEÇALHO FIXO (Não rola)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { yearInMenu-- }) {
-                    Icon(
-                        Icons.Default.KeyboardArrowLeft,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp))
+            // 2. Usamos um Box para ser a "âncora" exata do menu
+            Box(contentAlignment = Alignment.Center) {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { expanded = true }
+                ) {
+                    CustomTextTitle(
+                        text = "$currentMonthName ${selectedMonth.year}",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                 }
-                CustomTextTitle(
-                    text = yearInMenu.toString(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                IconButton(onClick = { yearInMenu++ }) {
-                    Icon(
-                        Icons.Default.KeyboardArrowRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp))
-                }
-            }
 
-            HorizontalDivider()
+                // O DropdownMenu agora sabe que deve abrir em relação ao Box centralizado
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    // Opcional: ajuste fino de posição se necessário
+                    // offset = DpOffset(x = 0.dp, y = 4.dp),
+                    modifier = Modifier
+                ) {
+                    // ... (seu conteúdo do menu: Cabeçalho, Divider e Column de meses)
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { yearInMenu-- }) {
+                            Icon(Icons.Default.KeyboardArrowLeft, null, modifier = Modifier.size(18.dp))
+                        }
+                        CustomTextTitle(text = yearInMenu.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        IconButton(onClick = { yearInMenu++ }) {
+                            Icon(Icons.Default.KeyboardArrowRight, null, modifier = Modifier.size(18.dp))
+                        }
+                    }
 
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 220.dp) // Define a altura máxima da lista
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                java.time.Month.entries.forEach { month ->
-                    val isSelected =
-                        month == selectedMonth.month && yearInMenu == selectedMonth.year
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = month.getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
-                                    .replaceFirstChar { it.uppercase() },
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Unspecified,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        onClick = {
-                            onMonthChange(YearMonth.of(yearInMenu, month))
-                            expanded = false
-                        },
-                        leadingIcon = {
-                            if (isSelected) Icon(
-                                Icons.Default.Check,
-                                null,
-                                modifier = Modifier.size(18.dp)
+                    HorizontalDivider()
+
+                    Column(
+                        modifier = Modifier
+                            .heightIn(max = 220.dp)
+                            .verticalScroll(rememberScrollState()),
+                    ) {
+                        java.time.Month.entries.forEach { month ->
+                            val isSelected = month == selectedMonth.month && yearInMenu == selectedMonth.year
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = month.getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
+                                            .replaceFirstChar { it.uppercase() },
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Unspecified,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                },
+                                onClick = {
+                                    onMonthChange(YearMonth.of(yearInMenu, month))
+                                    expanded = false
+                                },
+                                leadingIcon = {
+                                    if (isSelected) Icon(Icons.Default.Check, null, modifier = Modifier.size(18.dp))
+                                }
                             )
                         }
-                    )
+                    }
                 }
             }
         }
