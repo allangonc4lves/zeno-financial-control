@@ -18,10 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.TransactionINorEX
+import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryDropdown(
+fun CustomDropdown(
     selectedType: TransactionINorEX,
     selectedCategory: TransactionCategory?,
     onCategorySelected: (TransactionCategory) -> Unit
@@ -31,21 +32,22 @@ fun CategoryDropdown(
     // Filtra as categorias do Enum baseando-se no tipo (Income/Expense)
     // O 'remember(selectedType)' garante que a lista só mude se o tipo mudar
     val availableCategories = remember(selectedType) {
-        TransactionCategory.entries.filter { it.type == selectedType }
+        TransactionCategory.entries.filter { it.getAppearance().type == selectedType }
     }
+
+    val selectedAppearance = selectedCategory?.getAppearance()
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
-            value = selectedCategory?.displayName ?: "Selecione a Categoria",
+            value = selectedAppearance?.displayName ?: "Selecione a Categoria",
             onValueChange = {},
             readOnly = true,
             label = { Text("Categoria") },
-            // Mostra o ícone da categoria selecionada no campo de texto (opcional, mas fica legal)
-            leadingIcon = selectedCategory?.let {
-                { Icon(it.icon, contentDescription = null) }
+            leadingIcon = selectedAppearance?.let { appearance ->
+                { Icon(appearance.icon, contentDescription = null) }
             },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
@@ -59,16 +61,17 @@ fun CategoryDropdown(
             onDismissRequest = { expanded = false }
         ) {
             availableCategories.forEach { category ->
+                val appearance = category.getAppearance()
                 DropdownMenuItem(
-                    text = { Text(category.displayName) },
+                    text = { Text(appearance.displayName) },
                     onClick = {
                         onCategorySelected(category)
                         expanded = false
                     },
                     leadingIcon = {
                         Icon(
-                            imageVector = category.icon,
-                            contentDescription = category.displayName
+                            imageVector = appearance.icon,
+                            contentDescription = appearance.displayName
                         )
                     }
                 )

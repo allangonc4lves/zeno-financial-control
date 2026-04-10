@@ -35,7 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.TransactionINorEX
-import br.dev.allan.controlefinanceiro.presentation.ui.state.AddTransactionType
+import br.dev.allan.controlefinanceiro.presentation.ui.model.AddTransactionType
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -43,7 +43,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
-fun AddTransactionDialog(
+fun TransactionDialogAdd(
     onDismiss: () -> Unit,
     onConfirm: (Transaction) -> Unit,
     viewModel: TransactionViewModel = hiltViewModel(),
@@ -77,7 +77,7 @@ fun AddTransactionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { TextTitle("Cadastro de transação", MaterialTheme.colorScheme.primary) },
+        title = { CustomTextTitle("Cadastro de transação", MaterialTheme.colorScheme.primary) },
         text = {
             Column(
                 modifier = Modifier
@@ -117,7 +117,7 @@ fun AddTransactionDialog(
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
-                TextTitle("Tipo de transação", MaterialTheme.colorScheme.primary)
+                CustomTextTitle("Tipo de transação", MaterialTheme.colorScheme.primary)
 
                 CustomSingleChoiceSegmentedButton(
                     selectedIncomeOrExpense = selectedType.ordinal,
@@ -165,7 +165,7 @@ fun AddTransactionDialog(
                 }
 
                 // --- DROPDOWN DE CATEGORIA ---
-                CategoryDropdown(
+                CustomDropdown(
                     selectedType = selectedType,
                     selectedCategory = selectedCategory,
                     onCategorySelected = { category ->
@@ -182,7 +182,7 @@ fun AddTransactionDialog(
                         title = title,
                         amount = amount.toDoubleOrNull() ?: 0.0,
                         date = datePickerState.selectedDateMillis ?: System.currentTimeMillis(),
-                        category = selectedCategory?.name ?: "OTHERS_EXPENSE", // Passa apenas o nome
+                        category = selectedCategory ?: TransactionCategory.OTHERS_EXPENSE,
                         isFixed = checkTransactionType == AddTransactionType.FIXED,
                         isInstallment = checkTransactionType == AddTransactionType.INSTALLMENT,
                         installmentCount = if (checkTransactionType == AddTransactionType.INSTALLMENT) {

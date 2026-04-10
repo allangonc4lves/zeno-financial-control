@@ -3,7 +3,6 @@ package br.dev.allan.controlefinanceiro.presentation.ui.components
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -19,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FABCustomBottomAppBar(){
+fun CustomFabBottomBar(){
     var showDialog by remember { mutableStateOf(false) }
 
     FloatingActionButton(
@@ -40,7 +39,7 @@ fun FABCustomBottomAppBar(){
     }
 
     if (showDialog) {
-        AddTransactionDialog(
+        TransactionDialogAdd(
             onDismiss = { showDialog = false },
             onConfirm = { transaction ->
                 showDialog = false

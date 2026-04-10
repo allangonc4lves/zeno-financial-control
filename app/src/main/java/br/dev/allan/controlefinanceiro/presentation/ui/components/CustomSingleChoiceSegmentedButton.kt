@@ -5,7 +5,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import br.dev.allan.controlefinanceiro.presentation.ui.state.AddTransactionINorEX
+import br.dev.allan.controlefinanceiro.presentation.ui.model.AddTransactionINorEX
 
 @Composable
 fun CustomSingleChoiceSegmentedButton(

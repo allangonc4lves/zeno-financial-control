@@ -7,7 +7,7 @@ data class Transaction(
     val title: String,
     val amount: Double,
     val date: Long,
-    val category: String? = null,
+    val category: TransactionCategory,
     val isFixed: Boolean = false,
     val isInstallment: Boolean = false,
     val installmentCount: Int = 0,
