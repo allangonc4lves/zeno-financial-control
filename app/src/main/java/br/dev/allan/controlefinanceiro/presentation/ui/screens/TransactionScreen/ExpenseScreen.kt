@@ -27,8 +27,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.hilt.navigation.compose.hiltViewModel
-import br.dev.allan.controlefinanceiro.domain.model.TransactionINorEX
-import br.dev.allan.controlefinanceiro.domain.model.TransactionType
 
 @Composable
 fun ExpenseScreen(viewModel: TransactionViewModel = hiltViewModel()) {

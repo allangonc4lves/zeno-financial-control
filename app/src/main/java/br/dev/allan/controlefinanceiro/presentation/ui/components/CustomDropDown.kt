@@ -17,13 +17,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
-import br.dev.allan.controlefinanceiro.domain.model.TransactionINorEX
+import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomDropdown(
-    selectedType: TransactionINorEX,
+    selectedType: TransactionDirection,
     selectedCategory: TransactionCategory?,
     onCategorySelected: (TransactionCategory) -> Unit
 ) {

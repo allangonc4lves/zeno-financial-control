@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
-import br.dev.allan.controlefinanceiro.domain.model.TransactionINorEX
-import br.dev.allan.controlefinanceiro.presentation.ui.model.AddTransactionType
+import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
+import br.dev.allan.controlefinanceiro.domain.model.TransactionType
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -51,14 +51,14 @@ fun TransactionDialogAdd(
     // Estados básicos
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var checkTransactionType by remember { mutableStateOf(AddTransactionType.DEFAULT) }
+    var checkTransactionType by remember { mutableStateOf(TransactionType.DEFAULT) }
 
     // Configuração do DatePicker
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
     var showDatePicker by remember { mutableStateOf(false) }
 
     // Configuração do Dropdown de Categorias
-    var selectedType by remember { mutableStateOf(TransactionINorEX.EXPENSE) }
+    var selectedType by remember { mutableStateOf(TransactionDirection.EXPENSE) }
     var selectedCategory by remember { mutableStateOf<TransactionCategory?>(null) }
 
     // Configuração múmero de parcelas
@@ -123,7 +123,7 @@ fun TransactionDialogAdd(
                     selectedIncomeOrExpense = selectedType.ordinal,
                     onSelectionChange = { index ->
                         // 1. Atualiza o tipo (Entrada ou Saída) baseado no índice (0 ou 1)
-                        selectedType = TransactionINorEX.entries[index]
+                        selectedType = TransactionDirection.entries[index]
 
                         // 2. Reseta a categoria para null
                         // Isso é importante para que o Dropdown volte a exibir "Selecione a Categoria"
@@ -140,11 +140,11 @@ fun TransactionDialogAdd(
                         installmentCount = newCount
                     },
                     showQuantity = false,
-                    checked = checkTransactionType == AddTransactionType.FIXED,
+                    checked = checkTransactionType == TransactionType.FIXED,
                     onCheckedChange = { isChecked ->
                         // Se marcar este, automaticamente o outro desmarca porque o estado muda
                         checkTransactionType =
-                            if (isChecked) AddTransactionType.FIXED else AddTransactionType.DEFAULT
+                            if (isChecked) TransactionType.FIXED else TransactionType.DEFAULT
                     }
                 )
 
@@ -155,11 +155,11 @@ fun TransactionDialogAdd(
                         onQuantityChange = { newCount ->
                             installmentCount = newCount
                         },
-                        showQuantity = if (checkTransactionType == AddTransactionType.INSTALLMENT) true else false,
-                        checked = checkTransactionType == AddTransactionType.INSTALLMENT,
+                        showQuantity = if (checkTransactionType == TransactionType.INSTALLMENT) true else false,
+                        checked = checkTransactionType == TransactionType.INSTALLMENT,
                         onCheckedChange = { isChecked ->
                             checkTransactionType =
-                                if (isChecked) AddTransactionType.INSTALLMENT else AddTransactionType.DEFAULT
+                                if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT
                         }
                     )
                 }
@@ -183,9 +183,9 @@ fun TransactionDialogAdd(
                         amount = amount.toDoubleOrNull() ?: 0.0,
                         date = datePickerState.selectedDateMillis ?: System.currentTimeMillis(),
                         category = selectedCategory ?: TransactionCategory.OTHERS_EXPENSE,
-                        isFixed = checkTransactionType == AddTransactionType.FIXED,
-                        isInstallment = checkTransactionType == AddTransactionType.INSTALLMENT,
-                        installmentCount = if (checkTransactionType == AddTransactionType.INSTALLMENT) {
+                        isFixed = checkTransactionType == TransactionType.FIXED,
+                        isInstallment = checkTransactionType == TransactionType.INSTALLMENT,
+                        installmentCount = if (checkTransactionType == TransactionType.INSTALLMENT) {
                             if (installmentCount in 2..360) installmentCount else 2
                         } else {
                             0

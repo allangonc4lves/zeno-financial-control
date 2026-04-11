@@ -5,7 +5,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import br.dev.allan.controlefinanceiro.presentation.ui.model.AddTransactionINorEX
+import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 
 @Composable
 fun CustomSingleChoiceSegmentedButton(
@@ -15,7 +15,7 @@ fun CustomSingleChoiceSegmentedButton(
     val options = listOf("Entrada", "Saída")
 
     SingleChoiceSegmentedButtonRow {
-        val selected = if (selectedIncomeOrExpense == 0) AddTransactionINorEX.INCOME else AddTransactionINorEX.EXPENSE
+        val selected = if (selectedIncomeOrExpense == 0) TransactionDirection.INCOME else TransactionDirection.EXPENSE
         options.forEachIndexed { index, label ->
             SegmentedButton(
                 shape = SegmentedButtonDefaults.itemShape(
