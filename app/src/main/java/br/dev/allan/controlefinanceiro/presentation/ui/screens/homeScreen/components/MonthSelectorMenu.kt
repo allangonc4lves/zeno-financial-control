@@ -42,7 +42,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-fun MonthSelector(
+fun MonthSelectorMenu(
     selectedMonth: YearMonth,
     onMonthChange: (YearMonth) -> Unit
 ) {

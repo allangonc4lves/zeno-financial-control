@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.viewmodel
+package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,7 +7,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.data.settings.SettingsManager
-import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
 import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
@@ -25,11 +24,10 @@ import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
-class TransactionViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val repository: TransactionRepository,
     private val settingsManager: SettingsManager
 ) : ViewModel() {
-
     val isBalanceVisible = settingsManager.isBalanceVisible
         .stateIn(
             scope = viewModelScope,
@@ -52,14 +50,14 @@ class TransactionViewModel @Inject constructor(
         return Pair(start, end)
     }
 
-    // Flow para o Total de Despesas
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val totalExpenses: StateFlow<Double> = snapshotFlow { selectedMonth }
         .flatMapLatest { month ->
             val (start, end) = getMonthRange(month)
             repository.getTotalExpensesByMonth(start, end)
         }
-        .map { value: Double? -> value ?: 0.0 } // Especificamos o tipo (Double?) aqui
+        .map { value: Double? -> value ?: 0.0 }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Companion.WhileSubscribed(5000),
@@ -72,7 +70,7 @@ class TransactionViewModel @Inject constructor(
             val (start, end) = getMonthRange(month)
             repository.getTotalIncomesByMonth(start, end)
         }
-        .map { value: Double? -> value ?: 0.0 } // Especificamos o tipo (Double?) aqui
+        .map { value: Double? -> value ?: 0.0 }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Companion.WhileSubscribed(5000),
@@ -100,11 +98,10 @@ class TransactionViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val chartData: StateFlow<Map<CategoryAppearance, Double>> = snapshotFlow { selectedMonth }
         .flatMapLatest { month ->
-            val (start, end) = getMonthRange(month) // Agora start e end existem aqui dentro!
+            val (start, end) = getMonthRange(month)
             repository.getExpensesByCategory(start, end)
         }
         .map { list ->
-            // Converte a lista do banco para o Map que a UI espera
             list.associate { item ->
                 item.category.getAppearance() to item.total
             }
@@ -114,15 +111,5 @@ class TransactionViewModel @Inject constructor(
             started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = emptyMap()
         )
-    fun addTransaction(transaction: Transaction) {
-        viewModelScope.launch { repository.insertTransaction(transaction) }
-    }
 
-    fun updateTransaction(transaction: Transaction) {
-        viewModelScope.launch { repository.updateTransaction(transaction) }
-    }
-
-    fun deleteTransaction(transaction: Transaction) {
-        viewModelScope.launch { repository.deleteTransaction(transaction) }
-    }
 }

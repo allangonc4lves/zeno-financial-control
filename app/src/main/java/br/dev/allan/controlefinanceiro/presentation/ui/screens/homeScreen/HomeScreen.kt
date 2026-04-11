@@ -23,16 +23,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.CategoryChartCard
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.ExpensesByCategoryCard
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoDrawBoxTop
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.FinancialSummaryCard
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.TotalExpAndIncByMonthCard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -41,10 +39,9 @@ import java.util.Locale
 fun HomeScreen(
     onNavigateToTransactions: () -> Unit,
     onNavigateToReports: () -> Unit,
-    viewModel: TransactionViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val transactions by viewModel.transactions.collectAsState()
-
     val totalExpenses by viewModel.totalExpenses.collectAsState()
     val totalIncomes by viewModel.totalIncomes.collectAsState()
     val totalBalance by viewModel.totalBalance.collectAsState()
@@ -58,7 +55,7 @@ fun HomeScreen(
     ) {
         item {
             ZenoDrawBoxTop {
-                FinancialSummaryCard(
+                TotalExpAndIncByMonthCard(
                     totalBalance,
                     totalIncomes,
                     totalExpenses,
@@ -69,14 +66,13 @@ fun HomeScreen(
         }
 
         item {
-            CategoryChartCard(expensesMap)
+            ExpensesByCategoryCard(expensesMap)
         }
 
         item {
             Spacer(modifier = Modifier.size(16.dp))
             CustomTextTitle("Últimas atividades", Color.Black, 16)
         }
-
 
         items(transactions) { item ->
             val appearance = item.category.getAppearance()

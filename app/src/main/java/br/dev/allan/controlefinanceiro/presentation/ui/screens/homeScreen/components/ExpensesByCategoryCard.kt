@@ -24,7 +24,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
 
 @Composable
-fun CategoryChartCard(expensesByCategory: Map<CategoryAppearance, Double>) {
+fun ExpensesByCategoryCard(expensesByCategory: Map<CategoryAppearance, Double>) {
     CustomCard {
         Row(
             modifier = Modifier

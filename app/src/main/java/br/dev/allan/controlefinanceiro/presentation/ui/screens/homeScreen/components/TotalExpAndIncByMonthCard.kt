@@ -25,19 +25,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.HomeViewModel
 import kotlinx.coroutines.launch
 import java.time.YearMonth
 
 @Composable
-fun FinancialSummaryCard(
+fun TotalExpAndIncByMonthCard(
     totalBalance: Double,
     totalIncomes: Double,
     totalExpenses: Double,
     selectedMonth: YearMonth,
-    viewModel: TransactionViewModel = hiltViewModel(),
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    // Coleta o estado do DataStore
     val isVisible by viewModel.isBalanceVisible.collectAsState()
 
     val scope = rememberCoroutineScope()
@@ -48,15 +47,13 @@ fun FinancialSummaryCard(
                 .fillMaxWidth()
                 .padding(4.dp)
         ) {
-            // 1. O Seletor e o Ícone de Visibilidade
             Box(modifier = Modifier.fillMaxWidth()) {
-                MonthSelector(
+                MonthSelectorMenu(
                     selectedMonth = selectedMonth,
                     onMonthChange = { newMonth -> viewModel.updateMonth(newMonth) }
                 )
             }
 
-            // 2. Saldo Total
             Column(
                 modifier = Modifier
                     .padding(4.dp)
@@ -92,7 +89,6 @@ fun FinancialSummaryCard(
                 )
             }
 
-            // 3. Receitas e Despesas
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -100,7 +96,6 @@ fun FinancialSummaryCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                // Coluna Receitas
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Receitas", style = MaterialTheme.typography.labelMedium)
                     Text(
@@ -114,8 +109,6 @@ fun FinancialSummaryCard(
                         fontWeight = FontWeight.Medium
                     )
                 }
-
-                // Coluna Despesas
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Despesas", style = MaterialTheme.typography.labelMedium)
                     Text(
