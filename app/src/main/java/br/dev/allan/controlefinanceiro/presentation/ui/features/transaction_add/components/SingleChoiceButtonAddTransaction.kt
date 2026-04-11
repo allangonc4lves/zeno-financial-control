@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 
 @Composable
-fun CustomSingleChoiceSegmentedButton(
+fun SingleChoiceButtonAddTransaction(
     selectedIncomeOrExpense: Int,
     onSelectionChange: (Int) -> Unit
 ) {

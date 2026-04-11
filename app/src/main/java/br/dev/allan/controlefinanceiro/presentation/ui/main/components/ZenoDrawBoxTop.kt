@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
-fun DrawBoxTop(content: @Composable () -> Unit) {
+fun ZenoDrawBoxTop(content: @Composable () -> Unit) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
     val configuration = LocalConfiguration.current

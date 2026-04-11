@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun CustomTextField(
-    modifier: Modifier = Modifier,
     readOnly: Boolean,
     value: String,
     onValueChange: (String) -> Unit,
@@ -43,7 +42,7 @@ fun CustomTextField(
 
     val focusManager = LocalFocusManager.current
 
-    Column(modifier = modifier) {
+    Column() {
         TextField(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
@@ -107,7 +106,6 @@ fun CustomTextField(
 
 @Composable
 fun CustomOutlinedTextField(
-    modifier: Modifier = Modifier,
     readOnly: Boolean,
     value: String,
     onValueChange: (String) -> Unit,
@@ -122,7 +120,7 @@ fun CustomOutlinedTextField(
 
     val focusManager = LocalFocusManager.current
 
-    Column(modifier = modifier) {
+    Column() {
         OutlinedTextField(
             shape = RoundedCornerShape(50.dp),
             modifier = Modifier

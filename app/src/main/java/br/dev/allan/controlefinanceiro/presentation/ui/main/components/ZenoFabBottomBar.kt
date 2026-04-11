@@ -42,9 +42,6 @@ fun ZenoFabBottomBar(){
     if (showDialog) {
         AddTransactionDialog(
             onDismiss = { showDialog = false },
-            onConfirm = { transaction ->
-                showDialog = false
-            }
         )
     }
 }

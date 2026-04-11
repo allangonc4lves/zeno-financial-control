@@ -36,47 +36,36 @@ import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.domain.model.TransactionType
-import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.CustomDropdown
-import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.CustomSingleChoiceSegmentedButton
-import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.CustomSwitch
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.DropdownAddTransaction
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.SingleChoiceButtonAddTransaction
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.SwitchAddTransaction
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.AddTransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
     onDismiss: () -> Unit,
-    onConfirm: (Transaction) -> Unit,
-    viewModel: TransactionViewModel = hiltViewModel(),
+    viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
-    // Estados básicos
-    var title by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var checkTransactionType by remember { mutableStateOf(TransactionType.DEFAULT) }
-
-    // Configuração do DatePicker
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    val state = viewModel.uiState
     var showDatePicker by remember { mutableStateOf(false) }
 
-    // Configuração do Dropdown de Categorias
-    var selectedType by remember { mutableStateOf(TransactionDirection.EXPENSE) }
-    var selectedCategory by remember { mutableStateOf<TransactionCategory?>(null) }
-
-    // Configuração múmero de parcelas
-    var installmentCount by remember { mutableIntStateOf(2) }
-
     if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = state.dateMillis)
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("OK") }
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { viewModel.onDateChange(it) }
+                    showDatePicker = false
+                }) { Text("OK") }
             }
-        ) {
-            DatePicker(state = datePickerState)
-        }
+        ) { DatePicker(state = datePickerState) }
     }
 
     AlertDialog(
@@ -84,129 +73,82 @@ fun AddTransactionDialog(
         title = { CustomTextTitle("Cadastro de transação", MaterialTheme.colorScheme.primary) },
         text = {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Título e Valor (campos anteriores...)
                 OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
+                    value = state.title,
+                    onValueChange = { viewModel.onTitleChange(it) },
                     label = { Text("Título") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
+                    value = state.amount,
+                    onValueChange = { viewModel.onAmountChange(it) },
                     label = { Text("Valor") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // --- SELETOR DE DATA ---
                 OutlinedTextField(
-                    value = datePickerState.selectedDateMillis?.let {
-                        SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(it))
-                    } ?: "",
+                    value = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(state.dateMillis)),
                     onValueChange = {},
                     label = { Text("Data") },
-                    readOnly = true, // Evita abrir o teclado
+                    readOnly = true,
                     trailingIcon = {
                         IconButton(onClick = { showDatePicker = true }) {
-                            Icon(Icons.Default.DateRange, contentDescription = "Selecionar Data")
+                            Icon(Icons.Default.DateRange, contentDescription = null)
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
-                CustomTextTitle("Tipo de transação", MaterialTheme.colorScheme.primary)
 
-                CustomSingleChoiceSegmentedButton(
-                    selectedIncomeOrExpense = selectedType.ordinal,
+                SingleChoiceButtonAddTransaction(
+                    selectedIncomeOrExpense = state.direction.ordinal,
                     onSelectionChange = { index ->
-                        // 1. Atualiza o tipo (Entrada ou Saída) baseado no índice (0 ou 1)
-                        selectedType = TransactionDirection.entries[index]
-
-                        // 2. Reseta a categoria para null
-                        // Isso é importante para que o Dropdown volte a exibir "Selecione a Categoria"
-                        // e obrigue o usuário a escolher uma categoria válida para o novo tipo selecionado.
-                        selectedCategory = null
+                        viewModel.onDirectionChange(TransactionDirection.entries[index])
                     }
                 )
 
-                //Verifica se está marcado como fixo
-                CustomSwitch(
+                SwitchAddTransaction(
                     text = "Transação Fixa",
-                    quantityValue = 0,
-                    onQuantityChange = { newCount ->
-                        installmentCount = newCount
-                    },
-                    showQuantity = false,
-                    checked = checkTransactionType == TransactionType.FIXED,
+                    checked = state.transactionType == TransactionType.FIXED,
                     onCheckedChange = { isChecked ->
-                        // Se marcar este, automaticamente o outro desmarca porque o estado muda
-                        checkTransactionType =
-                            if (isChecked) TransactionType.FIXED else TransactionType.DEFAULT
-                    }
+                        viewModel.onTransactionTypeChange(if (isChecked) TransactionType.FIXED else TransactionType.DEFAULT)
+                    },
+                    quantityValue = 0,
+                    onQuantityChange = {},
+                    showQuantity = false
                 )
 
-                if(selectedType.ordinal == 1){
-                    CustomSwitch(
+                if (state.direction == TransactionDirection.EXPENSE) {
+                    SwitchAddTransaction(
                         text = "Parceladas",
-                        quantityValue = installmentCount,
-                        onQuantityChange = { newCount ->
-                            installmentCount = newCount
-                        },
-                        showQuantity = if (checkTransactionType == TransactionType.INSTALLMENT) true else false,
-                        checked = checkTransactionType == TransactionType.INSTALLMENT,
+                        checked = state.transactionType == TransactionType.INSTALLMENT,
                         onCheckedChange = { isChecked ->
-                            checkTransactionType =
-                                if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT
-                        }
+                            viewModel.onTransactionTypeChange(if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT)
+                        },
+                        quantityValue = state.installmentCount,
+                        onQuantityChange = { viewModel.onInstallmentCountChange(it) },
+                        showQuantity = state.transactionType == TransactionType.INSTALLMENT
                     )
                 }
 
-                // --- DROPDOWN DE CATEGORIA ---
-                CustomDropdown(
-                    selectedType = selectedType,
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = { category ->
-                        selectedCategory = category
-                    }
+                DropdownAddTransaction(
+                    selectedType = state.direction,
+                    selectedCategory = state.category,
+                    onCategorySelected = { viewModel.onCategoryChange(it) }
                 )
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    Log.i("teste", "installmentCount final: $installmentCount")
-                    val newTransaction = Transaction(
-                        title = title,
-                        amount = amount.toDoubleOrNull() ?: 0.0,
-                        date = datePickerState.selectedDateMillis ?: System.currentTimeMillis(),
-                        category = selectedCategory ?: TransactionCategory.OTHERS_EXPENSE,
-                        isFixed = checkTransactionType == TransactionType.FIXED,
-                        isInstallment = checkTransactionType == TransactionType.INSTALLMENT,
-                        installmentCount = if (checkTransactionType == TransactionType.INSTALLMENT) {
-                            if (installmentCount in 2..360) installmentCount else 2
-                        } else {
-                            0
-                        },
-                        type = selectedType
-                    )
-
-                    viewModel.addTransaction(newTransaction)
-                    onConfirm(newTransaction)
-                    Log.i("teste", "installmentCount final: $installmentCount")
-                }
-            ) {
-                Text("Confirmar")
-            }
+            Button(onClick = {
+                viewModel.saveTransaction()
+                onDismiss()
+            }) { Text("Confirmar") }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
 }

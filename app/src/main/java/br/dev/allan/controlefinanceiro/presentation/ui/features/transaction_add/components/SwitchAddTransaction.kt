@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 
 @Composable
-fun CustomSwitch(
+fun SwitchAddTransaction(
     text: String,
     quantityValue: Int,
     onQuantityChange: (Int) -> Unit,

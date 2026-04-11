@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.CategoryChartCard
-import br.dev.allan.controlefinanceiro.presentation.ui.main.components.DrawBoxTop
+import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoDrawBoxTop
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.FinancialSummaryCard
@@ -50,9 +50,6 @@ fun HomeScreen(
     val totalBalance by viewModel.totalBalance.collectAsState()
     val selectedMonth = viewModel.selectedMonth
 
-    val context = LocalContext.current
-    //val settingsManager = remember { SettingsManager(context) }
-
     val expensesMap by viewModel.chartData.collectAsState()
 
     LazyColumn(
@@ -60,7 +57,7 @@ fun HomeScreen(
         contentPadding = PaddingValues(bottom = 48.dp)
     ) {
         item {
-            DrawBoxTop {
+            ZenoDrawBoxTop {
                 FinancialSummaryCard(
                     totalBalance,
                     totalIncomes,

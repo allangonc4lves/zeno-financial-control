@@ -22,7 +22,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomDropdown(
+fun DropdownAddTransaction(
     selectedType: TransactionDirection,
     selectedCategory: TransactionCategory?,
     onCategorySelected: (TransactionCategory) -> Unit
