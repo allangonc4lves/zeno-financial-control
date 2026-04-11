@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,8 +19,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -38,6 +35,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
+import java.time.Month
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
@@ -99,7 +98,10 @@ fun MonthSelector(
                         IconButton(onClick = { yearInMenu-- }) {
                             Icon(Icons.Default.KeyboardArrowLeft, null, modifier = Modifier.size(18.dp))
                         }
-                        CustomTextTitle(text = yearInMenu.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        CustomTextTitle(
+                            text = yearInMenu.toString(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         IconButton(onClick = { yearInMenu++ }) {
                             Icon(Icons.Default.KeyboardArrowRight, null, modifier = Modifier.size(18.dp))
                         }
@@ -112,7 +114,7 @@ fun MonthSelector(
                             .heightIn(max = 220.dp)
                             .verticalScroll(rememberScrollState()),
                     ) {
-                        java.time.Month.entries.forEach { month ->
+                        Month.entries.forEach { month ->
                             val isSelected = month == selectedMonth.month && yearInMenu == selectedMonth.year
                             DropdownMenuItem(
                                 text = {

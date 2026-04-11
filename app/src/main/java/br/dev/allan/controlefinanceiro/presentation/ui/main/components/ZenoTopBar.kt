@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.main.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomTopBar() {
+fun ZenoTopBar() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 

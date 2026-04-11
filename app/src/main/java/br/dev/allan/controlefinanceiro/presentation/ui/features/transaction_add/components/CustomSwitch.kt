@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 
 @Composable
 fun CustomSwitch(

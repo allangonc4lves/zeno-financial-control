@@ -6,11 +6,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.dev.allan.controlefinanceiro.data.repository.TransactionRepositoryImpl
+import br.dev.allan.controlefinanceiro.data.settings.SettingsManager
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
+import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
+import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -18,16 +23,25 @@ import kotlinx.coroutines.launch
 import java.time.YearMonth
 import java.time.ZoneId
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
-import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
-import kotlinx.coroutines.flow.combine
 
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
-    private val repository: TransactionRepository
+    private val repository: TransactionRepository,
+    private val settingsManager: SettingsManager
 ) : ViewModel() {
+
+    val isBalanceVisible = settingsManager.isBalanceVisible
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Companion.WhileSubscribed(5000),
+            initialValue = true
+        )
+
+    fun toggleBalanceVisibility(isVisible: Boolean) {
+        viewModelScope.launch {
+            settingsManager.setBalanceVisible(isVisible)
+        }
+    }
 
     var selectedMonth by mutableStateOf(YearMonth.now())
         private set
@@ -48,7 +62,7 @@ class TransactionViewModel @Inject constructor(
         .map { value: Double? -> value ?: 0.0 } // Especificamos o tipo (Double?) aqui
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = 0.0
         )
 
@@ -61,7 +75,7 @@ class TransactionViewModel @Inject constructor(
         .map { value: Double? -> value ?: 0.0 } // Especificamos o tipo (Double?) aqui
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = 0.0
         )
 
@@ -69,7 +83,7 @@ class TransactionViewModel @Inject constructor(
         income - expense
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.Companion.WhileSubscribed(5000),
         initialValue = 0.0
     )
 
@@ -79,7 +93,7 @@ class TransactionViewModel @Inject constructor(
     val transactions = repository.getTransactions()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
@@ -97,7 +111,7 @@ class TransactionViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = emptyMap()
         )
     fun addTransaction(transaction: Transaction) {

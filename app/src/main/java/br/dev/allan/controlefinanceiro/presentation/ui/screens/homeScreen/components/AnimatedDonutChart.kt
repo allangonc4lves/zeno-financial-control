@@ -1,7 +1,6 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components
 
 import androidx.compose.animation.core.Animatable // Certifique-se de que é este!
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas

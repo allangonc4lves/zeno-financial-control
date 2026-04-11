@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
 
 @Composable

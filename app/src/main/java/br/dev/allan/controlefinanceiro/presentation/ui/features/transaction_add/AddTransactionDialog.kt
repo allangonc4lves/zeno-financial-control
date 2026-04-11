@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +36,10 @@ import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.domain.model.TransactionType
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.CustomDropdown
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.CustomSingleChoiceSegmentedButton
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.CustomSwitch
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -43,7 +47,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionDialogAdd(
+fun AddTransactionDialog(
     onDismiss: () -> Unit,
     onConfirm: (Transaction) -> Unit,
     viewModel: TransactionViewModel = hiltViewModel(),

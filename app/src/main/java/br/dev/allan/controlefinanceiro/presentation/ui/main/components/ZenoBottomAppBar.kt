@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.main.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Analytics
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LineStyle
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,17 +21,16 @@ import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.domain.model.ButtunBarNavigation
 
 @Composable
-fun CustomBottomAppBar(
-    onAccountClick: () -> Unit,
-    onCardsClick: () -> Unit,
-    onPixClick: () -> Unit,
-    onPaymentsClick: () -> Unit,
+fun ZenoBottomAppBar(
+    onHomeClick: () -> Unit,
+    onTransactionsClick: () -> Unit,
+    onReportsClick: () -> Unit,
     onMoreClick: () -> Unit
 ) {
     val items = listOf(
         ButtunBarNavigation("Home", Icons.Rounded.Home),
         ButtunBarNavigation("Transações", Icons.Rounded.LineStyle),
-        ButtunBarNavigation("Procurar", Icons.Rounded.Search),
+        ButtunBarNavigation("Balanço", Icons.Rounded.Analytics),
         ButtunBarNavigation("Mais", Icons.Rounded.Menu)
     )
 
@@ -49,21 +48,25 @@ fun CustomBottomAppBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Itens da Esquerda
-            ButtunBarNavigation(items[0])
-            ButtunBarNavigation(items[1], isSelected = true)
+            ButtonBarNavigation(items[0], false,onHomeClick)
+            ButtonBarNavigation(items[1], true, onTransactionsClick)
 
             // Espaço para o FAB central (importante para não sobrepor ícones)
             Spacer(modifier = Modifier.width(48.dp))
 
             // Itens da Direita
-            ButtunBarNavigation(items[2])
-            ButtunBarNavigation(items[3])
+            ButtonBarNavigation(items[2], false,onReportsClick)
+            ButtonBarNavigation(items[3], false,onMoreClick)
         }
     }
 }
 
 @Composable
-fun ButtunBarNavigation(item: ButtunBarNavigation, isSelected: Boolean = false) {
+fun ButtonBarNavigation(
+    item: ButtunBarNavigation,
+    isSelected: Boolean = false,
+    onClick: () -> Unit
+) {
     val color = if (isSelected) Color(0xFF4A56E2) else Color.Gray
 
     Column(
@@ -71,7 +74,7 @@ fun ButtunBarNavigation(item: ButtunBarNavigation, isSelected: Boolean = false) 
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .size(70.dp, 50.dp)
-            .clickable { /* Navegação */ }
+            .clickable { onClick() }
     ) {
         // Indicador superior se estiver selecionado (a linha roxa do print)
         if (isSelected) {

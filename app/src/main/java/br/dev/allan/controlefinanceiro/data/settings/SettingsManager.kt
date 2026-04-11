@@ -7,8 +7,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+val Context.dataStore by preferencesDataStore(name = "settings")
 class SettingsManager(private val context: Context) {
-    private val Context.dataStore by preferencesDataStore(name = "settings")
     private val IS_BALANCE_VISIBLE = booleanPreferencesKey("is_balance_visible")
 
     val isBalanceVisible: Flow<Boolean> = context.dataStore.data

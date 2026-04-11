@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.main.components
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box

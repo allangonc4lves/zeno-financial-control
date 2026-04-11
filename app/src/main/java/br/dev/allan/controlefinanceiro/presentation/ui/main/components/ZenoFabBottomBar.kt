@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.main.components
 
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -16,9 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.AddTransactionDialog
 
 @Composable
-fun CustomFabBottomBar(){
+fun ZenoFabBottomBar(){
     var showDialog by remember { mutableStateOf(false) }
 
     FloatingActionButton(
@@ -39,7 +40,7 @@ fun CustomFabBottomBar(){
     }
 
     if (showDialog) {
-        TransactionDialogAdd(
+        AddTransactionDialog(
             onDismiss = { showDialog = false },
             onConfirm = { transaction ->
                 showDialog = false

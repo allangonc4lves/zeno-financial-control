@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import br.dev.allan.controlefinanceiro.data.settings.SettingsManager
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import kotlinx.coroutines.launch
 import java.time.YearMonth
@@ -36,10 +36,10 @@ fun FinancialSummaryCard(
     totalExpenses: Double,
     selectedMonth: YearMonth,
     viewModel: TransactionViewModel = hiltViewModel(),
-    settingsManager: SettingsManager
 ) {
     // Coleta o estado do DataStore
-    val isVisible by settingsManager.isBalanceVisible.collectAsState(initial = true)
+    val isVisible by viewModel.isBalanceVisible.collectAsState()
+
     val scope = rememberCoroutineScope()
 
     CustomCard {
@@ -65,7 +65,12 @@ fun FinancialSummaryCard(
             ) {
                 Text("Saldo Total do Mês", style = MaterialTheme.typography.labelMedium)
                 Text(
-                    text = if (isVisible) "R$ ${String.format("%.2f", totalBalance)}" else "R$ •••••",
+                    text = if (isVisible) "R$ ${
+                        String.format(
+                            "%.2f",
+                            totalBalance
+                        )
+                    }" else "R$ •••••",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -74,10 +79,9 @@ fun FinancialSummaryCard(
                 )
             }
 
-            // Botão do Olho posicionado no canto superior direito
             IconButton(
                 onClick = {
-                    scope.launch { settingsManager.setBalanceVisible(!isVisible) }
+                    scope.launch { viewModel.toggleBalanceVisibility(!isVisible) }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
@@ -100,7 +104,12 @@ fun FinancialSummaryCard(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Receitas", style = MaterialTheme.typography.labelMedium)
                     Text(
-                        text = if (isVisible) "R$ ${String.format("%.2f", totalIncomes)}" else "R$ •••",
+                        text = if (isVisible) "R$ ${
+                            String.format(
+                                "%.2f",
+                                totalIncomes
+                            )
+                        }" else "R$ •••",
                         color = Color(0xFF4CAF50),
                         fontWeight = FontWeight.Medium
                     )
@@ -110,7 +119,12 @@ fun FinancialSummaryCard(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Despesas", style = MaterialTheme.typography.labelMedium)
                     Text(
-                        text = if (isVisible) "R$ ${String.format("%.2f", totalExpenses)}" else "R$ •••",
+                        text = if (isVisible) "R$ ${
+                            String.format(
+                                "%.2f",
+                                totalExpenses
+                            )
+                        }" else "R$ •••",
                         color = Color(0xFFF44336),
                         fontWeight = FontWeight.Medium
                     )

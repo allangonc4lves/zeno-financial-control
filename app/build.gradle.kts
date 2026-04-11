@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
 }
 
@@ -101,7 +102,12 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    //Material Symbols
+    // Compose Navigation + Serialization
+    implementation(libs.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
+
+
+    // Material Symbols
     implementation(libs.compose.material)
     implementation(libs.compose.icons)
 }

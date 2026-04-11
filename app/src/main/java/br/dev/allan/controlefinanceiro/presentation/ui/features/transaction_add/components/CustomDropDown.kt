@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.components
+package br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components
 
 
 import androidx.compose.foundation.layout.fillMaxWidth
