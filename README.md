@@ -1,6 +1,6 @@
 # Zeno - Controle Financeiro 
 
-📱 Preview <br> (APP AINDA EM DESENVOLVIMENTO...)<br>
+📱 Preview <br> (APP EM DESENVOLVIMENTO...)<br>
 
 <img width="360" height="780" alt="Screenshot_20260412_173307" src="https://github.com/user-attachments/assets/b26ab684-4cbc-4236-b4ec-eed32546cd39" /><br>
 
