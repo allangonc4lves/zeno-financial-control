@@ -1,5 +1,6 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,9 +15,12 @@ import androidx.compose.ui.unit.dp
 fun CustomTextContent(
     text: String,
     color: Color,
-    startPadding: Int = 0
+    modifier: Modifier = Modifier,
+    startPadding: Int = 0,
+    endPadding: Int = 0,
 ) {
-    Text(modifier = Modifier.padding(startPadding.dp),
+    Text(modifier = modifier
+        .padding(start = startPadding.dp, end = endPadding.dp ),
     text = text,
     color = color,
     maxLines = 1,

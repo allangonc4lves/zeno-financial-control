@@ -71,7 +71,7 @@ fun TotalExpAndIncByMonthCard(
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (totalBalance < 0) Color(0xFFF44336) else Color(0xFF4CAF50)
+                        color = if (totalBalance < 0) Color(0xFFAB1A1A) else Color(0xFF4CAF50)
                     )
                 )
             }
@@ -118,7 +118,7 @@ fun TotalExpAndIncByMonthCard(
                                 totalExpenses
                             )
                         }" else "R$ •••",
-                        color = Color(0xFFF44336),
+                        color = Color(0xFFAB1A1A),
                         fontWeight = FontWeight.Medium
                     )
                 }

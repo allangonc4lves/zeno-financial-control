@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,22 +23,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.ExpensesByCategoryCard
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoDrawBoxTop
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.TotalExpAndIncByMonthCard
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
+import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun HomeScreen(
-    onNavigateToTransactions: () -> Unit,
-    onNavigateToReports: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    navController: NavHostController,
+    viewModel: HomeViewModel = hiltViewModel(),
+    navViewModel: NavigationViewModel = hiltViewModel()
 ) {
     val transactions by viewModel.transactions.collectAsState()
     val totalExpenses by viewModel.totalExpenses.collectAsState()
@@ -65,20 +67,32 @@ fun HomeScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.size(16.dp))
-            CustomTextTitle("Despesas por categoria", Color.Black, 8)
+            if(totalExpenses > 0 ){
+                Spacer(modifier = Modifier.size(16.dp))
+                CustomTextTitle("Despesas por categoria", MaterialTheme.colorScheme.onPrimaryContainer, 8)
+                ExpensesByCategoryCard(expensesMap)
+            }
         }
 
         item {
-            ExpensesByCategoryCard(expensesMap)
-        }
-
-        item {
             Spacer(modifier = Modifier.size(16.dp))
-            CustomTextTitle("Últimas atividades", Color.Black, 8)
+            Row(
+                modifier = Modifier.fillMaxWidth(),//.clickable(){navViewModel.navigateWithOptions(navController, TransactionsRoute)},
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                CustomTextTitle("Últimas atividades", MaterialTheme.colorScheme.onPrimaryContainer, 8)
+                CustomTextContent(
+                    "Ver tudo",
+                    MaterialTheme.colorScheme.onPrimaryContainer,
+                    Modifier.clickable { navViewModel.navigateWithOptions(navController, TransactionsRoute) },
+                    0, 8,
+                )
+            }
         }
 
-        items(transactions) { item ->
+        items(transactions.takeLast(5)) { item ->
+
             val appearance = item.category.getAppearance()
 
             Row(
@@ -104,7 +118,7 @@ fun HomeScreen(
                         )
                         CustomTextContent(
                             appearance.displayName,
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -112,18 +126,19 @@ fun HomeScreen(
                 Column(horizontalAlignment = Alignment.End) {
                     CustomTextTitle(
                         if (item.type == TransactionDirection.EXPENSE) "- " + "R$ ${item.amount}" else "+ " + "R$ ${item.amount}",
-                        Color.Black
+                        if (item.type == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     CustomTextContent(
                         SimpleDateFormat(
                             "dd/MM/yyyy", Locale.getDefault()
                         ).format(
                             Date(item.date)
-                        ), MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
-            HorizontalDivider(thickness = 2.dp)
+           // HorizontalDivider(thickness = 2.dp)
         }
     }
 }

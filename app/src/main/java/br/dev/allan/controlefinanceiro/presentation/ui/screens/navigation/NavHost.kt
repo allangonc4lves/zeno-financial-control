@@ -7,12 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.HomeScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.reportsScreen.ReportsScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.TransactionsScreen
 
 @Composable
-fun ZenoNavHost(
+fun NavHost(
     navController: NavHostController,
     innerPadding: PaddingValues
 ) {
@@ -22,22 +23,22 @@ fun ZenoNavHost(
         modifier = Modifier.padding(innerPadding)
     ) {
         composable<HomeRoute> {
-            HomeScreen(
-                onNavigateToTransactions = {
-                    navController.navigate(TransactionsRoute)
-                },
-                onNavigateToReports = {
-                    navController.navigate(ReportsRoute)
-                }
-            )
+            HomeScreen(navController)
         }
 
         composable<TransactionsRoute> {
-            TransactionsScreen()
+            TransactionsScreen(navController)
         }
 
         composable<ReportsRoute> {
-            ReportsScreen()
+            ReportsScreen(navController)
         }
+
+        /*
+        composable<TransactionDetailRoute> { backStackEntry ->
+            val args = backStackEntry.toRoute<TransactionDetailRoute>()
+            TransactionDetailScreen(transactionId = args.id)
+        }
+        */
     }
 }
