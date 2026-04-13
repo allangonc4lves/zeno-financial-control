@@ -15,7 +15,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY date DESC")
     fun getAllTransactions(): Flow<List<TransactionEntity>>
 
-    // Busca transações do mês OU fixas (desde que criadas antes ou no mês selecionado)
+    @Query("SELECT * FROM transactions ORDER BY date DESC LIMIT 5")
+    fun getRecentTransactions(): Flow<List<Transaction>>
+
     @Query("""
         SELECT * FROM transactions 
         WHERE (date BETWEEN :start AND :end) 
@@ -24,7 +26,6 @@ interface TransactionDao {
     """)
     fun getTransactionsByMonth(start: Long, end: Long): Flow<List<Transaction>>
 
-    // Soma Despesas: do mês OU fixas
     @Query("""
     SELECT SUM(
         CASE 
@@ -36,20 +37,14 @@ interface TransactionDao {
     FROM transactions 
     WHERE type = 'EXPENSE' 
     AND (
-        -- Caso 1: Transação normal no mês selecionado
         (date BETWEEN :start AND :end) 
-        
-        -- Caso 2: Transação Fixa (qualquer mês após a criação)
+
         OR (isFixed = 1 AND date <= :end)
-        
-        -- Caso 3: Transação Parcelada (dentro do limite de meses)
+
         OR (
             isInstallment = 1 
             AND date <= :end 
             AND (
-                -- Calcula quantos meses se passaram desde a compra
-                -- 1 mês = 2629746000 milissegundos (aproximadamente)
-                -- Mas no SQL é mais seguro contar a diferença de meses:
                 ((:end - date) / 2629746000) < installmentCount
             )
         )
@@ -57,7 +52,6 @@ interface TransactionDao {
 """)
     fun getTotalExpensesByMonth(start: Long, end: Long): Flow<Double?>
 
-    // Soma Receitas: do mês OU fixas
     @Query("""
     SELECT SUM(
         CASE 
@@ -72,7 +66,6 @@ interface TransactionDao {
 """)
     fun getTotalIncomesByMonth(start: Long, end: Long): Flow<Double?>
 
-    // Soma por categoria
     @Query("""
     SELECT 
         category, 
@@ -86,15 +79,11 @@ interface TransactionDao {
     FROM transactions 
     WHERE type = 'EXPENSE' 
     AND (
-        -- 1. Transações comuns do mês
+        
         (date BETWEEN :start AND :end) 
-        
-        -- 2. Transações fixas (sempre aparecem após a data de criação)
+
         OR (isFixed = 1 AND date <= :end)
-        
-        -- 3. Parcelas ativas: 
-        -- Aparecem se a data da compra for anterior ao fim do mês atual
-        -- E se a diferença de meses for menor que o total de parcelas
+
         OR (
             isInstallment = 1 
             AND date <= :end 

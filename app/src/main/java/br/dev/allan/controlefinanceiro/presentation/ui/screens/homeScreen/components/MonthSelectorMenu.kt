@@ -61,13 +61,10 @@ fun MonthSelectorMenu(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        // 1. Removido o fillMaxWidth daqui para o container não ocupar a tela toda
-        // e o menu não se perder na esquerda.
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // 2. Usamos um Box para ser a "âncora" exata do menu
             Box(contentAlignment = Alignment.Center) {
                 Row(
                     modifier = Modifier
@@ -80,16 +77,11 @@ fun MonthSelectorMenu(
                     )
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                 }
-
-                // O DropdownMenu agora sabe que deve abrir em relação ao Box centralizado
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    // Opcional: ajuste fino de posição se necessário
-                    // offset = DpOffset(x = 0.dp, y = 4.dp),
                     modifier = Modifier
                 ) {
-                    // ... (seu conteúdo do menu: Cabeçalho, Divider e Column de meses)
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,

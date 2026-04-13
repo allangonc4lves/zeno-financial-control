@@ -3,6 +3,8 @@ package br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
@@ -18,6 +20,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,22 +35,32 @@ class AddTransactionViewModel @Inject constructor(
     var uiState by mutableStateOf(AddTransactionUiState())
         private set
 
-    // Canal privado para enviar eventos
     private val _uiEvent = Channel<SaveTransactionUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     fun onTitleChange(newTitle: String) {
         uiState = uiState.copy(title = newTitle, titleError = null)
+
     }
 
     fun onAmountChange(newAmount: String) {
-        val numericRegex = Regex("^[0-9]*$")
+        val digitsOnly = newAmount.filter { it.isDigit() }
 
-        if (newAmount.matches(numericRegex)) {
-            uiState = uiState.copy(amount = newAmount, amountError = null)
-        } else {
+        if (digitsOnly.isEmpty()) {
             uiState = uiState.copy(amount = "", amountError = null)
+            return
         }
+
+        if (digitsOnly.length <= 9) {
+            val formatted = formatToCurrency(digitsOnly)
+            uiState = uiState.copy(amount = formatted, amountError = null)
+        }
+    }
+
+    private fun formatToCurrency(digits: String): String {
+        val doubleValue = digits.toLong().toDouble() / 100
+        val formatter = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+        return formatter.format(doubleValue)
     }
 
     fun onCategoryChange(category: TransactionCategory) {
@@ -77,6 +91,12 @@ class AddTransactionViewModel @Inject constructor(
         val amountResult = validateAmount.execute(uiState.amount)
         val categoryResult = validateCategory.execute(uiState.category)
 
+        val amountToSave = uiState.amount
+            .replace("R$", "")
+            .replace(Regex("[\\s.]"), "")
+            .replace(",", ".")
+            .toDoubleOrNull() ?: 0.0
+
         val hasError = listOf(titleResult, amountResult, categoryResult).any { !it.successful }
 
         if (hasError) {
@@ -90,7 +110,7 @@ class AddTransactionViewModel @Inject constructor(
         } else {
             val transaction = Transaction(
                 title = uiState.title,
-                amount = uiState.amount.replace(",", ".").toDouble(),
+                amount = amountToSave,
                 date = uiState.dateMillis,
                 category = uiState.category!!,
                 isFixed = uiState.transactionType == TransactionType.FIXED,

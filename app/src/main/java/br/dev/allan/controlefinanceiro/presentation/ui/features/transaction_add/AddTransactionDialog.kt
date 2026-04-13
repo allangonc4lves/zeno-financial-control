@@ -61,6 +61,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.
 import br.dev.allan.controlefinanceiro.presentation.ui.features.transaction_add.components.SwitchAddTransaction
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import com.google.android.material.loadingindicator.LoadingIndicator
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -113,7 +114,7 @@ fun AddTransactionDialog(
                 ) {
                     CustomOutlinedTextField(
                         value = state.title,
-                        label = "Título",
+                        label = "Título*",
                         capitalization = KeyboardCapitalization.Sentences,
                         isError = state.titleError != null,
                         errorMessage = state.titleError ?: "",
@@ -122,8 +123,10 @@ fun AddTransactionDialog(
 
                     CustomOutlinedTextField(
                         value = state.amount,
-                        label = "Valor",
-                        keyboardType = KeyboardType.Decimal,
+                        label = "Valor*",
+                        forceCursorAtEnd = true,
+                        keyboardType = KeyboardType.NumberPassword,
+                        capitalization = KeyboardCapitalization.None,
                         isError = state.amountError != null,
                         errorMessage = state.amountError ?: "",
                         onValueChange = { viewModel.onAmountChange(it) }
@@ -135,10 +138,10 @@ fun AddTransactionDialog(
                                 state.dateMillis
                             )
                         ),
-                        label = "Data",
+                        label = "Data*",
                         isReadOnly = true,
-                        isError = state.titleError != null,
-                        errorMessage = state.titleError ?: "",
+                        isError = false,
+                        errorMessage = "",
                         onValueChange = { viewModel.onAmountChange(it) },
                         trailingIcon = {
                             IconButton(onClick = { showDatePicker = true }) {
@@ -181,20 +184,13 @@ fun AddTransactionDialog(
                         )
 
                     }
-
                     DropdownAddTransaction(
                         selectedType = state.direction,
                         selectedCategory = state.category,
-                        onCategorySelected = { viewModel.onCategoryChange(it) }
+                        onCategorySelected = { viewModel.onCategoryChange(it) },
+                        isError = state.categoryError != null,
+                        errorMessage = state.categoryError ?: ""
                     )
-                    if (state.categoryError != null) {
-                        Text(
-                            text = state.categoryError,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
-                    }
                 }
 
                 if (state.isLoading) {

@@ -1,7 +1,10 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,10 +30,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
+import br.dev.allan.controlefinanceiro.domain.model.TransactionType
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.ExpensesByCategoryCard
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoDrawBoxTop
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
+import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.TotalExpAndIncByMonthCard
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
@@ -44,6 +50,7 @@ fun HomeScreen(
     navViewModel: NavigationViewModel = hiltViewModel()
 ) {
     val transactions by viewModel.transactions.collectAsState()
+    val recentsTransactions by viewModel.recentTransactions.collectAsState()
     val totalExpenses by viewModel.totalExpenses.collectAsState()
     val totalIncomes by viewModel.totalIncomes.collectAsState()
     val totalBalance by viewModel.totalBalance.collectAsState()
@@ -77,7 +84,7 @@ fun HomeScreen(
         item {
             Spacer(modifier = Modifier.size(16.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),//.clickable(){navViewModel.navigateWithOptions(navController, TransactionsRoute)},
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -91,7 +98,7 @@ fun HomeScreen(
             }
         }
 
-        items(transactions.takeLast(5)) { item ->
+        items(recentsTransactions) { item ->
 
             val appearance = item.category.getAppearance()
 
@@ -99,19 +106,29 @@ fun HomeScreen(
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .clickable() {  },
+                    .clickable {},
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = appearance.icon,
-                        contentDescription = appearance.displayName,
-                        tint = MaterialTheme.colorScheme.primary,
+                    Box(
                         modifier = Modifier
-                            .width(32.dp)
-                    )
-                    Column {
+                            .size(40.dp)
+                            .background(
+                                color = if ( item.type.name == TransactionDirection.EXPENSE.name ) Color(0xFFAB1A1A)
+                                else Color(0xFF32A642),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = appearance.icon,
+                            contentDescription = appearance.displayName,
+                            tint = MaterialTheme.colorScheme.onSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Column(modifier = Modifier.padding(start = 4.dp)) {
                         CustomTextTitle(
                             item.title,
                             MaterialTheme.colorScheme.onSurfaceVariant
@@ -126,7 +143,7 @@ fun HomeScreen(
                 Column(horizontalAlignment = Alignment.End) {
                     CustomTextTitle(
                         if (item.type == TransactionDirection.EXPENSE) "- " + "R$ ${item.amount}" else "+ " + "R$ ${item.amount}",
-                        if (item.type == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else MaterialTheme.colorScheme.onPrimaryContainer
+                        MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     CustomTextContent(
                         SimpleDateFormat(
@@ -138,7 +155,6 @@ fun HomeScreen(
                     )
                 }
             }
-           // HorizontalDivider(thickness = 2.dp)
         }
     }
 }

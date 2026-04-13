@@ -6,7 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.dev.allan.controlefinanceiro.data.local.TransactionDao
 import br.dev.allan.controlefinanceiro.data.settings.SettingsManager
+import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
 import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
@@ -49,7 +51,6 @@ class HomeViewModel @Inject constructor(
         val end = month.atEndOfMonth().atTime(23, 59, 59).atZone(ZoneId.of("UTC")).toInstant().toEpochMilli()
         return Pair(start, end)
     }
-
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val totalExpenses: StateFlow<Double> = snapshotFlow { selectedMonth }
@@ -94,6 +95,11 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    val recentTransactions: StateFlow<List<Transaction>> =
+        repository.getRecentTransactions()
+            .map { it }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val chartData: StateFlow<Map<CategoryAppearance, Double>> = snapshotFlow { selectedMonth }

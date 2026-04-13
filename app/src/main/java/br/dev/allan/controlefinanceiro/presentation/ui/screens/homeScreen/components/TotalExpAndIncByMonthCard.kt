@@ -1,11 +1,15 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -13,21 +17,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.HomeViewModel
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 import java.time.YearMonth
+import java.util.Locale
 
 @Composable
 fun TotalExpAndIncByMonthCard(
@@ -41,11 +51,15 @@ fun TotalExpAndIncByMonthCard(
 
     val scope = rememberCoroutineScope()
 
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("pt", "BR")) }
+
+    fun formatValue(value: Double): String {
+        return if (isVisible) currencyFormatter.format(value) else "R$ •••••"
+    }
+
     CustomCard {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 MonthSelectorMenu(
@@ -56,7 +70,6 @@ fun TotalExpAndIncByMonthCard(
 
             Column(
                 modifier = Modifier
-                    .padding(4.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -91,38 +104,66 @@ fun TotalExpAndIncByMonthCard(
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Receitas", style = MaterialTheme.typography.labelMedium)
-                    Text(
-                        text = if (isVisible) "R$ ${
-                            String.format(
-                                "%.2f",
-                                totalIncomes
-                            )
-                        }" else "R$ •••",
-                        color = Color(0xFF4CAF50),
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Despesas", style = MaterialTheme.typography.labelMedium)
-                    Text(
-                        text = if (isVisible) "R$ ${
-                            String.format(
-                                "%.2f",
-                                totalExpenses
-                            )
-                        }" else "R$ •••",
-                        color = Color(0xFFAB1A1A),
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                SummaryItem(
+                    label = "Receitas",
+                    value = formatValue(totalIncomes),
+                    icon = Icons.Outlined.ArrowUpward,
+                    color = Color(0xFF32A642)
+                )
+
+                // Item de Despesa
+                SummaryItem(
+                    label = "Despesas",
+                    value = formatValue(totalExpenses),
+                    icon = Icons.Outlined.ArrowDownward,
+                    color = Color(0xFFAB1A1A)
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun SummaryItem(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    color: Color
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(color = color.copy(alpha = 0.1f), shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = color
+            )
         }
     }
 }

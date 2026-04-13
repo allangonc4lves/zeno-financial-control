@@ -9,6 +9,7 @@ interface TransactionRepository {
     fun getTotalIncomesByMonth(start: Long, end: Long): Flow<Double?>
     fun getExpensesByCategory(start: Long, end: Long): Flow<List<CategorySum>>
     fun getTransactions(): Flow<List<Transaction>>
+    fun getRecentTransactions(): Flow<List<Transaction>>
     suspend fun insertTransaction(transaction: Transaction)
     suspend fun updateTransaction(transaction: Transaction)
     suspend fun deleteTransaction(transaction: Transaction)
