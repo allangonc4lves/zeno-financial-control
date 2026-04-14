@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CircularLoading(
+fun Loading(
     modifier: Modifier = Modifier,
     size: Dp = 64.dp,
     trackColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),

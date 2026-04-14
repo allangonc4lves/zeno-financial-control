@@ -62,3 +62,26 @@ class ValidateCategory {
         return ValidationResult(successful = true)
     }
 }
+
+class ValidateLastDigitsCreditCard{
+    fun execute(input: String): ValidationResult {
+        if (input.isBlank()) {
+            return ValidationResult(
+                successful = false,
+                errorMessage = "Campo obrigatório"
+            )
+        }
+
+        // Regex: apenas dígitos e exatamente 4 caracteres
+        val regex = Regex("^\\d{4}$")
+
+        if (!regex.matches(input)) {
+            return ValidationResult(
+                successful = false,
+                errorMessage = "O campo deve conter exatamente 4 números"
+            )
+        }
+
+        return ValidationResult(successful = true)
+    }
+}

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "ca1b85fbafb53355fcb7e28865c9a441",
+    "identityHash": "8813322685ae21064960694579adb84c",
     "entities": [
       {
         "tableName": "transactions",
@@ -72,7 +72,7 @@
       },
       {
         "tableName": "credit_cards",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `bankName` TEXT NOT NULL, `brand` TEXT NOT NULL, `backgroundColor` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `bankName` TEXT NOT NULL, `brand` TEXT NOT NULL, `lastDigits` INTEGER NOT NULL, `backgroundColor` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -93,6 +93,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "lastDigits",
+            "columnName": "lastDigits",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "backgroundColor",
             "columnName": "backgroundColor",
             "affinity": "INTEGER",
@@ -109,7 +115,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ca1b85fbafb53355fcb7e28865c9a441')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8813322685ae21064960694579adb84c')"
     ]
   }
 }

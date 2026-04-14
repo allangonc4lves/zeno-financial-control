@@ -46,7 +46,6 @@ data class CategoryAppearance(
     val color: Color
 )
 
-// Função de extensão que mapeia a lógica de negócio para a visual
 fun TransactionCategory.getAppearance(): CategoryAppearance {
     return when (this) {
         TransactionCategory.CREDIT_CARD_PAYMENT -> CategoryAppearance("Credit Card", Icons.Outlined.CreditCard, TransactionDirection.EXPENSE, Color(0xFFFF0000))

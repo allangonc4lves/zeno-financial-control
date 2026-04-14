@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.domain.model.TransactionType
-import br.dev.allan.controlefinanceiro.presentation.ui.components.CircularLoading
+import br.dev.allan.controlefinanceiro.presentation.ui.components.Loading
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlinedTextField
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.DropdownAddTransaction
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.SingleChoiceButtonAddTransaction
@@ -106,7 +106,7 @@ fun AddTransactionDialog(
                         isReadOnly = true,
                         isError = false,
                         errorMessage = "",
-                        onValueChange = { viewModel.onAmountChange(it) },
+                        onValueChange = {},
                         trailingIcon = {
                             IconButton(onClick = { showDatePicker = true }) {
                                 Icon(
@@ -158,7 +158,7 @@ fun AddTransactionDialog(
                 }
 
                 if (state.isLoading) {
-                    CircularLoading()
+                    Loading()
                 }
             }
         }

@@ -7,7 +7,6 @@ data class CreditCard(
     val id: String = UUID.randomUUID().toString(),
     val bankName: String,
     val brand: String,
+    val lastDigits: Int,
     val backgroundColor: Long = 0xFF1E88E5
-){
-    fun toComposeColor(): Color = Color(backgroundColor)
-}
+)

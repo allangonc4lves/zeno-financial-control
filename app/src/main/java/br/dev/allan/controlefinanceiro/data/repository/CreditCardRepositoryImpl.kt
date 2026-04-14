@@ -34,8 +34,8 @@ class CreditCardRepositoryImpl @Inject constructor(
 
     // Mapping helpers
     private fun CreditCardEntity.toDomain(): CreditCard =
-        CreditCard(id = id, bankName = bankName, brand = brand, backgroundColor = backgroundColor)
+        CreditCard(id = id, bankName = bankName, brand = brand, backgroundColor = backgroundColor, lastDigits = 111)
 
     private fun CreditCard.toEntity(): CreditCardEntity =
-        CreditCardEntity(id = id, bankName = bankName, brand = brand, backgroundColor = backgroundColor)
+        CreditCardEntity(id = id, bankName = bankName, brand = brand, backgroundColor = backgroundColor, lastDigits = 222)
 }

@@ -2,6 +2,7 @@ package br.dev.allan.controlefinanceiro.di
 
 import br.dev.allan.controlefinanceiro.domain.usecase.ValidateAmount
 import br.dev.allan.controlefinanceiro.domain.usecase.ValidateCategory
+import br.dev.allan.controlefinanceiro.domain.usecase.ValidateLastDigitsCreditCard
 import br.dev.allan.controlefinanceiro.domain.usecase.ValidateText
 import dagger.Module
 import dagger.Provides
@@ -21,4 +22,6 @@ object ValidationModule {
     @Provides
     fun provideValidateCategory(): ValidateCategory = ValidateCategory()
 
+    @Provides
+    fun provideValidateLastDigitsCreditCard(): ValidateLastDigitsCreditCard = ValidateLastDigitsCreditCard()
 }
