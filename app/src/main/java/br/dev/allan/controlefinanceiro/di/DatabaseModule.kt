@@ -3,6 +3,7 @@ package br.dev.allan.controlefinanceiro.di
 import android.content.Context
 import androidx.room.Room
 import br.dev.allan.controlefinanceiro.data.local.AppDatabase
+import br.dev.allan.controlefinanceiro.data.local.CreditCardDao
 import br.dev.allan.controlefinanceiro.data.local.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -24,4 +25,8 @@ object DatabaseModule {
 
     @Provides
     fun provideTransactionDao(db: AppDatabase): TransactionDao = db.transactionDao()
+
+    @Provides
+    fun provideCreditCardDao(db: AppDatabase): CreditCardDao = db.creditCardDao()
+
 }

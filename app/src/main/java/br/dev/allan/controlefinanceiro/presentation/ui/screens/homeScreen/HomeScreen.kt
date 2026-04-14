@@ -88,13 +88,15 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                CustomTextTitle("Últimas atividades", MaterialTheme.colorScheme.onPrimaryContainer, 8)
-                CustomTextContent(
-                    "Ver tudo",
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    Modifier.clickable { navViewModel.navigateWithOptions(navController, TransactionsRoute) },
-                    0, 8,
-                )
+                if(recentsTransactions.isNotEmpty()){
+                    CustomTextTitle("Últimas atividades", MaterialTheme.colorScheme.onPrimaryContainer, 8)
+                    CustomTextContent(
+                        "Ver tudo",
+                        MaterialTheme.colorScheme.onPrimaryContainer,
+                        Modifier.clickable { navViewModel.navigateWithOptions(navController, TransactionsRoute) },
+                        0, 8,
+                    )
+                }
             }
         }
 
@@ -129,8 +131,7 @@ fun HomeScreen(
                         )
                     }
                     Column(modifier = Modifier.padding(start = 4.dp)) {
-                        CustomTextTitle(
-                            item.title,
+                        CustomTextTitle(if(item.isInstallment) item.title + "( " + item.installmentCount + "X de R$" + item.amount / item.installmentCount + " )" else item.title,
                             MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         CustomTextContent(

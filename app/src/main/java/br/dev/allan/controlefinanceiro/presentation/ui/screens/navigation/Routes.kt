@@ -15,3 +15,6 @@ object ReportsRoute
 data class TransactionDetailRoute(
     val id: Long
 )
+
+@Serializable
+object CreditCardsRoute

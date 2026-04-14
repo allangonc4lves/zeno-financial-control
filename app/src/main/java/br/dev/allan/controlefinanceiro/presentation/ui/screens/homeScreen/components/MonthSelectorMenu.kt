@@ -57,7 +57,7 @@ fun MonthSelectorMenu(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(top= 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -83,7 +83,6 @@ fun MonthSelectorMenu(
                     modifier = Modifier
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

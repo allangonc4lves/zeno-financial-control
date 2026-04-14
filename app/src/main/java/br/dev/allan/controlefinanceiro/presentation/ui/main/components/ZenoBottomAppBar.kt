@@ -6,8 +6,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Analytics
 import androidx.compose.material.icons.rounded.CompareArrows
+import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +25,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.HomeRo
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.ReportsRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
 import androidx.navigation.NavDestination.Companion.hasRoute
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.CreditCardsRoute
 
 @Composable
 fun ZenoBottomAppBar(
@@ -38,7 +39,7 @@ fun ZenoBottomAppBar(
         ButtonAppBarNavigation("Home", Icons.Rounded.Home, HomeRoute),
         ButtonAppBarNavigation("Transações", Icons.Rounded.CompareArrows, TransactionsRoute),
         ButtonAppBarNavigation("Relatórios", Icons.Rounded.Analytics, ReportsRoute),
-        ButtonAppBarNavigation("Mais", Icons.Rounded.Menu, "MoreRoute")
+        ButtonAppBarNavigation("CreditCards", Icons.Rounded.CreditCard, CreditCardsRoute)
     )
 
     BottomAppBar(
