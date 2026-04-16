@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.dev.allan.controlefinanceiro.data.local.mapper.toEntity
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
@@ -107,6 +108,22 @@ class AddTransactionViewModel @Inject constructor(
         uiState = uiState.copy(transactionType = type)
     }
 
+    fun onPaidChange(paid: Boolean) {
+        uiState = uiState.copy(isPaid = paid)
+    }
+
+    fun togglePaymentStatus(transaction: Transaction) {
+        viewModelScope.launch {
+            if (transaction.isInstallment) {
+
+                transactionRepository.incrementPaidInstallment(transaction.id)
+            } else {
+
+                transactionRepository.updatePaymentStatus(transaction.id, !transaction.isPaid)
+            }
+        }
+    }
+
     fun saveTransaction() {
         uiState = uiState.copy(isLoading = true)
 
@@ -148,7 +165,9 @@ class AddTransactionViewModel @Inject constructor(
                 isInstallment = uiState.transactionType == TransactionType.INSTALLMENT,
                 installmentCount = if (uiState.transactionType == TransactionType.INSTALLMENT) uiState.installmentCount else 0,
                 direction = uiState.direction,
-                creditCardId = uiState.selectedCardId
+                creditCardId = uiState.selectedCardId,
+                isPaid = uiState.isPaid,
+                paidInstallments = uiState.paidInstallments
             )
             Log.i("SaveCard", uiState.selectedCardId.toString())
             viewModelScope.launch {

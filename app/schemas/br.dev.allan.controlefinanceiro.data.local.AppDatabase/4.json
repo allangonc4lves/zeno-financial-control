@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "723d1f142bc0e5ff7a59fcefb03e50d2",
+    "identityHash": "347dc38edb99d2ae5b8c681ec98ff0f0",
     "entities": [
       {
         "tableName": "transactions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `amount` REAL NOT NULL, `date` INTEGER NOT NULL, `category` TEXT NOT NULL, `isFixed` INTEGER NOT NULL, `isInstallment` INTEGER NOT NULL, `installmentCount` INTEGER NOT NULL, `direction` TEXT NOT NULL, `creditCardId` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `amount` REAL NOT NULL, `date` INTEGER NOT NULL, `category` TEXT NOT NULL, `isFixed` INTEGER NOT NULL, `isInstallment` INTEGER NOT NULL, `installmentCount` INTEGER NOT NULL, `paidInstallments` INTEGER NOT NULL, `isPaid` INTEGER NOT NULL, `direction` TEXT NOT NULL, `creditCardId` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -53,6 +53,18 @@
           {
             "fieldPath": "installmentCount",
             "columnName": "installmentCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paidInstallments",
+            "columnName": "paidInstallments",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPaid",
+            "columnName": "isPaid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -120,7 +132,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '723d1f142bc0e5ff7a59fcefb03e50d2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '347dc38edb99d2ae5b8c681ec98ff0f0')"
     ]
   }
 }

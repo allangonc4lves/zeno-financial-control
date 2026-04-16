@@ -144,14 +144,26 @@ class HomeViewModel @Inject constructor(
         transactions.map { item ->
             val prefix = if (item.direction == TransactionDirection.EXPENSE) "- " else "+ "
 
+            val dynamicTitle = item.getDisplayTitle(System.currentTimeMillis())
+
             TransactionUIModel(
                 id = item.id,
-                title = item.title,
+                title = dynamicTitle,
                 formattedAmount = prefix + currencyManager.formatByCurrencyCode(item.amount, code),
                 formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(item.date)),
                 color = if (item.direction == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else Color(0xFF1B5E20),
                 category = item.category,
-                direction = item.direction
+                direction = item.direction,
+                isPaid = if (item.isInstallment) {
+                    val currentParcel = item.getCurrentParcelIndex(System.currentTimeMillis())
+                    currentParcel <= item.paidInstallments
+                } else {
+                    item.isPaid
+                },
+                isInstallment = item.isInstallment,
+                creditCardId = item.creditCardId,
+                formattedParcelInfo = null,
+                formattedTotalAmount = currencyManager.formatByCurrencyCode(item.amount, code),
             )
         }
     }.stateIn(

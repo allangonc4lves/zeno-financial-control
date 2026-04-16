@@ -19,11 +19,12 @@ interface TransactionDao {
     fun getRecentTransactions(dateCutoff: Long): Flow<List<Transaction>>
 
     @Query("""
-        SELECT * FROM transactions 
-        WHERE (date BETWEEN :start AND :end) 
-        OR (isFixed = 1 AND date <= :end)
-        ORDER BY date DESC
-    """)
+    SELECT * FROM transactions 
+    WHERE (date BETWEEN :start AND :end) 
+    OR (isFixed = 1 AND date <= :end)
+    OR (isInstallment = 1 AND date <= :end) -- Busca parcelas iniciadas antes do mês atual
+    ORDER BY date DESC
+""")
     fun getTransactionsByMonth(start: Long, end: Long): Flow<List<Transaction>>
 
     @Query(
@@ -130,8 +131,29 @@ interface TransactionDao {
     """)
     fun getTotalCardExpensesByMonth(cardId: String, start: Long, end: Long): Flow<Double?>
 
+    @Query("UPDATE transactions SET isPaid = :paid WHERE id = :id")
+    suspend fun updatePaymentStatus(id: Int, paid: Boolean)
+
+    @Query("UPDATE transactions SET paidInstallments = paidInstallments + 1 WHERE id = :id AND paidInstallments < installmentCount")
+    suspend fun incrementPaidInstallment(id: Int)
+
+    @Query("UPDATE transactions SET paidInstallments = paidInstallments - 1 WHERE id = :id AND paidInstallments > 0")
+    suspend fun decrementPaidInstallment(id: Int)
+
+    @Query("UPDATE transactions SET isPaid = :isPaid WHERE id IN (:ids)")
+    suspend fun updateTransactionsPaymentStatus(ids: List<Int>, isPaid: Boolean)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTransaction(transaction: TransactionEntity)
+    suspend fun markAsPaid(payment: PaymentStatusEntity)
+
+    @Query("DELETE FROM invoices_payment_status WHERE transactionId = :tId AND monthYear = :mY")
+    suspend fun markAsUnpaid(tId: String, mY: String)
+
+    @Query("SELECT * FROM invoices_payment_status")
+    fun getAllPaymentStatus(): Flow<List<PaymentStatusEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTransaction(transaction: TransactionEntity): Long
 
     @Update
     suspend fun updateTransaction(transaction: TransactionEntity)

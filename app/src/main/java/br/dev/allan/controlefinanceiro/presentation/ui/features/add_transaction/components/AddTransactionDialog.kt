@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -143,7 +144,6 @@ fun AddTransactionDialog(
                         showQuantity = false
                     )
 
-                    if (state.direction == TransactionDirection.EXPENSE) {}
                         SwitchAddTransaction(
                             text = "Parceladas",
                             checked = state.transactionType == TransactionType.INSTALLMENT,
@@ -154,6 +154,15 @@ fun AddTransactionDialog(
                             onQuantityChange = { viewModel.onInstallmentCountChange(it) },
                             showQuantity = state.transactionType == TransactionType.INSTALLMENT
                         )
+                    if (state.transactionType != TransactionType.INSTALLMENT) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = state.isPaid,
+                                onCheckedChange = { viewModel.onPaidChange(it) }
+                            )
+                            Text("Já está pago?")
+                        }
+                    }
 
                     DropdownAddTransaction(
                         selectedType = state.direction,

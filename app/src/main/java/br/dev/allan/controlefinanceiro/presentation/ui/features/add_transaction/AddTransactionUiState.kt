@@ -20,5 +20,7 @@ data class AddTransactionUiState(
     val categoryError: String? = null,
     val installmentCountError: String? = null,
     val selectedCardId: String? = null,
-    val cards: List<CreditCard> = emptyList()
+    val cards: List<CreditCard> = emptyList(),
+    val isPaid: Boolean = false,
+    val paidInstallments: Int = 0
 )

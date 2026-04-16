@@ -15,6 +15,8 @@ data class TransactionEntity(
     val isFixed: Boolean = false,
     val isInstallment: Boolean = false,
     val installmentCount: Int = 0,
+    val paidInstallments: Int = 0,
+    val isPaid: Boolean = false,
     val direction: TransactionDirection,
     val creditCardId: String? = null
 )
