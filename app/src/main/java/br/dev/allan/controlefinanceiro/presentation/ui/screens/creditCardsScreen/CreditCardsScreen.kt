@@ -3,7 +3,6 @@ package br.dev.allan.controlefinanceiro.presentation.ui.screens.creditCardsScree
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -33,12 +32,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,18 +44,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.MonthSelector
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.AddCreditCardsViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
-import br.dev.allan.controlefinanceiro.util.CurrencyManager
 
 @Composable
 fun CreditCardsScreen(
@@ -70,6 +62,7 @@ fun CreditCardsScreen(
     val totalOpenInvoices by viewModel.totalOpenInvoicesState.collectAsState()
     val chartData by viewModel.chartDataState.collectAsState()
     val currentMonth by viewModel.currentMonth.collectAsState()
+    val selectedMonthTotal by viewModel.formattedSelectedMonthTotal.collectAsState()
 
     val pagerState = rememberPagerState(pageCount = { cards.size })
 
@@ -125,7 +118,7 @@ fun CreditCardsScreen(
                     CreditCardBarChart(
                         data = chartData,
                         barColor = selectedCardColor,
-                        currencyManager = viewModel.currencyManager,
+                        totalMonth = selectedMonthTotal,
                         totalOpenInvoices = totalOpenInvoices,
                         modifier = Modifier.fillMaxWidth(),
                         onStatusClick = { isPaid ->
@@ -182,7 +175,7 @@ fun CardTransactionItem(item: TransactionUIModel) {
 fun CreditCardBarChart(
     data: List<CreditCardAmountByYear>,
     barColor: Color,
-    currencyManager: CurrencyManager,
+    totalMonth: String,
     totalOpenInvoices: String,
     modifier: Modifier = Modifier,
     onStatusClick: (Boolean) -> Unit
@@ -208,7 +201,7 @@ fun CreditCardBarChart(
                     color = Color.Gray
                 )
                 Text(
-                    text = currencyManager.formatByCurrencyCode(selectedMonthData?.totalValue ?: 0.0, "BRL"),
+                    text = totalMonth,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Black
                 )

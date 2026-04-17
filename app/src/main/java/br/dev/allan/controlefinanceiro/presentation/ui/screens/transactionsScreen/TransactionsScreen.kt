@@ -46,7 +46,6 @@ fun TransactionsScreen(
     navController: NavHostController,
     viewModel: MonthTransactionsViewModel = hiltViewModel()
 ) {
-    // Coleta os estados do ViewModel
     val transactions by viewModel.transactionsUiState.collectAsStateWithLifecycle()
     val currentMonthMillis by viewModel.currentMonth.collectAsStateWithLifecycle()
 
@@ -55,7 +54,6 @@ fun TransactionsScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // 1. Cabeçalho de Navegação de Datas
         MonthSelector(
             currentMonthMillis = currentMonthMillis,
             onPreviousMonth = { viewModel.changeMonth(-1) },
@@ -64,7 +62,6 @@ fun TransactionsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 2. Lista de Transações
         if (transactions.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Nenhuma transação encontrada para este período.")
