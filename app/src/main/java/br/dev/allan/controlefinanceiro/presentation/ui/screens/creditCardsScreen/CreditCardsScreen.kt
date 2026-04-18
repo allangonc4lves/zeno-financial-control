@@ -48,14 +48,20 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddCreditCardRoute
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddTransactionRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.MonthSelector
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
+import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
 
 @Composable
 fun CreditCardsScreen(
+    navController: NavHostController,
     viewModel: CreditCardTransactionViewModel = hiltViewModel(),
+    navViewModel: NavigationViewModel = hiltViewModel()
 ) {
     val cards by viewModel.cards.collectAsState()
     val transactions by viewModel.transactionsUiState.collectAsState()
@@ -66,7 +72,8 @@ fun CreditCardsScreen(
 
     val pagerState = rememberPagerState(pageCount = { cards.size })
 
-    val selectedCardColor = if (cards.isNotEmpty()) Color(cards[pagerState.currentPage].backgroundColor) else Color.Gray
+    val selectedCardColor =
+        if (cards.isNotEmpty()) Color(cards[pagerState.currentPage].backgroundColor) else Color.Gray
 
     LaunchedEffect(pagerState.currentPage, cards) {
         if (cards.isNotEmpty()) {
@@ -78,7 +85,7 @@ fun CreditCardsScreen(
 
     Column(
         modifier = Modifier
-        .fillMaxSize()
+            .fillMaxSize()
             .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -96,7 +103,15 @@ fun CreditCardsScreen(
                 brand = card.brand,
                 lastDigits = card.lastDigits.toString(),
                 backgroundColorLong = card.backgroundColor,
-                modifier = Modifier.fillMaxWidth().height(190.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(190.dp)
+                    .clickable {
+                        navViewModel.navigateToForm(
+                            navController = navController,
+                            route = AddCreditCardRoute(id = card.id)
+                        )
+                    }
             )
         }
 
@@ -138,7 +153,9 @@ fun CreditCardsScreen(
 fun CardTransactionItem(item: TransactionUIModel) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -257,7 +274,9 @@ fun CreditCardBarChart(
                 }
 
                 Column(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom
                 ) {

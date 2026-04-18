@@ -9,12 +9,15 @@ object HomeRoute
 object TransactionsRoute
 
 @Serializable
+data class AddTransactionRoute(val id: Int? = null)
+
+@Serializable
 object ReportsRoute
 
 @Serializable
-data class TransactionDetailRoute(
-    val id: Long
-)
+object CreditCardsRoute
 
 @Serializable
-object CreditCardsRoute
+data class AddCreditCardRoute(val id: String? = null)
+
+

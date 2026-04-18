@@ -22,6 +22,8 @@ interface TransactionRepository {
     suspend fun markAsUnpaid(transactionId: String, monthYear: String)
     fun getTransactionsBetweenDates(startDate: Long, endDate: Long): Flow<List<TransactionEntity>>
     fun getAllPaymentStatuses(): Flow<List<PaymentStatusEntity>>
+    suspend fun getTransactionById(id: Int): Transaction?
+    suspend fun deleteTransaction(id: Int)
     suspend fun insertTransaction(transaction: Transaction): Long
     suspend fun updateTransaction(transaction: Transaction)
     suspend fun deleteTransaction(transaction: Transaction)

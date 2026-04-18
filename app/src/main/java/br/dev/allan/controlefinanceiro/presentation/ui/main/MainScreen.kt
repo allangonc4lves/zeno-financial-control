@@ -47,7 +47,6 @@ fun MainScreen() {
             onDismissRequest = { showSheet = false },
             sheetState = sheetState,
         ) {
-            // Passa a instância da ViewModel (obtida via hiltViewModel())
             ProfileSheetContent(
                 viewModel = hiltViewModel(),
                 onClose = { showSheet = false }

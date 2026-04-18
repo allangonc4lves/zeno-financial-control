@@ -17,15 +17,16 @@ class CreditCardRepositoryImpl @Inject constructor(
     override fun getCards(): Flow<List<CreditCard>> =
         dao.observeAll().map { list -> list.map { it.toDomain() } }
 
-    override fun getCardById(id: String): Flow<CreditCard?> =
-        dao.observeById(id).map { it?.toDomain() }
-
-    override suspend fun addCard(card: CreditCard) {
-        dao.insert(card.toEntity())
+    override suspend fun getCardById(id: String): CreditCard? {
+        return dao.getCardById(id)?.toDomain()
     }
 
     override suspend fun updateCard(card: CreditCard) {
-        dao.update(card.toEntity())
+        dao.updateCard(card.toEntity())
+    }
+
+    override suspend fun addCard(card: CreditCard) {
+        dao.insert(card.toEntity())
     }
 
     override suspend fun removeCard(id: String) {

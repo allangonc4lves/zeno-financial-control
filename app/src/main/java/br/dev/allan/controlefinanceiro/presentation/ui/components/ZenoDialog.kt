@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZenoDialog(
-    title: String,
     dismissText: String = "Cancelar",
     confirmText: String = "Salvar",
     onDismiss: () -> Unit,
@@ -21,7 +20,7 @@ fun ZenoDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { CustomTextTitle(text = title, color = MaterialTheme.colorScheme.onPrimaryContainer) },
+        //title = { CustomTextTitle(text = title, color = MaterialTheme.colorScheme.onPrimaryContainer) },
         text = {
             content()
         },

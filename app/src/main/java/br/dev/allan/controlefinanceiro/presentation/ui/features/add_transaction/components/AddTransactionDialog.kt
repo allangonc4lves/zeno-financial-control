@@ -13,12 +13,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,8 +41,9 @@ import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.domain.model.TransactionType
 import br.dev.allan.controlefinanceiro.presentation.ui.components.Loading
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlinedTextField
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.ui.components.ZenoDialog
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.AddTransactionViewModel
+import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.SaveTransactionUiEvent
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -48,12 +53,21 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
+    transactionId: Int? = null,
     onDismiss: () -> Unit,
-    viewModel: AddTransactionViewModel = hiltViewModel()
+    viewModel: TransactionViewModel = hiltViewModel()
 ) {
 
     val state = viewModel.uiState
     var showDatePicker by remember { mutableStateOf(false) }
+
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    LaunchedEffect(transactionId) {
+        if (transactionId != null && transactionId != -1) {
+            viewModel.loadTransactionToEdit(transactionId)
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
@@ -65,11 +79,40 @@ fun AddTransactionDialog(
         }
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.resetState()
+        }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Excluir Transação?") },
+            text = { Text("Esta ação não pode ser desfeita.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteTransaction()
+                    showDeleteConfirm = false
+                }) {
+                    Text("Excluir", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     ZenoDialog(
-        title ="Nova transação",
         onDismiss = { onDismiss() },
         onConfirm = { viewModel.saveTransaction() },
         content = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+
+            }
             Box(contentAlignment = Alignment.Center) {
                 Column(
                     modifier = Modifier
@@ -79,6 +122,21 @@ fun AddTransactionDialog(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CustomTextTitle(if (transactionId == null || transactionId == -1) "Nova transação" else "Editar transação")
+                        if (transactionId != null && transactionId != -1) {
+                            IconButton(onClick = { showDeleteConfirm = true }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Excluir",
+                                    tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    }
                     Row(modifier = Modifier.fillMaxWidth()) {
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
@@ -144,16 +202,16 @@ fun AddTransactionDialog(
                         showQuantity = false
                     )
 
-                        SwitchAddTransaction(
-                            text = "Parceladas",
-                            checked = state.transactionType == TransactionType.INSTALLMENT,
-                            onCheckedChange = { isChecked ->
-                                viewModel.onTransactionTypeChange(if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT)
-                            },
-                            quantityValue = state.installmentCount,
-                            onQuantityChange = { viewModel.onInstallmentCountChange(it) },
-                            showQuantity = state.transactionType == TransactionType.INSTALLMENT
-                        )
+                    SwitchAddTransaction(
+                        text = "Parceladas",
+                        checked = state.transactionType == TransactionType.INSTALLMENT,
+                        onCheckedChange = { isChecked ->
+                            viewModel.onTransactionTypeChange(if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT)
+                        },
+                        quantityValue = state.installmentCount,
+                        onQuantityChange = { viewModel.onInstallmentCountChange(it) },
+                        showQuantity = state.transactionType == TransactionType.INSTALLMENT
+                    )
                     if (state.transactionType != TransactionType.INSTALLMENT) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(

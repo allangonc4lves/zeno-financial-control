@@ -155,6 +155,12 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE date BETWEEN :startDate AND :endDate ORDER BY date DESC")
     fun getTransactionsBetweenDates(startDate: Long, endDate: Long): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    suspend fun getTransactionById(id: Int): TransactionEntity?
+
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun deleteTransactionById(id: Int)
+
     @Query("SELECT * FROM invoices_payment_status")
     fun getAllPaymentStatuses(): Flow<List<PaymentStatusEntity>>
 

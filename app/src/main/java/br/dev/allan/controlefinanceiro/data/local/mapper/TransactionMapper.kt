@@ -15,8 +15,10 @@ fun TransactionEntity.toDomain(): Transaction {
         isFixed = isFixed,
         isInstallment = isInstallment,
         installmentCount = installmentCount,
+        paidInstallments = paidInstallments,
+        isPaid = isPaid,
         direction = direction,
-        creditCardId = creditCardId
+        creditCardId = creditCardId,
     )
 }
 
@@ -30,10 +32,14 @@ fun Transaction.toEntity(): TransactionEntity {
         isFixed = isFixed,
         isInstallment = isInstallment,
         installmentCount = installmentCount,
+        paidInstallments = paidInstallments,
+        isPaid = isPaid,
         direction = direction,
         creditCardId = creditCardId
     )
 }
+
+
 
 fun TransactionEntity.toDomain(
     payments: List<PaymentStatusEntity>,

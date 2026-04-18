@@ -16,4 +16,8 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
             restoreState = true
         }
     }
+
+    fun navigateToForm(navController: NavHostController, route: Any) {
+        navController.navigate(route)
+    }
 }

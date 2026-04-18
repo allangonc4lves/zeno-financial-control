@@ -117,6 +117,14 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDao.incrementPaidInstallment(id)
     }
 
+    override suspend fun getTransactionById(id: Int): Transaction? {
+        return transactionDao.getTransactionById(id)?.toDomain()
+    }
+
+    override suspend fun deleteTransaction(id: Int) {
+        transactionDao.deleteTransactionById(id)
+    }
+
     override suspend fun insertTransaction(transaction: Transaction) =
         transactionDao.insertTransaction(transaction.toEntity())
 

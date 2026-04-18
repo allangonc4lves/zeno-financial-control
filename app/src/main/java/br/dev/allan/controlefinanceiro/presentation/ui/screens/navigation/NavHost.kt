@@ -7,6 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
+import androidx.navigation.toRoute
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.components.AddCreditCardDialog
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.AddTransactionDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.creditCardsScreen.CreditCardsScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.HomeScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.reportsScreen.ReportsScreen
@@ -30,14 +34,29 @@ fun NavHost(
             TransactionsScreen(navController)
         }
 
+        dialog<AddTransactionRoute> { backStackEntry ->
+            val route: AddTransactionRoute = backStackEntry.toRoute()
+            AddTransactionDialog(
+                transactionId = route.id,
+                onDismiss = { navController.popBackStack() }
+            )
+        }
+
         composable<ReportsRoute> {
             ReportsScreen(navController)
         }
 
         composable< CreditCardsRoute> {
-            CreditCardsScreen(
+            CreditCardsScreen(navController)
+        }
 
+        dialog< AddCreditCardRoute> { backStackEntry ->
+            val route: AddCreditCardRoute = backStackEntry.toRoute()
+            AddCreditCardDialog(
+                cardId = route.id,
+                onDismiss = { navController.popBackStack() }
             )
         }
+
     }
 }

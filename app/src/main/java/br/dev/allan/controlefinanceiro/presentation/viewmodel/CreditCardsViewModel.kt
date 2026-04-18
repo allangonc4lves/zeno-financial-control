@@ -20,14 +20,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class AddCreditCardsViewModel @Inject constructor(
+class CreditCardsViewModel @Inject constructor(
     private val validateText: ValidateText = ValidateText(),
     private val validateLastDigits: ValidateLastDigitsCreditCard = ValidateLastDigitsCreditCard(),
     private val repository: CreditCardRepository
 ) : ViewModel() {
+    private var currentCardId: String? = null
     var uiState by mutableStateOf(AddCreditCardUiState())
         private set
 
@@ -54,6 +56,20 @@ class AddCreditCardsViewModel @Inject constructor(
     val cards: StateFlow<List<CreditCard>> =
         repository.getCards().stateIn(viewModelScope, SharingStarted.Companion.Lazily, emptyList())
 
+    fun loadCardToEdit(id: String) {
+        viewModelScope.launch {
+            repository.getCardById(id)?.let { card ->
+                currentCardId = card.id
+                uiState = uiState.copy(
+                    bankName = card.bankName,
+                    brand = card.brand,
+                    lastDigits = card.lastDigits.toString(),
+                    backgroundColor = card.backgroundColor
+                )
+            }
+        }
+    }
+
     fun saveCard() {
         uiState = uiState.copy(isLoading = true)
 
@@ -61,38 +77,47 @@ class AddCreditCardsViewModel @Inject constructor(
         val brandResult = validateText.execute(uiState.brand)
         val lastDigitsResult = validateLastDigits.execute(uiState.lastDigits)
 
-        val hasError = listOf(bankNameResult, brandResult, lastDigitsResult).any { !it.successful }
-
-        if (hasError) {
-            uiState = uiState.copy(isLoading = false)
+        if (listOf(bankNameResult, brandResult, lastDigitsResult).any { !it.successful }) {
             uiState = uiState.copy(
+                isLoading = false,
                 bankNameError = bankNameResult.errorMessage,
                 brandError = brandResult.errorMessage,
+                lastDigitsError = lastDigitsResult.errorMessage
             )
             return
-        } else {
-            val card = CreditCard(
-                bankName = uiState.bankName,
-                brand = uiState.brand,
-                lastDigits = uiState.lastDigits.toIntOrNull() ?: 1234,
-                backgroundColor = uiState.backgroundColor
-            )
+        }
 
-            viewModelScope.launch {
+        val card = CreditCard(
+            id = currentCardId ?: UUID.randomUUID().toString(),
+            bankName = uiState.bankName,
+            brand = uiState.brand,
+            lastDigits = uiState.lastDigits.toIntOrNull() ?: 0,
+            backgroundColor = uiState.backgroundColor
+        )
+
+        viewModelScope.launch {
+            if (currentCardId == null) {
                 repository.addCard(card)
+            } else {
+                repository.updateCard(card)
+            }
 
-                delay(2000L)
+            _uiEvent.send(SaveCreditCardUiEvent.SaveSuccess)
+            uiState = uiState.copy(isLoading = false)
+        }
+    }
+
+    fun removeCard() {
+        currentCardId?.let { id ->
+            viewModelScope.launch {
+                repository.removeCard(id)
                 _uiEvent.send(SaveCreditCardUiEvent.SaveSuccess)
-                uiState = uiState.copy(isLoading = false)
             }
         }
     }
 
-    fun updateCard(card: CreditCard) {
-        viewModelScope.launch { repository.updateCard(card) }
-    }
-
-    fun removeCard(id: String) {
-        viewModelScope.launch { repository.removeCard(id) }
+    fun resetState() {
+        currentCardId = null
+        uiState = AddCreditCardUiState()
     }
 }
