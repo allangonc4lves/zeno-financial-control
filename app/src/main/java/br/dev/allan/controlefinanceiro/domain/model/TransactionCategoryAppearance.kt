@@ -1,9 +1,7 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.model
+package br.dev.allan.controlefinanceiro.domain.model
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.graphics.vector.ImageVector
-import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.AirportShuttle
 import androidx.compose.material.icons.outlined.Analytics

@@ -1,6 +1,7 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.screens.reportsScreen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,10 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ListItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -23,6 +32,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -43,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
+import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.ReportItem
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.ReportViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionStatusFilter
@@ -63,6 +76,8 @@ fun ReportsScreen(
     val sheetState = rememberModalBottomSheetState()
 
     var showDatePicker by remember { mutableStateOf(false) }
+
+    var showCategorySheet by remember { mutableStateOf(false) }
 
     val dateRangePickerState = rememberDateRangePickerState()
 
@@ -129,50 +144,105 @@ fun ReportsScreen(
             SummaryCard(title = "Saldo do Período", value = uiState.formattedBalance, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
         }
 
-        ScrollableTabRow(
-            selectedTabIndex = 0,
-            edgePadding = 16.dp,
-            modifier = Modifier.padding(top = 16.dp),
-            indicator = {},
-            divider = {}
+        LazyRow (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            FilterChip(
-                selected = filterState.typeFilter == TransactionTypeFilter.INCOME,
-                onClick = {
-                    val newFilter = if (filterState.typeFilter == TransactionTypeFilter.INCOME) TransactionTypeFilter.ALL else TransactionTypeFilter.INCOME
-                    viewModel.updateTypeFilter(newFilter)
-                },
-                label = { Text("Receitas") }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FilterChip(
-                selected = filterState.typeFilter == TransactionTypeFilter.EXPENSE,
-                onClick = {
-                    val newFilter = if (filterState.typeFilter == TransactionTypeFilter.EXPENSE) TransactionTypeFilter.ALL else TransactionTypeFilter.EXPENSE
-                    viewModel.updateTypeFilter(newFilter)
-                },
-                label = { Text("Despesas") }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+            item {
+                FilterChip(
+                    selected = filterState.typeFilter == TransactionTypeFilter.INVOICES_ONLY,
+                    onClick = {
+                        val newFilter = if (filterState.typeFilter == TransactionTypeFilter.INVOICES_ONLY)
+                            TransactionTypeFilter.ALL else TransactionTypeFilter.INVOICES_ONLY
+                        viewModel.updateTypeFilter(newFilter)
+                    },
+                    label = { Text("Cartão de credito") },
+                    leadingIcon = {
+                        Icon(Icons.Default.CreditCard, contentDescription = null, modifier = Modifier.size(18.dp))
+                    }
+                )
+            }
 
-            FilterChip(
-                selected = filterState.statusFilter == TransactionStatusFilter.PAID,
-                onClick = {
-                    val newFilter = if (filterState.statusFilter == TransactionStatusFilter.PAID) TransactionStatusFilter.ALL else TransactionStatusFilter.PAID
-                    viewModel.updateStatusFilter(newFilter)
-                },
-                label = { Text("Pagos") }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FilterChip(
-                selected = filterState.statusFilter == TransactionStatusFilter.UNPAID,
-                onClick = {
-                    val newFilter = if (filterState.statusFilter == TransactionStatusFilter.UNPAID) TransactionStatusFilter.ALL else TransactionStatusFilter.UNPAID
-                    viewModel.updateStatusFilter(newFilter)
-                },
-                label = { Text("Pendentes") }
-            )
+            item {
+                val selectedCategory = filterState.categoryFilter
+                FilterChip(
+                    selected = filterState.categoryFilter != null,
+                    onClick = {
+                        if (filterState.categoryFilter != null) {
+                            viewModel.updateCategoryFilter(null)
+                        } else {
+                            showCategorySheet = true
+                        }
+                    },
+                    label = { Text(filterState.categoryFilter ?: "Categorias") },
+                    leadingIcon = {
+                        if (selectedCategory != null) {
+                            val appearance = TransactionCategory.entries.find { it.name == selectedCategory }?.getAppearance()
+                            appearance?.let { Icon(it.icon, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                        } else {
+                            Icon(Icons.Default.Category, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    },
+                    trailingIcon = {
+                        if (selectedCategory != null) {
+                            IconButton(onClick = { viewModel.updateCategoryFilter(null) }, modifier = Modifier.size(18.dp)) {
+                                Icon(Icons.Default.Close, contentDescription = "Limpar")
+                            }
+                        }
+                    }
+                )
+            }
+
+            item {
+                FilterChip(
+                    selected = filterState.typeFilter == TransactionTypeFilter.INCOME,
+                    onClick = {
+                        val newFilter = if (filterState.typeFilter == TransactionTypeFilter.INCOME) TransactionTypeFilter.ALL else TransactionTypeFilter.INCOME
+                        viewModel.updateTypeFilter(newFilter)
+                    },
+                    label = { Text("Receitas") }
+                )
+            }
+
+            item {
+                FilterChip(
+                    selected = filterState.typeFilter == TransactionTypeFilter.EXPENSE,
+                    onClick = {
+                        val newFilter = if (filterState.typeFilter == TransactionTypeFilter.EXPENSE) TransactionTypeFilter.ALL else TransactionTypeFilter.EXPENSE
+                        viewModel.updateTypeFilter(newFilter)
+                    },
+                    label = { Text("Despesas") }
+                )
+            }
+
+            item {
+                FilterChip(
+                    selected = filterState.statusFilter == TransactionStatusFilter.PAID,
+                    onClick = {
+                        val newFilter = if (filterState.statusFilter == TransactionStatusFilter.PAID) TransactionStatusFilter.ALL else TransactionStatusFilter.PAID
+                        viewModel.updateStatusFilter(newFilter)
+                    },
+                    label = { Text("Pagos") }
+                )
+            }
+
+            item {
+                FilterChip(
+                    selected = filterState.statusFilter == TransactionStatusFilter.UNPAID,
+                    onClick = {
+                        val newFilter = if (filterState.statusFilter == TransactionStatusFilter.UNPAID) TransactionStatusFilter.ALL else TransactionStatusFilter.UNPAID
+                        viewModel.updateStatusFilter(newFilter)
+                    },
+                    label = { Text("Pendentes") }
+                )
+            }
         }
+
+
 
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -221,6 +291,44 @@ fun ReportsScreen(
                                     Text(tx.title)
                                     Text(tx.formattedAmount, fontWeight = FontWeight.Bold)
                                 }
+                            }
+                        }
+                    }
+                }
+
+                if (showCategorySheet) {
+                    ModalBottomSheet(onDismissRequest = { showCategorySheet = false }) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 32.dp)
+                        ) {
+                            item {
+                                Text("Filtrar por Categoria", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
+                            }
+
+                            item {
+                                ListItem(
+                                    headlineContent = { Text("Todas as Categorias") },
+                                    modifier = Modifier.clickable {
+                                        viewModel.updateCategoryFilter(null)
+                                        showCategorySheet = false
+                                    }
+                                )
+                            }
+
+                            items(TransactionCategory.entries) { category ->
+                                val appearance = category.getAppearance()
+                                ListItem(
+                                    headlineContent = { Text(appearance.displayName) },
+                                    leadingContent = {
+                                        Icon(appearance.icon, contentDescription = null, tint = appearance.color)
+                                    },
+                                    modifier = Modifier.clickable {
+                                        viewModel.updateCategoryFilter(category.name)
+                                        showCategorySheet = false
+                                    }
+                                )
                             }
                         }
                     }

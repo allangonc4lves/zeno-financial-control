@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
+import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
 
 @Composable
 fun AnimatedDonutChart(

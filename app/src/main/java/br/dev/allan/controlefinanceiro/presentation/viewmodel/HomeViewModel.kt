@@ -12,8 +12,8 @@ import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
-import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
-import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
+import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
+import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import br.dev.allan.controlefinanceiro.util.CurrencyManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

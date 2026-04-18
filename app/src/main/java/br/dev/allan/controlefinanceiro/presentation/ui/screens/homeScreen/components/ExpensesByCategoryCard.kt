@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
-import br.dev.allan.controlefinanceiro.presentation.ui.model.CategoryAppearance
+import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
 
 @Composable

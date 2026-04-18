@@ -22,14 +22,15 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
-enum class TransactionTypeFilter { ALL, INCOME, EXPENSE }
+enum class TransactionTypeFilter { ALL, INCOME, EXPENSE, INVOICES_ONLY }
 enum class TransactionStatusFilter { ALL, PAID, UNPAID }
 
 data class ReportFilterState(
     val startDate: Long,
     val endDate: Long,
     val typeFilter: TransactionTypeFilter = TransactionTypeFilter.ALL,
-    val statusFilter: TransactionStatusFilter = TransactionStatusFilter.ALL
+    val statusFilter: TransactionStatusFilter = TransactionStatusFilter.ALL,
+    val categoryFilter: String? = null
 )
 
 data class ReportUIState(
@@ -99,6 +100,11 @@ class ReportViewModel @Inject constructor(
         val creditCardGroups = mutableMapOf<String, Pair<Long, MutableList<TransactionUIModel>>>()
 
         allTransactions.forEach { tx ->
+            // 1. Filtro de Categoria
+            if (filters.categoryFilter != null && tx.category.name != filters.categoryFilter) {
+                return@forEach
+            }
+
             val occurrences = getOccurrencesInRange(tx, filters.startDate, filters.endDate)
 
             occurrences.forEach { occurrenceDate ->
@@ -110,10 +116,12 @@ class ReportViewModel @Inject constructor(
                     tx.isPaid
                 }
 
+                // 2. Filtro de Tipo (Incluindo a lógica de Somente Faturas)
                 val matchesType = when (filters.typeFilter) {
                     TransactionTypeFilter.ALL -> true
                     TransactionTypeFilter.INCOME -> tx.direction == TransactionDirection.INCOME
                     TransactionTypeFilter.EXPENSE -> tx.direction == TransactionDirection.EXPENSE
+                    TransactionTypeFilter.INVOICES_ONLY -> tx.creditCardId != null // Só passa se for cartão
                 }
 
                 val matchesStatus = when (filters.statusFilter) {
@@ -147,13 +155,15 @@ class ReportViewModel @Inject constructor(
                         val key = "${tx.creditCardId}_$currentMonthYear"
                         if (!creditCardGroups.containsKey(key)) creditCardGroups[key] = Pair(occurrenceDate, mutableListOf())
                         creditCardGroups[key]?.second?.add(uiModel)
-                    } else {
+                    } else if (filters.typeFilter != TransactionTypeFilter.INVOICES_ONLY) {
+                        // 3. Só adiciona transação comum se NÃO estivermos no modo "Somente Faturas"
                         reportItems.add(ReportItem.Transaction(uiModel, occurrenceDate))
                     }
                 }
             }
         }
 
+        // Processamento dos grupos de cartões para criar as faturas (Invoices)
         creditCardGroups.forEach { (key, groupData) ->
             val dateSort = groupData.first
             val txs = groupData.second
@@ -161,11 +171,7 @@ class ReportViewModel @Inject constructor(
             val cardId = txs.first().creditCardId ?: ""
 
             val cardInfo = cards.find { it.id == cardId }
-            val displayName = if (cardInfo != null) {
-                "${cardInfo.bankName} (${cardInfo.brand})" // Ex: Nubank (Mastercard)
-            } else {
-                "Cartão Removido"
-            }
+            val displayName = cardInfo?.let { "${it.bankName} (${it.brand})" } ?: "Cartão Removido"
 
             reportItems.add(ReportItem.Invoice(
                 cardId = cardId,
@@ -179,11 +185,11 @@ class ReportViewModel @Inject constructor(
             ))
         }
 
+        // 4. Totais calculados dinamicamente com base no que sobrou na lista após os filtros
         val totalIncome = reportItems
             .filterIsInstance<ReportItem.Transaction>()
             .filter { it.model.direction == TransactionDirection.INCOME }
             .sumOf { it.model.amount }
-
 
         val totalExpense = reportItems.sumOf { item ->
             when (item) {
@@ -279,5 +285,15 @@ class ReportViewModel @Inject constructor(
         val cal2 = Calendar.getInstance().apply { timeInMillis = d2 }
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
+    }
+
+    fun updateCategoryFilter(categoryName: String?) {
+        _filterState.update { it.copy(categoryFilter = categoryName) }
+    }
+
+    fun showOnlyInvoices(show: Boolean) {
+        _filterState.update {
+            it.copy(typeFilter = if (show) TransactionTypeFilter.INVOICES_ONLY else TransactionTypeFilter.ALL)
+        }
     }
 }

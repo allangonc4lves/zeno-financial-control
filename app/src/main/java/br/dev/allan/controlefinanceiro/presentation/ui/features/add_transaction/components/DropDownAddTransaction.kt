@@ -19,7 +19,7 @@ import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlinedTextField
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
-import br.dev.allan.controlefinanceiro.presentation.ui.model.getAppearance
+import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
