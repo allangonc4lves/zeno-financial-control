@@ -179,13 +179,18 @@ class ReportViewModel @Inject constructor(
             ))
         }
 
-        val totalIncome = reportItems.filterIsInstance<ReportItem.Transaction>()
-            .filter { it.model.direction == TransactionDirection.INCOME }.sumOf { it.model.amount }
+        val totalIncome = reportItems
+            .filterIsInstance<ReportItem.Transaction>()
+            .filter { it.model.direction == TransactionDirection.INCOME }
+            .sumOf { it.model.amount }
 
-        val totalExpense = reportItems.sumOf {
-            when(it) {
-                is ReportItem.Transaction -> if (it.model.direction == TransactionDirection.EXPENSE) it.model.amount else 0.0
-                is ReportItem.Invoice -> it.totalAmount
+
+        val totalExpense = reportItems.sumOf { item ->
+            when (item) {
+                is ReportItem.Transaction -> {
+                    if (item.model.direction == TransactionDirection.EXPENSE) item.model.amount else 0.0
+                }
+                is ReportItem.Invoice -> item.totalAmount
             }
         }
 
@@ -214,31 +219,48 @@ class ReportViewModel @Inject constructor(
     private fun getOccurrencesInRange(tx: Transaction, start: Long, end: Long): List<Long> {
         val dates = mutableListOf<Long>()
 
+        val calStart = Calendar.getInstance().apply { timeInMillis = start }
+        val calEnd = Calendar.getInstance().apply { timeInMillis = end }
+
+        val calTx = Calendar.getInstance().apply { timeInMillis = tx.date }
+
         when {
             tx.isFixed -> {
-                val calTransaction = Calendar.getInstance().apply { timeInMillis = tx.date }
-                val calFilterStart = Calendar.getInstance().apply { timeInMillis = start }
-
-                if (start >= getStartOfMonth(tx.date) || isSameMonth(tx.date, start)) {
-                    dates.add(start)
+                val tempCal = calStart.clone() as Calendar
+                while (tempCal.before(calEnd) || isSameMonth(tempCal, calEnd)) {
+                    if (!isBeforeMonth(tempCal, calTx)) {
+                        dates.add(tempCal.timeInMillis)
+                    }
+                    tempCal.add(Calendar.MONTH, 1)
                 }
             }
 
             tx.isInstallment -> {
                 for (i in 0 until tx.installmentCount) {
-                    val cal = Calendar.getInstance().apply {
-                        timeInMillis = tx.date
-                        add(Calendar.MONTH, i)
+                    val calParcel = (calTx.clone() as Calendar).apply { add(Calendar.MONTH, i) }
+                    if (calParcel.timeInMillis in start..end || isSameMonth(calParcel, calStart) || isSameMonth(calParcel, calEnd)) {
+                        dates.add(calParcel.timeInMillis)
                     }
-                    if (cal.timeInMillis in start..end) dates.add(cal.timeInMillis)
                 }
             }
 
+            // CASO: COMUM
             else -> {
                 if (tx.date in start..end) dates.add(tx.date)
             }
         }
         return dates
+    }
+
+    private fun isSameMonth(c1: Calendar, c2: Calendar): Boolean {
+        return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) &&
+                c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
+    }
+
+    private fun isBeforeMonth(current: Calendar, reference: Calendar): Boolean {
+        if (current.get(Calendar.YEAR) < reference.get(Calendar.YEAR)) return true
+        if (current.get(Calendar.YEAR) > reference.get(Calendar.YEAR)) return false
+        return current.get(Calendar.MONTH) < reference.get(Calendar.MONTH)
     }
 
     private fun getStartOfMonth(millis: Long): Long {
