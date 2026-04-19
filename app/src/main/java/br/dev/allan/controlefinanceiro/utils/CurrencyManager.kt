@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.util
+package br.dev.allan.controlefinanceiro.utils
 
 import java.text.NumberFormat
 import java.util.Locale

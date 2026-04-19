@@ -5,9 +5,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
+import br.dev.allan.controlefinanceiro.domain.model.TransactionType
 import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
-import br.dev.allan.controlefinanceiro.util.CurrencyManager
+import br.dev.allan.controlefinanceiro.utils.CurrencyManager
+import br.dev.allan.controlefinanceiro.utils.formatMillisToMonthYear
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +43,7 @@ class MonthTransactionsViewModel @Inject constructor(
     val currentMonth = _currentMonth.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val transactionsUiState: StateFlow<List<TransactionUIModel>> = _currentMonth
+    val transactionsUiModel: StateFlow<List<TransactionUIModel>> = _currentMonth
         .flatMapLatest { monthMillis ->
             val (start, end) = getMonthRange(monthMillis)
             repository.getTransactionsByMonth(start, end).map { list ->
@@ -54,16 +56,17 @@ class MonthTransactionsViewModel @Inject constructor(
                         else -> true
                     }
                 }.map { transaction ->
-                    val titleWithParcel = transaction.getDisplayTitle(monthMillis)
 
                     val datePattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "ddMM")
                     TransactionUIModel(
                         id = transaction.id,
-                        title = titleWithParcel,
+                        title = transaction.title,
                         formattedAmount = currencyManager.formatByCurrencyCode(transaction.amount, "BRL"),
                         formattedDate = SimpleDateFormat(datePattern, Locale.getDefault()).format(Date(transaction.date)),
                         color = if (transaction.direction == TransactionDirection.EXPENSE) Color.Red else Color.Green,
                         category = transaction.category,
+                        type = transaction.type,
+                        isFixed = transaction.isFixed,
                         direction = transaction.direction,
                         isPaid = transaction.isPaid,
                         isInstallment = transaction.isInstallment,
@@ -80,21 +83,31 @@ class MonthTransactionsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun togglePayment(uiModel: TransactionUIModel) {
+        viewModelScope.launch {
+            val id = uiModel.id
+
+            if (uiModel.type == TransactionType.FIXED) {
+                val monthYear = formatMillisToMonthYear(currentMonth.value)
+
+                if (uiModel.isPaid) {
+                    repository.markAsUnpaid(id.toString(), monthYear)
+                } else {
+                    repository.markAsPaid(id.toString(), monthYear)
+                }
+            } else {
+                repository.updatePaymentStatus(id, !uiModel.isPaid)
+            }
+        }
+    }
+
     fun changeMonth(increment: Int) {
         val cal = Calendar.getInstance().apply { timeInMillis = _currentMonth.value }
         cal.add(Calendar.MONTH, increment)
         _currentMonth.value = cal.timeInMillis
     }
 
-    fun togglePayment(uiModel: TransactionUIModel) {
-        viewModelScope.launch {
-            if (uiModel.isInstallment) {
-                repository.incrementPaidInstallment(uiModel.id)
-            } else {
-                repository.updatePaymentStatus(uiModel.id, !uiModel.isPaid)
-            }
-        }
-    }
     private fun getMonthRange(monthMillis: Long): Pair<Long, Long> {
         val cal = Calendar.getInstance().apply { timeInMillis = monthMillis }
         val start = cal.timeInMillis
@@ -106,3 +119,4 @@ class MonthTransactionsViewModel @Inject constructor(
         return Pair(start, end)
     }
 }
+

@@ -56,7 +56,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddCre
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.MonthSelector
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
-import br.dev.allan.controlefinanceiro.util.toSystemDayMonth
+import br.dev.allan.controlefinanceiro.utils.toSystemDayMonth
 
 @Composable
 fun CreditCardsScreen(

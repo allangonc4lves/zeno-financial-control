@@ -13,9 +13,8 @@ interface TransactionRepository {
     fun getExpensesByCategory(start: Long, end: Long): Flow<List<CategorySum>>
     fun getTransactions(): Flow<List<Transaction>>
     fun getRecentTransactions(): Flow<List<Transaction>>
-    suspend fun updatePaymentStatus(id: Int, isPaid: Boolean)
-    suspend fun incrementPaidInstallment(id: Int)
-    suspend fun updateTransactionsPaymentStatus(ids: List<Int>, isPaid: Boolean)
+    suspend fun deleteTransactionGroup(groupId: String)
+    suspend fun updatePaymentStatus(id: Int, paid: Boolean)
     fun getCreditCardTransactions(monthYear: String? = null): Flow<List<Transaction>>
     fun getTotalUnpaidForCard(cardId: String): Flow<Double>
     suspend fun markAsPaid(transactionId: String, monthYear: String)
@@ -25,6 +24,7 @@ interface TransactionRepository {
     suspend fun getTransactionById(id: Int): Transaction?
     suspend fun deleteTransaction(id: Int)
     suspend fun insertTransaction(transaction: Transaction): Long
+    suspend fun insertTransactions(transactions: List<Transaction>)
     suspend fun updateTransaction(transaction: Transaction)
     suspend fun deleteTransaction(transaction: Transaction)
 }

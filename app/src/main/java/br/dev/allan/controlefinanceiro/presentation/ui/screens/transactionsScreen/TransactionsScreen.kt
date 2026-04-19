@@ -46,7 +46,7 @@ fun TransactionsScreen(
     navController: NavHostController,
     viewModel: MonthTransactionsViewModel = hiltViewModel()
 ) {
-    val transactions by viewModel.transactionsUiState.collectAsStateWithLifecycle()
+    val transactions by viewModel.transactionsUiModel.collectAsStateWithLifecycle()
     val currentMonthMillis by viewModel.currentMonth.collectAsStateWithLifecycle()
 
     Column(
@@ -74,7 +74,9 @@ fun TransactionsScreen(
                 items(transactions, key = { it.id }) { uiModel ->
                     TransactionItemRow(
                         uiModel = uiModel,
-                        onTogglePayment = { viewModel.togglePayment(uiModel) }
+                        onTogglePayment = {
+                            viewModel.togglePayment(uiModel)
+                        }
                     )
                 }
             }

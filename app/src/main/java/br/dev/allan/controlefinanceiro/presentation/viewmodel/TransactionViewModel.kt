@@ -85,6 +85,14 @@ class TransactionViewModel @Inject constructor(
         Log.i("onCategoryChange", uiState.selectedCardId.toString())
     }
 
+    fun onGroupIdChange(groupId: String?) {
+        uiState = uiState.copy(groupId = groupId)
+    }
+
+    fun onCurrentInstallmentChange(installment: Int) {
+        uiState = uiState.copy(currentInstallment = installment)
+    }
+
     fun onSelectCard(cardId: String?) {
         uiState = uiState.copy(selectedCardId = cardId)
         Log.i("onSelectCard", cardId.toString())
@@ -111,14 +119,12 @@ class TransactionViewModel @Inject constructor(
         uiState = uiState.copy(isPaid = paid)
     }
 
-    fun togglePaymentStatus(transaction: Transaction) {
+    fun togglePayment(transaction: Transaction, monthYear: String) {
         viewModelScope.launch {
-            if (transaction.isInstallment) {
-
-                transactionRepository.incrementPaidInstallment(transaction.id)
+            if (transaction.isPaid) {
+                transactionRepository.markAsUnpaid(transaction.id.toString(), monthYear)
             } else {
-
-                transactionRepository.updatePaymentStatus(transaction.id, !transaction.isPaid)
+                transactionRepository.markAsPaid(transaction.id.toString(), monthYear)
             }
         }
     }
@@ -132,6 +138,12 @@ class TransactionViewModel @Inject constructor(
 
             _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
             uiState = uiState.copy(isLoading = false)
+        }
+    }
+
+    fun onDeleteGroup(groupId: String) {
+        viewModelScope.launch {
+            transactionRepository.deleteTransactionGroup(groupId)
         }
     }
 
@@ -185,26 +197,83 @@ class TransactionViewModel @Inject constructor(
 
         val amountToSave = parseAmountFromUi(uiState.amount)
 
-        val transaction = Transaction(
-            id = currentTransactionId ?: 0,
-            title = uiState.title,
-            amount = amountToSave,
-            date = uiState.dateMillis,
-            category = uiState.category!!,
-            isFixed = uiState.transactionType == TransactionType.FIXED,
-            isInstallment = uiState.transactionType == TransactionType.INSTALLMENT,
-            installmentCount = if (uiState.transactionType == TransactionType.INSTALLMENT) uiState.installmentCount else 0,
-            direction = uiState.direction,
-            creditCardId = uiState.selectedCardId,
-            isPaid = uiState.isPaid,
-            paidInstallments = uiState.paidInstallments
-        )
-
         viewModelScope.launch {
             if (currentTransactionId == null) {
-                transactionRepository.insertTransaction(transaction)
+
+                if (uiState.transactionType == TransactionType.INSTALLMENT && uiState.installmentCount > 1) {
+
+                    val generatedGroupId = java.util.UUID.randomUUID().toString()
+                    val transactionsToInsert = mutableListOf<Transaction>()
+
+                    for (i in 0 until uiState.installmentCount) {
+                        val calendar = java.util.Calendar.getInstance().apply {
+                            timeInMillis = uiState.dateMillis
+                            add(java.util.Calendar.MONTH, i)
+                        }
+
+                        transactionsToInsert.add(
+                            Transaction(
+                                id = 0,
+                                groupId = generatedGroupId,
+                                title = uiState.title,
+                                amount = amountToSave,
+                                date = calendar.timeInMillis,
+                                category = uiState.category!!,
+                                isFixed = false,
+                                isInstallment = true,
+                                installmentCount = uiState.installmentCount,
+                                currentInstallment = i + 1,
+                                direction = uiState.direction,
+                                creditCardId = uiState.selectedCardId,
+                                isPaid = if (i == 0) uiState.isPaid else false,
+                                type = TransactionType.INSTALLMENT
+                            )
+                        )
+                    }
+
+                    transactionRepository.insertTransactions(transactionsToInsert)
+
+                } else {
+
+                    val singleTransaction = Transaction(
+                        id = 0,
+                        groupId = null,
+                        title = uiState.title,
+                        amount = amountToSave,
+                        date = uiState.dateMillis,
+                        category = uiState.category!!,
+                        isFixed = uiState.transactionType == TransactionType.FIXED,
+                        isInstallment = false,
+                        installmentCount = 0,
+                        currentInstallment = 0,
+                        direction = uiState.direction,
+                        creditCardId = uiState.selectedCardId,
+                        isPaid = uiState.isPaid,
+                        type = uiState.transactionType
+                    )
+
+                    transactionRepository.insertTransaction(singleTransaction)
+                }
+
             } else {
-                transactionRepository.updateTransaction(transaction)
+                val updatedTransaction = Transaction(
+                    id = currentTransactionId ?: 0,
+                    groupId = uiState.groupId,
+                    title = uiState.title,
+                    amount = amountToSave,
+                    date = uiState.dateMillis,
+                    category = uiState.category!!,
+                    isFixed = uiState.transactionType == TransactionType.FIXED,
+                    isInstallment = uiState.transactionType == TransactionType.INSTALLMENT,
+                    installmentCount = uiState.installmentCount,
+                    currentInstallment = uiState.currentInstallment,
+                    direction = uiState.direction,
+                    creditCardId = uiState.selectedCardId,
+                    isPaid = uiState.isPaid,
+                    type = uiState.transactionType
+                )
+
+                transactionRepository.updateTransaction(updatedTransaction)
             }
 
             _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)

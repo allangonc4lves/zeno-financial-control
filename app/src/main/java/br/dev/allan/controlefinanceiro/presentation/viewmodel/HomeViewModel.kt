@@ -14,7 +14,7 @@ import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
 import br.dev.allan.controlefinanceiro.domain.model.getAppearance
-import br.dev.allan.controlefinanceiro.util.CurrencyManager
+import br.dev.allan.controlefinanceiro.utils.CurrencyManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -193,27 +193,22 @@ class HomeViewModel @Inject constructor(
         transactions.map { item ->
             val prefix = if (item.direction == TransactionDirection.EXPENSE) "- " else "+ "
 
-            val dynamicTitle = item.getDisplayTitle(System.currentTimeMillis())
-
             TransactionUIModel(
                 id = item.id,
-                title = dynamicTitle,
+                title = item.title,
                 formattedAmount = prefix + currencyManager.formatByCurrencyCode(item.amount, code),
                 formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("pt-BR")).format(Date(item.date)),
                 color = if (item.direction == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else Color(0xFF1B5E20),
                 category = item.category,
                 direction = item.direction,
-                isPaid = if (item.isInstallment) {
-                    val currentParcel = item.getCurrentParcelIndex(System.currentTimeMillis())
-                    currentParcel <= item.paidInstallments
-                } else {
-                    item.isPaid
-                },
+                isPaid = item.isPaid,
                 isInstallment = item.isInstallment,
                 creditCardId = item.creditCardId,
                 formattedParcelInfo = null,
                 formattedTotalAmount = currencyManager.formatByCurrencyCode(item.amount, code),
-                amount = item.amount
+                amount = item.amount,
+                type = item.type,
+                isFixed = item.isFixed
             )
         }
     }.stateIn(

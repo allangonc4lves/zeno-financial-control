@@ -45,6 +45,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitl
 import br.dev.allan.controlefinanceiro.presentation.ui.components.ZenoDialog
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.SaveTransactionUiEvent
+import br.dev.allan.controlefinanceiro.utils.toSystemFormatDate
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -168,7 +169,7 @@ fun AddTransactionDialog(
                     }
 
                     CustomOutlinedTextField(
-                        value = dateFormat.format(Date(state.dateMillis)),
+                        value = dateFormat.format(Date(state.dateMillis)).toSystemFormatDate(),
                         label = "Data*",
                         isReadOnly = true,
                         isError = false,

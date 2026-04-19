@@ -4,13 +4,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.data.dataStore.SettingsManager
-import br.dev.allan.controlefinanceiro.data.local.PaymentStatusEntity
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.creditCardsScreen.CreditCardAmountByYear
-import br.dev.allan.controlefinanceiro.util.CurrencyManager
+import br.dev.allan.controlefinanceiro.utils.CurrencyManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,7 +98,9 @@ class CreditCardTransactionViewModel @Inject constructor(
                         creditCardId = transaction.creditCardId,
                         category = transaction.category,
                         direction = transaction.direction,
-                        amount = roundedParcel
+                        amount = roundedParcel,
+                        type = transaction.type,
+                        isFixed = transaction.isFixed
                     )
                 }
         }

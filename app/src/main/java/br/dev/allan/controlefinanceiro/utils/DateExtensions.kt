@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.util
+package br.dev.allan.controlefinanceiro.utils
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -27,4 +27,10 @@ fun String.toSystemDayMonth(): String {
     } catch (e: Exception) {
         this
     }
+}
+
+fun formatMillisToMonthYear(millis: Long): String {
+    val date = java.util.Date(millis)
+    val formatter = java.text.SimpleDateFormat("MM/yyyy", java.util.Locale.getDefault())
+    return formatter.format(date)
 }

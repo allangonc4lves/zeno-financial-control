@@ -6,14 +6,16 @@ import java.util.Calendar
 
 data class Transaction(
     val id: Int = 0,
+    val groupId: String? = null,
     val title: String,
     val amount: Double,
     val date: Long,
     val category: TransactionCategory,
+    val type: TransactionType,
     val isFixed: Boolean = false,
     val isInstallment: Boolean = false,
     val installmentCount: Int = 0,
-    val paidInstallments: Int = 0,
+    val currentInstallment: Int = 0,
     val isPaid: Boolean = false,
     val direction: TransactionDirection,
     val creditCardId: String? = null
@@ -30,12 +32,6 @@ data class Transaction(
         val monthsBetween = (yearDiff * 12) + monthDiff
 
         return (monthsBetween + 1).coerceIn(1, installmentCount)
-    }
-
-    fun getDisplayTitle(referenceDate: Long): String {
-        if (!isInstallment) return title
-        val current = getCurrentParcelIndex(referenceDate)
-        return "$title ($current/$installmentCount)"
     }
 
     fun isExpired(referenceDate: Long): Boolean {

@@ -37,7 +37,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddTra
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
-import br.dev.allan.controlefinanceiro.util.toSystemFormatDate
+import br.dev.allan.controlefinanceiro.utils.toSystemFormatDate
 
 @Composable
 fun HomeScreen(
