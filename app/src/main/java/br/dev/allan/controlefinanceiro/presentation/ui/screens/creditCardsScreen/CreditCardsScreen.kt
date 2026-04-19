@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -45,13 +46,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddCreditCardRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.MonthSelector
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
@@ -84,68 +89,91 @@ fun CreditCardsScreen(
 
     val cardWidth: Dp = 300.dp
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth(),
-            pageSize = PageSize.Fixed(cardWidth),
-            contentPadding = PaddingValues(horizontal = (LocalConfiguration.current.screenWidthDp.dp - cardWidth) / 2),
-            pageSpacing = 16.dp,
-        ) { page ->
-            val card = cards[page]
-            CreditCardPreview(
-                bankName = card.bankName,
-                brand = card.brand,
-                lastDigits = card.lastDigits.toString(),
-                backgroundColorLong = card.backgroundColor,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(190.dp)
-                    .clickable {
-                        navViewModel.navigateToForm(
-                            navController = navController,
-                            route = AddCreditCardRoute(id = card.id)
+    if(cards.isNotEmpty()){
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth(),
+                pageSize = PageSize.Fixed(cardWidth),
+                contentPadding = PaddingValues(horizontal = (LocalConfiguration.current.screenWidthDp.dp - cardWidth) / 2),
+                pageSpacing = 16.dp,
+            ) { page ->
+                val card = cards[page]
+                CreditCardPreview(
+                    bankName = card.bankName,
+                    brand = card.brand,
+                    lastDigits = card.lastDigits.toString(),
+                    backgroundColorLong = card.backgroundColor,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(190.dp)
+                        .clickable {
+                            navViewModel.navigateToForm(
+                                navController = navController,
+                                route = AddCreditCardRoute(id = card.id)
+                            )
+                        }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MonthSelector(
+                currentMonthMillis = currentMonth,
+                onPreviousMonth = { viewModel.changeMonth(-1) },
+                onNextMonth = { viewModel.changeMonth(1) }
+            )
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    if (chartData.isNotEmpty()) {
+                        CreditCardBarChart(
+                            data = chartData,
+                            barColor = selectedCardColor,
+                            totalMonth = selectedMonthTotal,
+                            totalOpenInvoices = totalOpenInvoices,
+                            modifier = Modifier.fillMaxWidth(),
+                            onStatusClick = { isPaid ->
+                                viewModel.markMonthAsPaid(isPaid)
+                            }
                         )
                     }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MonthSelector(
-            currentMonthMillis = currentMonth,
-            onPreviousMonth = { viewModel.changeMonth(-1) },
-            onNextMonth = { viewModel.changeMonth(1) }
-        )
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                if (chartData.isNotEmpty()) {
-                    CreditCardBarChart(
-                        data = chartData,
-                        barColor = selectedCardColor,
-                        totalMonth = selectedMonthTotal,
-                        totalOpenInvoices = totalOpenInvoices,
-                        modifier = Modifier.fillMaxWidth(),
-                        onStatusClick = { isPaid ->
-                            viewModel.markMonthAsPaid(isPaid)
-                        }
-                    )
+                }
+                items(transactions, key = { it.id }) { transaction ->
+                    CardTransactionItem(transaction)
                 }
             }
-            items(transactions, key = { it.id }) { transaction ->
-                CardTransactionItem(transaction)
-            }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.zeno_not_found_cards),
+                contentDescription = "zeno",
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(bottom = 8.dp),
+                contentScale = ContentScale.Inside
+            )
+            CustomTextContent(
+                text = "Nenhuma cartão encontrado!",
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
