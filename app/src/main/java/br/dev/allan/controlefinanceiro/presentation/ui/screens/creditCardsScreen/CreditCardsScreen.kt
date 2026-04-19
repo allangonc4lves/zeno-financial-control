@@ -1,5 +1,6 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.screens.creditCardsScreen
 
+import android.util.Log
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -52,10 +53,10 @@ import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddCreditCardRoute
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddTransactionRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.MonthSelector
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
+import br.dev.allan.controlefinanceiro.util.toSystemDayMonth
 
 @Composable
 fun CreditCardsScreen(
@@ -181,7 +182,8 @@ fun CardTransactionItem(item: TransactionUIModel) {
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                Text(text = item.formattedDate, style = MaterialTheme.typography.bodySmall)
+                Text(text = item.formattedDate.toSystemDayMonth(), style = MaterialTheme.typography.bodySmall)
+                Log.i("testeDate", item.formattedDate + item.formattedDate.toSystemDayMonth())
             }
         }
     }

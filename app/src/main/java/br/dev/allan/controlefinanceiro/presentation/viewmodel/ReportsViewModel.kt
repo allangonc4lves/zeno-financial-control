@@ -1,5 +1,6 @@
 package br.dev.allan.controlefinanceiro.presentation.viewmodel
 
+import android.text.format.DateFormat
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -135,12 +136,13 @@ class ReportViewModel @Inject constructor(
                     val rawParcel = if (tx.isInstallment && tx.installmentCount > 0) tx.amount / tx.installmentCount else tx.amount
                     val roundedParcel = Math.round(rawParcel * 100.0) / 100.0
 
+                    val datePattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "ddMM")
                     val uiModel = TransactionUIModel(
                         id = tx.id,
                         title = tx.title,
                         formattedAmount = currencyManager.formatByCurrencyCode(roundedParcel, code),
                         formattedTotalAmount = currencyManager.formatByCurrencyCode(tx.amount, code),
-                        formattedDate = SimpleDateFormat("dd/MM", Locale.getDefault()).format(Date(occurrenceDate)),
+                        formattedDate = SimpleDateFormat(datePattern, Locale.getDefault()).format(Date(occurrenceDate)),
                         formattedParcelInfo = if (tx.isInstallment) "$currentParcel/${tx.installmentCount}" else null,
                         color = if (tx.direction == TransactionDirection.EXPENSE) Color.Red else Color.Green,
                         isPaid = isPaidInThisMonth,

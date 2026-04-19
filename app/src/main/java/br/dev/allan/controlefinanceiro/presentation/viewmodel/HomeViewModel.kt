@@ -199,7 +199,7 @@ class HomeViewModel @Inject constructor(
                 id = item.id,
                 title = dynamicTitle,
                 formattedAmount = prefix + currencyManager.formatByCurrencyCode(item.amount, code),
-                formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(item.date)),
+                formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("pt-BR")).format(Date(item.date)),
                 color = if (item.direction == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else Color(0xFF1B5E20),
                 category = item.category,
                 direction = item.direction,

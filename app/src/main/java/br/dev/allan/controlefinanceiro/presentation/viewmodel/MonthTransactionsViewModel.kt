@@ -1,5 +1,6 @@
 package br.dev.allan.controlefinanceiro.presentation.viewmodel
 
+import android.text.format.DateFormat
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -55,11 +56,12 @@ class MonthTransactionsViewModel @Inject constructor(
                 }.map { transaction ->
                     val titleWithParcel = transaction.getDisplayTitle(monthMillis)
 
+                    val datePattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "ddMM")
                     TransactionUIModel(
                         id = transaction.id,
                         title = titleWithParcel,
                         formattedAmount = currencyManager.formatByCurrencyCode(transaction.amount, "BRL"),
-                        formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(transaction.date)),
+                        formattedDate = SimpleDateFormat(datePattern, Locale.getDefault()).format(Date(transaction.date)),
                         color = if (transaction.direction == TransactionDirection.EXPENSE) Color.Red else Color.Green,
                         category = transaction.category,
                         direction = transaction.direction,

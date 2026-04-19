@@ -21,9 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,21 +28,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.ExpensesByCategoryCard
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoDrawBoxTop
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
-import br.dev.allan.controlefinanceiro.presentation.ui.features.detail_transaction.EditTransactionDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.TotalExpAndIncByMonthCard
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddTransactionRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import br.dev.allan.controlefinanceiro.util.toSystemFormatDate
 
 @Composable
 fun HomeScreen(
@@ -167,12 +159,9 @@ fun HomeScreen(
                             text = item.formattedAmount,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
+
                         CustomTextContent(
-                            text = SimpleDateFormat(
-                                "dd/MM/yyyy", Locale.getDefault()
-                            ).format(
-                                Date(item.formattedDate)
-                            ),
+                            text = item.formattedDate.toSystemFormatDate(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }
