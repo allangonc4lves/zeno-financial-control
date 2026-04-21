@@ -11,6 +11,8 @@ import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.creditCardsScreen.CreditCardAmountByYear
 import br.dev.allan.controlefinanceiro.utils.CurrencyManager
 import br.dev.allan.controlefinanceiro.utils.DateHelper
+import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
+import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -178,6 +180,38 @@ class CreditCardTransactionViewModel @Inject constructor(
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "...")
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val categoryChartData = combine(
+        _selectedCardId,
+        _currentMonth
+    ) { cardId, monthMillis ->
+        cardId to monthMillis
+    }.flatMapLatest { (cardId, monthMillis) ->
+        if (cardId == null) return@flatMapLatest flowOf(emptyMap<CategoryAppearance, Double>())
+
+        val monthYear = SimpleDateFormat("MM-yyyy", Locale.getDefault()).format(Date(monthMillis))
+        transactionRepository.getCreditCardTransactions(monthYear).map { allTransactions ->
+            val calendar = Calendar.getInstance().apply { timeInMillis = monthMillis }
+            val startStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
+            calendar.add(Calendar.MONTH, 1)
+            val endStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
+
+            allTransactions
+                .filter { it.creditCardId == cardId && it.date >= startStr && it.date < endStr }
+                .groupBy { it.category }
+                .mapKeys { it.key.getAppearance() }
+                .mapValues { entry -> entry.value.sumOf { it.amount } }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val categoryChartLabels = combine(
+        categoryChartData,
+        currencyCode
+    ) { map, code ->
+        map.mapValues { currencyManager.formatByCurrencyCode(it.value, code) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
     fun markMonthAsPaid(isPaid: Boolean) {
         viewModelScope.launch {

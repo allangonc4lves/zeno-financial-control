@@ -57,6 +57,8 @@ import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.ExpensesByCategoryCard
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddCreditCardRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.MonthSelector
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
@@ -75,6 +77,8 @@ fun CreditCardsScreen(
     val chartData by viewModel.chartDataState.collectAsState()
     val currentMonth by viewModel.currentMonth.collectAsState()
     val selectedMonthTotal by viewModel.formattedSelectedMonthTotal.collectAsState()
+    val categoryChartValues by viewModel.categoryChartData.collectAsState()
+    val categoryChartLabels by viewModel.categoryChartLabels.collectAsState()
 
     val pagerState = rememberPagerState(pageCount = { cards.size })
 
@@ -148,6 +152,18 @@ fun CreditCardsScreen(
                             }
                         )
                     }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CustomTextTitle(
+                        text = "Gastos por categoria no cartão",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        startPadding = 8
+                    )
+                    ExpensesByCategoryCard(
+                        chartDataValues = categoryChartValues,
+                        chartDataLabels = categoryChartLabels
+                    )
                 }
                 items(transactions, key = { it.id }) { transaction ->
                     CardTransactionItem(transaction)
