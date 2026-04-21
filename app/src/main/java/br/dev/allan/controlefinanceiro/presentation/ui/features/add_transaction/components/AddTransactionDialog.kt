@@ -212,6 +212,23 @@ fun AddTransactionDialog(
                         showQuantity = uiState.transactionType == TransactionType.INSTALLMENT
                     )
 
+                    SwitchAddTransaction(
+                        text = "Cartão de Crédito",
+                        checked = uiState.isCreditCard,
+                        onCheckedChange = { onAction(TransactionAction.CreditCardToggle(it)) },
+                        quantityValue = 0,
+                        onQuantityChange = {},
+                        showQuantity = false
+                    )
+
+                    if (uiState.isCreditCard) {
+                        CardSelector(
+                            cards = uiState.cards,
+                            selectedCardId = uiState.selectedCardId,
+                            onCardSelected = { onAction(TransactionAction.CardSelected(it)) }
+                        )
+                    }
+
                     DropdownAddTransaction(
                         selectedType = uiState.direction,
                         selectedCategory = uiState.category,

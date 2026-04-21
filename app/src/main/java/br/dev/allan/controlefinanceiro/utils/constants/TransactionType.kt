@@ -1,3 +1,3 @@
 package br.dev.allan.controlefinanceiro.utils.constants
 
-enum class TransactionType { DEFAULT, INSTALLMENT, REPEAT, CREDIT_CARD }
+enum class TransactionType { DEFAULT, INSTALLMENT, REPEAT }

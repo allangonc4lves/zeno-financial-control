@@ -32,7 +32,7 @@ class SaveTransactionUseCase @Inject constructor(
         }
 
         val amount = state.amount.parseToDouble()
-        // A conversão acontece aqui, usando o dado que veio do STATE
+
         val dateToSave = DateHelper.fromUiToDb(state.dateDisplay)
 
         return try {

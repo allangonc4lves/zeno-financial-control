@@ -91,6 +91,9 @@ class TransactionViewModel @Inject constructor(
             is TransactionAction.PaidChanged ->
                 updateState { it.copy(isPaid = action.paid) }
 
+            is TransactionAction.CreditCardToggle ->
+                updateState { it.copy(isCreditCard = action.isCreditCard, selectedCardId = if (!action.isCreditCard) null else it.selectedCardId) }
+
             is TransactionAction.Save -> save()
 
             is TransactionAction.Delete -> delete()
@@ -141,7 +144,8 @@ class TransactionViewModel @Inject constructor(
                         tx.isInstallment -> TransactionType.INSTALLMENT
                         else -> TransactionType.DEFAULT
                     },
-                    installmentCount = if (tx.isInstallment) tx.installmentCount else 2
+                    installmentCount = if (tx.isInstallment) tx.installmentCount else 2,
+                    isCreditCard = tx.creditCardId != null
                 )}
             }
         }
