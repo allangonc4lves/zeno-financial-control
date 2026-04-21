@@ -24,6 +24,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,16 +36,17 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import br.dev.allan.controlefinanceiro.domain.model.InputModeCustomTextField
-import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.domain.model.TransactionType
+import br.dev.allan.controlefinanceiro.utils.constants.InputModeCustomTextField
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
 import br.dev.allan.controlefinanceiro.presentation.ui.components.Loading
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlinedTextField
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.ui.components.ZenoDialog
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.SaveTransactionUiEvent
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.TransactionAction
 import br.dev.allan.controlefinanceiro.utils.toSystemFormatDate
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -58,28 +60,28 @@ fun AddTransactionDialog(
     onDismiss: () -> Unit,
     viewModel: TransactionViewModel = hiltViewModel()
 ) {
+    val onAction = viewModel::onAction
+    val uiState by viewModel.uiState.collectAsState()
 
-    val state = viewModel.uiState
     var showDatePicker by remember { mutableStateOf(false) }
-
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
-        timeZone = java.util.TimeZone.getTimeZone("UTC")
+    val dateFormat = remember {
+        SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        }
     }
 
     LaunchedEffect(transactionId) {
         if (transactionId != null && transactionId != -1) {
-            viewModel.loadTransactionToEdit(transactionId)
+            viewModel.loadToEdit(transactionId)
         }
     }
 
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                is SaveTransactionUiEvent.SaveSuccess -> {
-                    onDismiss()
-                }
+                is SaveTransactionUiEvent.SaveSuccess -> onDismiss()
             }
         }
     }
@@ -97,7 +99,7 @@ fun AddTransactionDialog(
             text = { Text("Esta ação não pode ser desfeita.") },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteTransaction()
+                    onAction(TransactionAction.Delete) // Usando Action
                     showDeleteConfirm = false
                 }) {
                     Text("Excluir", color = MaterialTheme.colorScheme.error)
@@ -113,16 +115,13 @@ fun AddTransactionDialog(
 
     ZenoDialog(
         onDismiss = { onDismiss() },
-        onConfirm = { viewModel.saveTransaction() },
+        onConfirm = { onAction(TransactionAction.Save) }, // Usando Action
         content = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-
-            }
             Box(contentAlignment = Alignment.Center) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .alpha(if (state.isLoading) 0.5f else 1f)
+                        .alpha(if (uiState.isLoading) 0.5f else 1f)
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -138,38 +137,40 @@ fun AddTransactionDialog(
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = "Excluir",
-                                    tint = MaterialTheme.colorScheme.primary)
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
                     }
-                    Row(modifier = Modifier.fillMaxWidth()) {
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
-                            value = state.title,
+                            value = uiState.title,
                             label = "Título*",
                             capitalization = KeyboardCapitalization.Sentences,
-                            isError = state.titleError != null,
-                            errorMessage = state.titleError ?: "",
-                            onValueChange = { viewModel.onTitleChange(it) }
+                            isError = uiState.titleError != null,
+                            errorMessage = uiState.titleError ?: "",
+                            onValueChange = { onAction(TransactionAction.TitleChanged(it)) },
                         )
 
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
-                            value = state.amount,
+                            value = uiState.amount,
                             label = "Valor*",
                             forceCursorAtEnd = true,
                             inputMode = InputModeCustomTextField.DIGITS,
                             maxLength = 9,
                             keyboardType = KeyboardType.NumberPassword,
                             capitalization = KeyboardCapitalization.None,
-                            isError = state.amountError != null,
-                            errorMessage = state.amountError ?: "",
-                            onValueChange = { viewModel.onAmountChange(it) }
+                            isError = uiState.amountError != null,
+                            errorMessage = uiState.amountError ?: "",
+                            onValueChange = { onAction(TransactionAction.AmountChanged(it)) }
                         )
                     }
 
                     CustomOutlinedTextField(
-                        value = dateFormat.format(Date(state.dateMillis)).toSystemFormatDate(),
+                        value = dateFormat.format(Date(uiState.dateMillis)).toSystemFormatDate(),
                         label = "Data*",
                         isReadOnly = true,
                         isError = false,
@@ -177,70 +178,58 @@ fun AddTransactionDialog(
                         onValueChange = {},
                         trailingIcon = {
                             IconButton(onClick = { showDatePicker = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = "Selecionar data"
-                                )
+                                Icon(Icons.Default.DateRange, "Data")
                             }
                         }
                     )
 
                     SingleChoiceButtonAddTransaction(
-                        selectedIncomeOrExpense = state.direction.ordinal,
+                        selectedIncomeOrExpense = uiState.direction.ordinal,
                         onSelectionChange = { index ->
-                            viewModel.onDirectionChange(TransactionDirection.entries[index])
+                            onAction(TransactionAction.DirectionChanged(TransactionDirection.entries[index]))
                         }
                     )
 
                     SwitchAddTransaction(
-                        text = "Transação Fixa",
-                        checked = state.transactionType == TransactionType.FIXED,
+                        text = "Repetir",
+                        checked = uiState.transactionType == TransactionType.INSTALLMENT,
                         onCheckedChange = { isChecked ->
-                            viewModel.onTransactionTypeChange(if (isChecked) TransactionType.FIXED else TransactionType.DEFAULT)
+                            onAction(TransactionAction.TypeChanged(if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT))
                         },
-                        quantityValue = 0,
-                        onQuantityChange = {},
-                        showQuantity = false
+                        quantityValue = uiState.installmentCount,
+                        onQuantityChange = { onAction(TransactionAction.InstallmentCountChanged(it)) },
+                        showQuantity = uiState.transactionType == TransactionType.INSTALLMENT
                     )
 
                     SwitchAddTransaction(
-                        text = "Parceladas",
-                        checked = state.transactionType == TransactionType.INSTALLMENT,
+                        text = "Parcelar",
+                        checked = uiState.transactionType == TransactionType.INSTALLMENT,
                         onCheckedChange = { isChecked ->
-                            viewModel.onTransactionTypeChange(if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT)
+                            onAction(TransactionAction.TypeChanged(if (isChecked) TransactionType.INSTALLMENT else TransactionType.DEFAULT))
                         },
-                        quantityValue = state.installmentCount,
-                        onQuantityChange = { viewModel.onInstallmentCountChange(it) },
-                        showQuantity = state.transactionType == TransactionType.INSTALLMENT
+                        quantityValue = uiState.installmentCount,
+                        onQuantityChange = { onAction(TransactionAction.InstallmentCountChanged(it)) },
+                        showQuantity = uiState.transactionType == TransactionType.INSTALLMENT
                     )
-                    if (state.transactionType != TransactionType.INSTALLMENT) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = state.isPaid,
-                                onCheckedChange = { viewModel.onPaidChange(it) }
-                            )
-                            Text("Já está pago?")
-                        }
-                    }
 
                     DropdownAddTransaction(
-                        selectedType = state.direction,
-                        selectedCategory = state.category,
-                        onCategorySelected = { viewModel.onCategoryChange(it) },
-                        isError = state.categoryError != null,
-                        errorMessage = state.categoryError ?: ""
+                        selectedType = uiState.direction,
+                        selectedCategory = uiState.category,
+                        onCategorySelected = { onAction(TransactionAction.CategoryChanged(it)) },
+                        isError = uiState.categoryError != null,
+                        errorMessage = uiState.categoryError ?: ""
                     )
 
-                    if (viewModel.uiState.category == TransactionCategory.CREDIT_CARD_PAYMENT) {
+                    if (uiState.category == TransactionCategory.OTHERS_EXPENSE) {
                         CardSelector(
-                            cards = viewModel.uiState.cards,
-                            selectedCardId = viewModel.uiState.selectedCardId,
-                            onCardSelected = { viewModel.onSelectCard(it) }
+                            cards = uiState.cards,
+                            selectedCardId = uiState.selectedCardId,
+                            onCardSelected = { onAction(TransactionAction.CardSelected(it)) }
                         )
                     }
                 }
 
-                if (state.isLoading) {
+                if (uiState.isLoading) {
                     Loading()
                 }
             }
@@ -248,16 +237,24 @@ fun AddTransactionDialog(
     )
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = state.dateMillis)
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.dateMillis)
+
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { viewModel.onDateChange(it) }
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val formatted = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
+                            timeZone = java.util.TimeZone.getTimeZone("UTC")
+                        }.format(java.util.Date(millis))
+
+                        onAction(TransactionAction.DateChanged(formatted))
+                    }
                     showDatePicker = false
                 }) { Text("OK") }
             }
-        ) { DatePicker(state = datePickerState) }
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
-
 }

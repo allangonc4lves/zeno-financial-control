@@ -2,7 +2,6 @@ package br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScre
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -39,7 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.R
-import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
+import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MonthTransactionsViewModel

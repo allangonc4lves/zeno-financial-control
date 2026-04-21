@@ -31,7 +31,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.dev.allan.controlefinanceiro.domain.model.InputModeCustomTextField
+import br.dev.allan.controlefinanceiro.utils.constants.InputModeCustomTextField
 
 @Composable
 fun CustomOutlinedTextField(

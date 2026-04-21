@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.dev.allan.controlefinanceiro.domain.model.CreditCardPreviewType
+import br.dev.allan.controlefinanceiro.utils.constants.CreditCardPreviewType
 
 @Composable
 fun CreditCardPreview(

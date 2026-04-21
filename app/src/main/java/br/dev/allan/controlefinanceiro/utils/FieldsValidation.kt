@@ -1,6 +1,6 @@
-package br.dev.allan.controlefinanceiro.domain.usecase
+package br.dev.allan.controlefinanceiro.utils
 
-import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
 
 data class ValidationResult(
     val successful: Boolean,

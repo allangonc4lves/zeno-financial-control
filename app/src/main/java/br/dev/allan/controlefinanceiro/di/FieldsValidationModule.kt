@@ -1,9 +1,9 @@
 package br.dev.allan.controlefinanceiro.di
 
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateAmount
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateCategory
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateLastDigitsCreditCard
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateText
+import br.dev.allan.controlefinanceiro.utils.ValidateAmount
+import br.dev.allan.controlefinanceiro.utils.ValidateCategory
+import br.dev.allan.controlefinanceiro.utils.ValidateLastDigitsCreditCard
+import br.dev.allan.controlefinanceiro.utils.ValidateText
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

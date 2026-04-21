@@ -15,8 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlinedTextField
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.domain.model.getAppearance

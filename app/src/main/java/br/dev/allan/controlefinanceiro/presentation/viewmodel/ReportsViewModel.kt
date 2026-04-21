@@ -8,11 +8,12 @@ import br.dev.allan.controlefinanceiro.data.dataStore.SettingsManager
 import br.dev.allan.controlefinanceiro.data.local.PaymentStatusEntity
 import br.dev.allan.controlefinanceiro.domain.model.CreditCard
 import br.dev.allan.controlefinanceiro.domain.model.Transaction // IMPORTANTE: Seu model de domínio
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.utils.CurrencyManager
+import br.dev.allan.controlefinanceiro.utils.DateHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -147,7 +148,6 @@ class ReportViewModel @Inject constructor(
                         type = tx.type,
                         direction = tx.direction,
                         isPaid = isPaidInThisMonth,
-                        isFixed = tx.isFixed,
                         isInstallment = tx.isInstallment,
                         currentInstallment = tx.currentInstallment,
                         installmentCount = tx.installmentCount,
@@ -164,7 +164,6 @@ class ReportViewModel @Inject constructor(
                 }
             }
         }
-
         creditCardGroups.forEach { (key, groupData) ->
             val dateSort = groupData.first
             val txs = groupData.second
@@ -225,33 +224,33 @@ class ReportViewModel @Inject constructor(
     private fun getOccurrencesInRange(tx: Transaction, start: Long, end: Long): List<Long> {
         val dates = mutableListOf<Long>()
 
-        val calStart = Calendar.getInstance().apply { timeInMillis = start }
-        val calEnd = Calendar.getInstance().apply { timeInMillis = end }
+        val startStr = DateHelper.fromMillisToDb(start)
+        val endStr = DateHelper.fromMillisToDb(end)
 
-        val calTx = Calendar.getInstance().apply { timeInMillis = tx.date }
+        val calTx = Calendar.getInstance().apply {
+            val dateObj = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(tx.date)
+            time = dateObj ?: Date()
+        }
 
         when {
-            tx.isFixed -> {
-                val tempCal = calStart.clone() as Calendar
-                while (tempCal.before(calEnd) || isSameMonth(tempCal, calEnd)) {
-                    if (!isBeforeMonth(tempCal, calTx)) {
-                        dates.add(tempCal.timeInMillis)
-                    }
-                    tempCal.add(Calendar.MONTH, 1)
-                }
-            }
-
             tx.isInstallment -> {
                 for (i in 0 until tx.installmentCount) {
-                    val calParcel = (calTx.clone() as Calendar).apply { add(Calendar.MONTH, i) }
-                    if (calParcel.timeInMillis in start..end || isSameMonth(calParcel, calStart) || isSameMonth(calParcel, calEnd)) {
+                    val calParcel = (calTx.clone() as Calendar).apply {
+                        add(Calendar.MONTH, i)
+                    }
+
+                    val parcelDateStr = DateHelper.fromMillisToDb(calParcel.timeInMillis)
+
+                    if (parcelDateStr in startStr..endStr) {
                         dates.add(calParcel.timeInMillis)
                     }
                 }
             }
-
             else -> {
-                if (tx.date in start..end) dates.add(tx.date)
+                if (tx.date in startStr..endStr) {
+                    val txMillis = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(tx.date)?.time
+                    txMillis?.let { dates.add(it) }
+                }
             }
         }
         return dates

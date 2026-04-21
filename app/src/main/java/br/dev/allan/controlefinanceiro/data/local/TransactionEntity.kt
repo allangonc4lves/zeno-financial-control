@@ -2,9 +2,9 @@ package br.dev.allan.controlefinanceiro.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.domain.model.TransactionType
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
 
 @Entity(tableName = "transactions")
 data class TransactionEntity(
@@ -12,10 +12,9 @@ data class TransactionEntity(
     val groupId: String? = null,
     val title: String,
     val amount: Double,
-    val date: Long,
+    val date: String,
     val category: TransactionCategory,
     val type: TransactionType,
-    val isFixed: Boolean = false,
     val isInstallment: Boolean = false,
     val installmentCount: Int = 0,
     val currentInstallment: Int = 0,

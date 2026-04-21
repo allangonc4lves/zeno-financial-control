@@ -4,11 +4,13 @@ data class AddCreditCardUiState (
     val bankName: String = "",
     val brand: String = "",
     val lastDigits: String = "",
+    val dueDate: String = "",
     val backgroundColor: Long = 0xFF1E88E5,
     val bankNameError: String? = null,
     val brandError: String? = null,
     val lastDigitsError: String? = null,
     val isLoading: Boolean = false,
+    val activated: Boolean = true,
     val palette: List<Long> = listOf(
         0xFF1E88E5L, // azul
         0xFF43A047L, // verde
@@ -22,5 +24,4 @@ data class AddCreditCardUiState (
         0xFF757575L, // cinza
         0xFFFF9800L  // laranja
     )
-
 )

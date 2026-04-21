@@ -1,301 +1,156 @@
 package br.dev.allan.controlefinanceiro.presentation.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
-import br.dev.allan.controlefinanceiro.domain.model.TransactionCategory
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.domain.model.TransactionType
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
 import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateAmount
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateCategory
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateText
-import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.AddTransactionUiState
+import br.dev.allan.controlefinanceiro.domain.usecase.SaveTransactionUseCase
+import br.dev.allan.controlefinanceiro.utils.ValidateAmount
+import br.dev.allan.controlefinanceiro.utils.ValidateCategory
+import br.dev.allan.controlefinanceiro.utils.ValidateText
+import br.dev.allan.controlefinanceiro.utils.AddTransactionUiState
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.SaveTransactionUiEvent
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.TransactionAction
+import br.dev.allan.controlefinanceiro.utils.DateHelper
+import br.dev.allan.controlefinanceiro.utils.formatAmountForUi
+import br.dev.allan.controlefinanceiro.utils.formatAsCurrency
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.text.replace
 
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
-    private val transactionRepository: TransactionRepository,
-    private val creditCardRepository: CreditCardRepository,
-    private val validateText: ValidateText = ValidateText(),
-    private val validateAmount: ValidateAmount = ValidateAmount(),
-    private val validateCategory: ValidateCategory = ValidateCategory(),
+    private val repository: TransactionRepository,
+    private val cardRepository: CreditCardRepository,
+    private val saveUseCase: SaveTransactionUseCase
 ) : ViewModel() {
 
-    private var currentTransactionId: Int? = null
-    var uiState by mutableStateOf(AddTransactionUiState())
-        private set
+    private var currentId: Int? = null
+    private val _uiState = MutableStateFlow(AddTransactionUiState())
+    val uiState = _uiState.asStateFlow()
 
     private val _uiEvent = Channel<SaveTransactionUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     init {
         viewModelScope.launch {
-            creditCardRepository.getCards().collect { cards ->
-                uiState = uiState.copy(cards = cards)
+            cardRepository.getCards().collect { cards ->
+                _uiState.update { it.copy(cards = cards) }
             }
         }
     }
 
-    fun onTitleChange(newTitle: String) {
-        uiState = uiState.copy(title = newTitle, titleError = null)
+    fun onAction(action: TransactionAction) {
+        when (action) {
+            is TransactionAction.TitleChanged ->
+                updateState { it.copy(title = action.value, titleError = null) }
 
-    }
+            is TransactionAction.AmountChanged ->
+                updateState { it.copy(amount = action.value.formatAsCurrency(), amountError = null) }
 
-    fun onAmountChange(newAmount: String) {
-        var digitsOnly = newAmount.filter { it.isDigit() }
+            is TransactionAction.CategoryChanged ->
+                updateState { it.copy(category = action.value, categoryError = null) }
 
-        if (digitsOnly.length > 9) {
-            digitsOnly = digitsOnly.take(9)
+            is TransactionAction.DateChanged -> {
+                updateState { it.copy(
+                    dateDisplay = action.millis,
+                    dateMillis = try {
+                        SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(action.millis)?.time ?: it.dateMillis
+                    } catch(e: Exception) { it.dateMillis }
+                )}
+            }
+
+            is TransactionAction.TypeChanged ->
+                updateState { it.copy(transactionType = action.type) }
+
+            is TransactionAction.InstallmentCountChanged ->
+                updateState { it.copy(installmentCount = action.count.coerceIn(2, 360)) }
+
+            is TransactionAction.CardSelected ->
+                updateState { it.copy(selectedCardId = action.cardId) }
+
+            is TransactionAction.DirectionChanged ->
+                updateState { it.copy(direction = action.dir, category = null) }
+
+            is TransactionAction.PaidChanged ->
+                updateState { it.copy(isPaid = action.paid) }
+
+            is TransactionAction.Save -> save()
+
+            is TransactionAction.Delete -> delete()
         }
-
-        val doubleValue = digitsOnly.toDoubleOrNull()?.div(100) ?: 0.0
-        val symbols = DecimalFormatSymbols(Locale("pt", "BR")).apply {
-            currencySymbol = ""
-            decimalSeparator = ','
-            groupingSeparator = '.'
-        }
-
-        val formatter = DecimalFormat("#,##0.00", symbols)
-        val formatted = formatter.format(doubleValue).trim()
-
-        uiState = uiState.copy(amount = formatted)
     }
 
-    fun onCategoryChange(category: TransactionCategory) {
-        uiState = uiState.copy(
-            category = category,
-            categoryError = null,
-            selectedCardId = if (category == TransactionCategory.CREDIT_CARD_PAYMENT) uiState.selectedCardId else null
-        )
-        Log.i("onCategoryChange", uiState.selectedCardId.toString())
-    }
-
-    fun onGroupIdChange(groupId: String?) {
-        uiState = uiState.copy(groupId = groupId)
-    }
-
-    fun onCurrentInstallmentChange(installment: Int) {
-        uiState = uiState.copy(currentInstallment = installment)
-    }
-
-    fun onSelectCard(cardId: String?) {
-        uiState = uiState.copy(selectedCardId = cardId)
-        Log.i("onSelectCard", cardId.toString())
-    }
-
-    fun onInstallmentCountChange(count: Int) {
-        val validCount = if (count in 2..360) count else 2
-        uiState = uiState.copy(installmentCount = validCount)
-    }
-
-    fun onDateChange(millis: Long) {
-        uiState = uiState.copy(dateMillis = millis)
-    }
-
-    fun onDirectionChange(direction: TransactionDirection) {
-        uiState = uiState.copy(direction = direction, category = null)
-    }
-
-    fun onTransactionTypeChange(type: TransactionType) {
-        uiState = uiState.copy(transactionType = type)
-    }
-
-    fun onPaidChange(paid: Boolean) {
-        uiState = uiState.copy(isPaid = paid)
-    }
-
-    fun togglePayment(transaction: Transaction, monthYear: String) {
+   fun save() {
         viewModelScope.launch {
-            if (transaction.isPaid) {
-                transactionRepository.markAsUnpaid(transaction.id.toString(), monthYear)
+            updateState { it.copy(isLoading = true) }
+            val result = saveUseCase.execute(_uiState.value, currentId)
+
+            if (result.isSuccess) {
+                _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
             } else {
-                transactionRepository.markAsPaid(transaction.id.toString(), monthYear)
+                // Aqui você pode tratar os erros de validação voltando para o estado
+                updateState { it.copy(isLoading = false) }
             }
         }
     }
 
-    fun deleteTransaction() {
-        val idToDelete = currentTransactionId ?: return
-
-        viewModelScope.launch {
-            uiState = uiState.copy(isLoading = true)
-            transactionRepository.deleteTransaction(idToDelete)
-
-            _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
-            uiState = uiState.copy(isLoading = false)
+    fun delete() {
+        currentId?.let { id ->
+            viewModelScope.launch {
+                repository.deleteTransaction(id)
+                _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
+            }
         }
     }
 
-    fun onDeleteGroup(groupId: String) {
-        viewModelScope.launch {
-            transactionRepository.deleteTransactionGroup(groupId)
-        }
+    fun updateState(transform: (AddTransactionUiState) -> AddTransactionUiState) {
+        _uiState.update(transform)
     }
 
-    fun loadTransactionToEdit(id: Int) {
+    fun loadToEdit(id: Int) {
         viewModelScope.launch {
-            transactionRepository.getTransactionById(id)?.let { tx ->
-                currentTransactionId = tx.id
-
-                uiState = uiState.copy(
+            repository.getTransactionById(id)?.let { tx ->
+                currentId = tx.id
+                updateState { it.copy(
                     title = tx.title,
                     amount = formatAmountForUi(tx.amount),
-                    dateMillis = tx.date,
+                    dateDisplay = DateHelper.fromDbToUi(tx.date),
+                    dateMillis = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(tx.date)?.time ?: System.currentTimeMillis(),
                     category = tx.category,
                     direction = tx.direction,
                     isPaid = tx.isPaid,
                     selectedCardId = tx.creditCardId,
                     transactionType = when {
-                        tx.isFixed -> TransactionType.FIXED
                         tx.isInstallment -> TransactionType.INSTALLMENT
                         else -> TransactionType.DEFAULT
                     },
                     installmentCount = if (tx.isInstallment) tx.installmentCount else 2
-                )
+                )}
             }
-        }
-    }
-
-    fun saveTransaction() {
-        uiState = uiState.copy(isLoading = true)
-
-        val titleResult = validateText.execute(uiState.title)
-        val amountResult = validateAmount.execute(uiState.amount)
-        val categoryResult = validateCategory.execute(uiState.category)
-
-        if (uiState.category == TransactionCategory.CREDIT_CARD_PAYMENT && uiState.selectedCardId.isNullOrBlank()) {
-            uiState = uiState.copy(isLoading = false, categoryError = "Selecione um cartão")
-            return
-        }
-
-        val hasError = listOf(titleResult, amountResult, categoryResult).any { !it.successful }
-
-        if (hasError) {
-            uiState = uiState.copy(
-                isLoading = false,
-                titleError = titleResult.errorMessage,
-                amountError = amountResult.errorMessage,
-                categoryError = categoryResult.errorMessage,
-            )
-            return
-        }
-
-        val amountToSave = parseAmountFromUi(uiState.amount)
-
-        viewModelScope.launch {
-            if (currentTransactionId == null) {
-
-                if (uiState.transactionType == TransactionType.INSTALLMENT && uiState.installmentCount > 1) {
-
-                    val generatedGroupId = java.util.UUID.randomUUID().toString()
-                    val transactionsToInsert = mutableListOf<Transaction>()
-
-                    for (i in 0 until uiState.installmentCount) {
-                        val calendar = java.util.Calendar.getInstance().apply {
-                            timeInMillis = uiState.dateMillis
-                            add(java.util.Calendar.MONTH, i)
-                        }
-
-                        transactionsToInsert.add(
-                            Transaction(
-                                id = 0,
-                                groupId = generatedGroupId,
-                                title = uiState.title,
-                                amount = amountToSave,
-                                date = calendar.timeInMillis,
-                                category = uiState.category!!,
-                                isFixed = false,
-                                isInstallment = true,
-                                installmentCount = uiState.installmentCount,
-                                currentInstallment = i + 1,
-                                direction = uiState.direction,
-                                creditCardId = uiState.selectedCardId,
-                                isPaid = if (i == 0) uiState.isPaid else false,
-                                type = TransactionType.INSTALLMENT
-                            )
-                        )
-                    }
-
-                    transactionRepository.insertTransactions(transactionsToInsert)
-
-                } else {
-
-                    val singleTransaction = Transaction(
-                        id = 0,
-                        groupId = null,
-                        title = uiState.title,
-                        amount = amountToSave,
-                        date = uiState.dateMillis,
-                        category = uiState.category!!,
-                        isFixed = uiState.transactionType == TransactionType.FIXED,
-                        isInstallment = false,
-                        installmentCount = 0,
-                        currentInstallment = 0,
-                        direction = uiState.direction,
-                        creditCardId = uiState.selectedCardId,
-                        isPaid = uiState.isPaid,
-                        type = uiState.transactionType
-                    )
-
-                    transactionRepository.insertTransaction(singleTransaction)
-                }
-
-            } else {
-                val updatedTransaction = Transaction(
-                    id = currentTransactionId ?: 0,
-                    groupId = uiState.groupId,
-                    title = uiState.title,
-                    amount = amountToSave,
-                    date = uiState.dateMillis,
-                    category = uiState.category!!,
-                    isFixed = uiState.transactionType == TransactionType.FIXED,
-                    isInstallment = uiState.transactionType == TransactionType.INSTALLMENT,
-                    installmentCount = uiState.installmentCount,
-                    currentInstallment = uiState.currentInstallment,
-                    direction = uiState.direction,
-                    creditCardId = uiState.selectedCardId,
-                    isPaid = uiState.isPaid,
-                    type = uiState.transactionType
-                )
-
-                transactionRepository.updateTransaction(updatedTransaction)
-            }
-
-            _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
-            uiState = uiState.copy(isLoading = false)
         }
     }
 
     fun resetState() {
-        val currentCards = uiState.cards
-        currentTransactionId = null
-        uiState = AddTransactionUiState(cards = currentCards)
+        val currentCards = _uiState.value.cards
+        currentId = null
+        _uiState.value = AddTransactionUiState(cards = currentCards)
     }
 
-    private fun formatAmountForUi(amount: Double): String {
-        val formatter = DecimalFormat("#,##0.00", DecimalFormatSymbols(Locale("pt", "BR")))
-        return formatter.format(amount)
-    }
-
-    private fun parseAmountFromUi(amountStr: String): Double {
-        return amountStr
-            .replace(Regex("[^0-9,]"), "")
-            .replace(",", ".")
-            .toDoubleOrNull() ?: 0.0
-    }
 }

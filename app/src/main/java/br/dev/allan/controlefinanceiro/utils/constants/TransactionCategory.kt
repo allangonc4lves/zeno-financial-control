@@ -1,8 +1,7 @@
-package br.dev.allan.controlefinanceiro.domain.model
+package br.dev.allan.controlefinanceiro.utils.constants
 
 enum class TransactionCategory {
     // EXPENSES
-    CREDIT_CARD_PAYMENT,
     SAVINGS,
     HOUSING,
     ENERGY_BILL,

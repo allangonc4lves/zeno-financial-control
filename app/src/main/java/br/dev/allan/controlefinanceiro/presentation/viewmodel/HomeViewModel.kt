@@ -8,12 +8,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.data.dataStore.SettingsManager
+import br.dev.allan.controlefinanceiro.data.local.mapper.toUi
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
 import br.dev.allan.controlefinanceiro.domain.model.getAppearance
+import br.dev.allan.controlefinanceiro.domain.usecase.GetMonthlyTransactionsUseCase
+import br.dev.allan.controlefinanceiro.utils.HomeUiState
 import br.dev.allan.controlefinanceiro.utils.CurrencyManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,186 +40,62 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val repository: TransactionRepository,
     private val currencyManager: CurrencyManager,
-    private val settingsManager: SettingsManager
+    private val settingsManager: SettingsManager,
+    private val getMonthlyTransactionsUseCase: GetMonthlyTransactionsUseCase
 ) : ViewModel() {
-
-    val isBalanceVisible = settingsManager.isBalanceVisible
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5000),
-            initialValue = true
-        )
-
-    fun toggleBalanceVisibility(isVisible: Boolean) {
-        viewModelScope.launch {
-            settingsManager.setBalanceVisible(isVisible)
-        }
-    }
 
     var selectedMonth by mutableStateOf(YearMonth.now())
         private set
 
-    private fun getMonthRange(month: YearMonth): Pair<Long, Long> {
-        val start = month.atDay(1).atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
-        val end = month.atEndOfMonth().atTime(23, 59, 59).atZone(ZoneId.of("UTC")).toInstant().toEpochMilli()
-        return Pair(start, end)
-    }
+    val uiState: StateFlow<HomeUiState> = combine(
+        settingsManager.isBalanceVisible,
+        settingsManager.currencyCode,
+        repository.getTransactions(),
+        snapshotFlow { selectedMonth }
+    ) { isVisible, code, allTransactions, month ->
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val totalIncomes: StateFlow<Double> = combine(
-        snapshotFlow { selectedMonth },
-        repository.getTransactions()
-    ) { month, allTransactions ->
-        val (start, end) = getMonthRange(month)
+        // 1. Filtrar transações do mês
+        val monthlyTransactions = getMonthlyTransactionsUseCase(allTransactions, month)
 
-        allTransactions
+        // 2. Calcular valores numéricos (Double)
+        val incomeVal = monthlyTransactions
             .filter { it.direction == TransactionDirection.INCOME }
-            .sumOf { tx ->
-                val belongsToMonth = isTransactionInMonth(tx, month, start, end)
+            .sumOf { getMonthlyTransactionsUseCase.getAmountForMonth(it) }
 
-                if (belongsToMonth) {
-                    if (tx.isInstallment && tx.installmentCount > 0) {
-                        (tx.amount / tx.installmentCount).round2()
-                    } else {
-                        tx.amount
-                    }
-                } else 0.0
-            }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val totalExpenses: StateFlow<Double> = combine(
-        snapshotFlow { selectedMonth },
-        repository.getTransactions()
-    ) { month, allTransactions ->
-        val (start, end) = getMonthRange(month)
-
-        allTransactions
+        val expenseVal = monthlyTransactions
             .filter { it.direction == TransactionDirection.EXPENSE }
-            .sumOf { tx ->
-                val belongsToMonth = isTransactionInMonth(tx, month, start, end)
+            .sumOf { getMonthlyTransactionsUseCase.getAmountForMonth(it) }
 
-                if (belongsToMonth) {
-                    if (tx.isInstallment && tx.installmentCount > 0) {
-                        (tx.amount / tx.installmentCount).round2()
-                    } else {
-                        tx.amount
-                    }
-                } else 0.0
-            }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+        val totalBalanceVal = incomeVal - expenseVal // Agora sim, as variáveis acima existem aqui!
 
-    private fun isTransactionInMonth(tx: Transaction, month: YearMonth, start: Long, end: Long): Boolean {
-        return when {
-            tx.isFixed -> {
-                val txMonth = YearMonth.from(Instant.ofEpochMilli(tx.date).atZone(ZoneId.of("UTC")))
-                !month.isBefore(txMonth)
+        // 3. Preparar dados do gráfico
+        val expensesByCategory = monthlyTransactions
+            .filter { it.direction == TransactionDirection.EXPENSE }
+            .groupBy { it.category.getAppearance() }
+            .mapValues { entry ->
+                entry.value.sumOf { getMonthlyTransactionsUseCase.getAmountForMonth(it) }
             }
-            tx.isInstallment -> {
-                val txDate = Instant.ofEpochMilli(tx.date).atZone(ZoneId.of("UTC")).toLocalDate()
-                val monthsBetween = ChronoUnit.MONTHS.between(
-                    YearMonth.from(txDate).atDay(1),
-                    month.atDay(1)
-                ).toInt()
-                monthsBetween in 0 until tx.installmentCount
-            }
-            else -> tx.date in start..end
+
+        val chartLabels = expensesByCategory.mapValues { entry ->
+            currencyManager.formatByCurrencyCode(entry.value, code)
         }
-    }
 
-    private fun Double.round2() = Math.round(this * 100.0) / 100.0
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val chartData: StateFlow<Map<CategoryAppearance, Double>> = snapshotFlow { selectedMonth }
-        .flatMapLatest { month ->
-            val (start, end) = getMonthRange(month)
-            repository.getExpensesByCategory(start, end)
-        }
-        .map { list ->
-            list.associate { item ->
-                item.category.getAppearance() to item.total
-            }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5000),
-            initialValue = emptyMap()
+        // 4. Retornar o Estado Único
+        HomeUiState(
+            isBalanceVisible = isVisible,
+            rawBalance = totalBalanceVal, // Enviando o número para a lógica de cor
+            balance = currencyManager.formatByCurrencyCode(totalBalanceVal, code),
+            incomes = currencyManager.formatByCurrencyCode(incomeVal, code),
+            expenses = currencyManager.formatByCurrencyCode(expenseVal, code),
+            transactions = monthlyTransactions.take(10).map { it.toUi(currencyManager, code) },
+            chartDataValues = expensesByCategory,
+            chartDataLabels = chartLabels
         )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
 
-    val totalBalance: StateFlow<Double> = combine(totalIncomes, totalExpenses) { income, expense ->
-        income - expense
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+    fun updateMonth(newMonth: YearMonth) { selectedMonth = newMonth }
 
-    val formattedIncomes: StateFlow<String> = combine(
-        totalIncomes,
-        settingsManager.currencyCode
-    ) { value, code ->
-        currencyManager.formatByCurrencyCode(value, code)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "...")
-
-    val formattedExpenses: StateFlow<String> = combine(
-        totalExpenses,
-        settingsManager.currencyCode
-    ) { value, code ->
-        currencyManager.formatByCurrencyCode(value, code)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "...")
-
-    val formattedBalance: StateFlow<String> = combine(
-        totalBalance,
-        settingsManager.currencyCode
-    ) { value, code ->
-        currencyManager.formatByCurrencyCode(value, code)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "...")
-
-    val formattedCategoryExpenses: StateFlow<Map<CategoryAppearance, String>> = combine(
-        chartData,
-        settingsManager.currencyCode
-    ) { map, code ->
-        map.mapValues { currencyManager.formatByCurrencyCode(it.value, code) }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
-
-    fun updateMonth(newMonth: YearMonth) {
-        selectedMonth = newMonth
+    fun toggleBalanceVisibility(isVisible: Boolean) {
+        viewModelScope.launch { settingsManager.setBalanceVisible(isVisible) }
     }
-    val transactions = repository.getTransactions()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val recentTransactionsUI: StateFlow<List<TransactionUIModel>> = combine(
-        repository.getRecentTransactions(),
-        settingsManager.currencyCode
-    ) { transactions, code ->
-        transactions.map { item ->
-            val prefix = if (item.direction == TransactionDirection.EXPENSE) "- " else "+ "
-
-            TransactionUIModel(
-                id = item.id,
-                title = item.title,
-                amount = item.amount,
-                formattedTotalAmount = currencyManager.formatByCurrencyCode(item.amount, code),
-                formattedAmount = prefix + currencyManager.formatByCurrencyCode(item.amount, code),
-                formattedParcelInfo = null,
-                formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("pt-BR")).format(Date(item.date)),
-                color = if (item.direction == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else Color(0xFF1B5E20),
-                category = item.category,
-                type = item.type,
-                direction = item.direction,
-                isPaid = item.isPaid,
-                isFixed = item.isFixed,
-                isInstallment = item.isInstallment,
-                currentInstallment = item.currentInstallment,
-                installmentCount = item.installmentCount,
-                creditCardId = item.creditCardId,
-            )
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
 }

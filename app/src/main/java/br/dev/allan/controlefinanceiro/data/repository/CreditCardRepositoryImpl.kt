@@ -4,6 +4,8 @@ import br.dev.allan.controlefinanceiro.domain.model.CreditCard
 import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
 import br.dev.allan.controlefinanceiro.data.local.CreditCardDao
 import br.dev.allan.controlefinanceiro.data.local.CreditCardEntity
+import br.dev.allan.controlefinanceiro.data.local.mapper.toDomain
+import br.dev.allan.controlefinanceiro.data.local.mapper.toEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -33,9 +35,4 @@ class CreditCardRepositoryImpl @Inject constructor(
         dao.deleteById(id)
     }
 
-    private fun CreditCardEntity.toDomain(): CreditCard =
-        CreditCard(id = id, bankName = bankName, brand = brand, backgroundColor = backgroundColor, lastDigits = lastDigits)
-
-    private fun CreditCard.toEntity(): CreditCardEntity =
-        CreditCardEntity(id = id, bankName = bankName, brand = brand, backgroundColor = backgroundColor, lastDigits = lastDigits)
 }

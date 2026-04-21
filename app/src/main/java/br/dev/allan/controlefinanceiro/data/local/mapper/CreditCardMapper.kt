@@ -8,7 +8,9 @@ fun CreditCardEntity.toDomain() = CreditCard(
     bankName = bankName,
     brand = brand,
     lastDigits = lastDigits,
-    backgroundColor = backgroundColor
+    dueDate = dueDate,
+    backgroundColor = backgroundColor,
+    activated = activated
 )
 
 fun CreditCard.toEntity() = CreditCardEntity(
@@ -16,5 +18,7 @@ fun CreditCard.toEntity() = CreditCardEntity(
     bankName = bankName,
     brand = brand,
     lastDigits = lastDigits,
-    backgroundColor = backgroundColor
+    dueDate = dueDate,
+    backgroundColor = backgroundColor,
+    activated = activated
 )

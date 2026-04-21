@@ -31,8 +31,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import br.dev.allan.controlefinanceiro.domain.model.CreditCardPreviewType
-import br.dev.allan.controlefinanceiro.domain.model.InputModeCustomTextField
+import br.dev.allan.controlefinanceiro.utils.constants.CreditCardPreviewType
+import br.dev.allan.controlefinanceiro.utils.constants.InputModeCustomTextField
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlinedTextField
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle

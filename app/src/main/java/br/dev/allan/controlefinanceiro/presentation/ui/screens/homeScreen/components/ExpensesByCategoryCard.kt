@@ -20,28 +20,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
-import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 
 @Composable
 fun ExpensesByCategoryCard(
-    expensesByCategory: Map<CategoryAppearance, Double>,
-    viewModel: HomeViewModel = hiltViewModel()
+    chartDataValues: Map<CategoryAppearance, Double>,
+    chartDataLabels: Map<CategoryAppearance, String>
 ) {
-    val formattedValues by viewModel.formattedCategoryExpenses.collectAsState()
-
-    val cardModifier = if (expensesByCategory.isEmpty()) {
+    val cardModifier = if (chartDataValues.isEmpty()) {
         Modifier.height(200.dp)
     } else {
         Modifier.wrapContentHeight()
@@ -56,11 +50,12 @@ fun ExpensesByCategoryCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            if (expensesByCategory.isNotEmpty()) {
+            if (chartDataValues.isNotEmpty()) {
 
-                AnimatedDonutChart(data = expensesByCategory)
+                // O gráfico recebe os Doubles para calcular as fatias
+                AnimatedDonutChart(data = chartDataValues)
 
-                val categoryList = expensesByCategory.keys.toList()
+                val categoryList = chartDataValues.keys.toList()
 
                 LazyColumn(
                     modifier = Modifier.weight(1f),
@@ -73,7 +68,10 @@ fun ExpensesByCategoryCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
                                 Box(
                                     modifier = Modifier
                                         .size(8.dp)
@@ -89,8 +87,9 @@ fun ExpensesByCategoryCard(
                                 )
                             }
 
+                            // A legenda recebe a String formatada (R$ ...)
                             Text(
-                                text = formattedValues[category] ?: "...",
+                                text = chartDataLabels[category] ?: "...",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -99,7 +98,9 @@ fun ExpensesByCategoryCard(
                 }
             } else {
                 Row(
-                    modifier = Modifier.padding(12.dp).fillMaxSize(),
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {

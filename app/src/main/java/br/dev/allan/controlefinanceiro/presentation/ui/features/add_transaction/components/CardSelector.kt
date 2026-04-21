@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.domain.model.CreditCard
-import br.dev.allan.controlefinanceiro.domain.model.CreditCardPreviewType
+import br.dev.allan.controlefinanceiro.utils.constants.CreditCardPreviewType
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
 import kotlinx.coroutines.launch
 import kotlin.math.abs

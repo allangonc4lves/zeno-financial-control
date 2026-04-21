@@ -36,6 +36,8 @@ import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.material.icons.outlined.TheaterComedy
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.ui.graphics.Color
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
 
 data class CategoryAppearance(
     val displayName: String,
@@ -46,7 +48,7 @@ data class CategoryAppearance(
 
 fun TransactionCategory.getAppearance(): CategoryAppearance {
     return when (this) {
-        TransactionCategory.CREDIT_CARD_PAYMENT -> CategoryAppearance("Credit Card", Icons.Outlined.CreditCard, TransactionDirection.EXPENSE, Color(0xFFFF0000))
+        //TransactionCategory.CREDIT_CARD_PAYMENT -> CategoryAppearance("Credit Card", Icons.Outlined.CreditCard, TransactionDirection.EXPENSE, Color(0xFFFF0000))
         TransactionCategory.SAVINGS -> CategoryAppearance("Savings", Icons.Outlined.Savings, TransactionDirection.EXPENSE, Color(0xFF22FF00))
         TransactionCategory.HOUSING -> CategoryAppearance("Housing", Icons.Outlined.House, TransactionDirection.EXPENSE, Color(0xFFD000FF))
         TransactionCategory.ENERGY_BILL -> CategoryAppearance("Energy bill", Icons.Outlined.ElectricalServices, TransactionDirection.EXPENSE, Color(0xFF5E35B1))

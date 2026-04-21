@@ -4,11 +4,12 @@ import android.text.format.DateFormat
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
-import br.dev.allan.controlefinanceiro.domain.model.TransactionType
-import br.dev.allan.controlefinanceiro.domain.model.TransactionUIModel
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.utils.CurrencyManager
+import br.dev.allan.controlefinanceiro.utils.DateHelper
 import br.dev.allan.controlefinanceiro.utils.formatMillisToMonthYear
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,18 +47,27 @@ class MonthTransactionsViewModel @Inject constructor(
     val transactionsUiModel: StateFlow<List<TransactionUIModel>> = _currentMonth
         .flatMapLatest { monthMillis ->
             val (start, end) = getMonthRange(monthMillis)
+            val startStr = DateHelper.fromMillisToDb(start)
+            val endStr = DateHelper.fromMillisToDb(end)
+
             repository.getTransactionsByMonth(start, end).map { list ->
                 list.filter { transaction ->
                     when {
-                        transaction.date > end -> false
+                        transaction.date > endStr -> false
 
                         transaction.isInstallment -> !transaction.isExpired(monthMillis)
 
                         else -> true
                     }
                 }.map { transaction ->
-
                     val datePattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "ddMM")
+
+                    val dateForUi = try {
+                        SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(transaction.date) ?: Date()
+                    } catch (e: Exception) {
+                        Date()
+                    }
+
                     TransactionUIModel(
                         id = transaction.id,
                         title = transaction.title,
@@ -65,13 +75,12 @@ class MonthTransactionsViewModel @Inject constructor(
                         formattedTotalAmount = currencyManager.formatByCurrencyCode(transaction.amount, "BRL"),
                         formattedAmount = currencyManager.formatByCurrencyCode(transaction.amount, "BRL"),
                         formattedParcelInfo = null,
-                        formattedDate = SimpleDateFormat(datePattern, Locale.getDefault()).format(Date(transaction.date)),
+                        formattedDate = SimpleDateFormat(datePattern, Locale.getDefault()).format(dateForUi),
                         color = if (transaction.direction == TransactionDirection.EXPENSE) Color.Red else Color.Green,
                         category = transaction.category,
                         type = transaction.type,
                         direction = transaction.direction,
                         isPaid = transaction.isPaid,
-                        isFixed = transaction.isFixed,
                         isInstallment = transaction.isInstallment,
                         currentInstallment = transaction.currentInstallment,
                         installmentCount = transaction.installmentCount,
@@ -90,7 +99,7 @@ class MonthTransactionsViewModel @Inject constructor(
         viewModelScope.launch {
             val id = uiModel.id
 
-            if (uiModel.type == TransactionType.FIXED) {
+            if (uiModel.type == TransactionType.DEFAULT) {
                 val monthYear = formatMillisToMonthYear(currentMonth.value)
 
                 if (uiModel.isPaid) {

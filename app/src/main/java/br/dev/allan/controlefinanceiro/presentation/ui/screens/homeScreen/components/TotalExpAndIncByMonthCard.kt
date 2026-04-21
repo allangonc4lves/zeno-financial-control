@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
@@ -45,9 +46,7 @@ fun TotalExpAndIncByMonthCard(
     selectedMonth: YearMonth,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val isVisible by viewModel.isBalanceVisible.collectAsState()
-
-    val totalBalance by viewModel.totalBalance.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
 
@@ -71,23 +70,23 @@ fun TotalExpAndIncByMonthCard(
             ) {
                 Text("Saldo Total do Mês", style = MaterialTheme.typography.labelMedium)
                 Text(
-                    text = if (isVisible) formattedBalance else "R$ •••••",
+                    text = if (uiState.isBalanceVisible) formattedBalance else "R$ •••••",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (totalBalance < 0) Color(0xFFAB1A1A) else Color(0xFF4CAF50)
+                        color = if (uiState.rawBalance < 0) Color(0xFFAB1A1A) else Color(0xFF4CAF50)
                     )
                 )
             }
 
             IconButton(
                 onClick = {
-                    scope.launch { viewModel.toggleBalanceVisibility(!isVisible) }
+                    scope.launch { viewModel.toggleBalanceVisibility(!uiState.isBalanceVisible) }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Icon(
-                    imageVector = if (isVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                    imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                     contentDescription = "Alternar Visibilidade",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -101,14 +100,14 @@ fun TotalExpAndIncByMonthCard(
             ) {
                 SummaryItem(
                     label = "Receitas",
-                    value = if (isVisible) formattedIncomes else "R$ •••••",
+                    value = if (uiState.isBalanceVisible) formattedIncomes else "R$ •••••",
                     icon = Icons.Outlined.ArrowUpward,
                     color = Color(0xFF32A642)
                 )
 
                 SummaryItem(
                     label = "Despesas",
-                    value = if (isVisible) formattedExpenses else "R$ •••••",
+                    value = if (uiState.isBalanceVisible) formattedExpenses else "R$ •••••",
                     icon = Icons.Outlined.ArrowDownward,
                     color = Color(0xFFAB1A1A)
                 )

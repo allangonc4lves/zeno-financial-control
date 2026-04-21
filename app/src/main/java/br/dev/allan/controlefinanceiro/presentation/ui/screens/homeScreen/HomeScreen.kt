@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -22,18 +20,16 @@ import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.R
-import br.dev.allan.controlefinanceiro.domain.model.TransactionDirection
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.ExpensesByCategoryCard
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoDrawBoxTop
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
@@ -43,7 +39,6 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddTra
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
-import br.dev.allan.controlefinanceiro.utils.toSystemFormatDate
 
 @Composable
 fun HomeScreen(
@@ -51,13 +46,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     navViewModel: NavigationViewModel = hiltViewModel()
 ) {
-    val recentsTransactions by viewModel.recentTransactionsUI.collectAsState()
-    val formattedIncomes by viewModel.formattedIncomes.collectAsState()
-    val formattedExpenses by viewModel.formattedExpenses.collectAsState()
-    val formattedBalance by viewModel.formattedBalance.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedMonth = viewModel.selectedMonth
-
-    val chartData by viewModel.chartData.collectAsState()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -66,10 +56,10 @@ fun HomeScreen(
         item {
             ZenoDrawBoxTop {
                 TotalExpAndIncByMonthCard(
-                    formattedIncomes,
-                    formattedExpenses,
-                    formattedBalance,
-                    selectedMonth
+                    uiState.incomes,
+                    uiState.expenses,
+                    uiState.balance,
+                    selectedMonth,
                 )
             }
         }
@@ -81,8 +71,11 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 startPadding = 8
             )
-            if (chartData.isNotEmpty()) {
-                ExpensesByCategoryCard(chartData)
+            if (uiState.chartDataValues.isNotEmpty()) {
+                ExpensesByCategoryCard(
+                    chartDataValues = uiState.chartDataValues,
+                    chartDataLabels = uiState.chartDataLabels
+                )
             } else {
                 Column(
                     modifier = Modifier
@@ -94,8 +87,7 @@ fun HomeScreen(
                     Image(
                         painter = painterResource(id = R.drawable.zeno_not_found),
                         contentDescription = "Minha imagem",
-                        modifier = Modifier
-                            .size(150.dp),
+                        modifier = Modifier.size(150.dp),
                         contentScale = ContentScale.Inside
                     )
                     CustomTextContent(
@@ -122,19 +114,20 @@ fun HomeScreen(
                     text = "Ver tudo",
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.clickable {
-                        navViewModel.navigateWithOptions(
-                            navController,
-                            TransactionsRoute
-                        )
+                        navViewModel.navigateWithOptions(navController, TransactionsRoute)
                     },
                     startPadding = 0,
                     endPadding = 8,
                 )
             }
         }
-        if (recentsTransactions.isNotEmpty()) {
-            items(recentsTransactions) { item ->
 
+        // --- CORREÇÃO AQUI: Usando uiState.transactions ---
+        if (uiState.transactions.isNotEmpty()) {
+            items(
+                items = uiState.transactions,
+                key = { it.id } // Boa prática adicionar uma key
+            ) { item ->
                 val appearance = item.category.getAppearance()
 
                 Row(
@@ -155,10 +148,8 @@ fun HomeScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .background(
-                                    color = if (item.direction.name == TransactionDirection.EXPENSE.name) Color(
-                                        0xFFAB1A1A
-                                    )
-                                    else Color(0xFF32A642),
+                                    // Usando a cor que já vem mapeada no seu UiModel!
+                                    color = item.color,
                                     shape = CircleShape
                                 ),
                             contentAlignment = Alignment.Center
@@ -189,7 +180,9 @@ fun HomeScreen(
                         )
 
                         CustomTextContent(
-                            text = item.formattedDate.toSystemFormatDate(),
+                            // Se formattedDate já é String, você não precisa do .toSystemFormatDate()
+                            // a menos que seja uma extensão sua para Strings.
+                            text = item.formattedDate,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }

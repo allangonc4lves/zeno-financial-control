@@ -1,9 +1,18 @@
 package br.dev.allan.controlefinanceiro.data.local.mapper
 
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import br.dev.allan.controlefinanceiro.data.local.PaymentStatusEntity
 import br.dev.allan.controlefinanceiro.data.local.TransactionEntity
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
+import br.dev.allan.controlefinanceiro.utils.AddTransactionUiState
+import br.dev.allan.controlefinanceiro.utils.CurrencyManager
+import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 fun TransactionEntity.toDomain(): Transaction {
     return Transaction(
@@ -14,7 +23,6 @@ fun TransactionEntity.toDomain(): Transaction {
         date = date,
         category = category,
         type = type,
-        isFixed = isFixed,
         isInstallment = isInstallment,
         installmentCount = installmentCount,
         currentInstallment = currentInstallment,
@@ -34,7 +42,6 @@ fun Transaction.toEntity(): TransactionEntity {
         date = date,
         category = category,
         type = type,
-        isFixed = isFixed,
         isInstallment = isInstallment,
         installmentCount = installmentCount,
         currentInstallment = currentInstallment,
@@ -43,63 +50,67 @@ fun Transaction.toEntity(): TransactionEntity {
         creditCardId = creditCardId
     )
 }
-/*
-fun TransactionEntity.toDomain(
-    payments: List<PaymentStatusEntity>,
-    monthYear: String?,
-): Transaction {
 
-    val isPaidThisMonth = if (!monthYear.isNullOrBlank()) {
-        payments.any { payment ->
-            payment.transactionId == this.id.toString()
-            && payment.monthYear == monthYear
-        }
-    } else {
-        if (this.creditCardId != null) false else this.isPaid
+fun Transaction.toUi(currencyManager: CurrencyManager, code: String): TransactionUIModel {
+    val prefix = if (direction == TransactionDirection.EXPENSE) "- " else "+ "
+
+    val dateObj = try {
+        SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(date) ?: Date()
+    } catch (e: Exception) {
+        Date()
     }
 
-    return Transaction(
+    return TransactionUIModel(
         id = id,
         title = title,
         amount = amount,
-        date = date,
-        isPaid = isPaidThisMonth,
+        formattedAmount = prefix + currencyManager.formatByCurrencyCode(amount, code),
+        formattedDate = SimpleDateFormat("dd/MM", Locale("pt", "BR")).format(dateObj),
+        color = if (direction == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else Color(0xFF1B5E20),
+        category = category,
+        type = type,
+        direction = direction,
+        isPaid = isPaid,
         isInstallment = isInstallment,
+        currentInstallment = currentInstallment,
         installmentCount = installmentCount,
         creditCardId = creditCardId,
-        category = category,
-        direction = direction,
-        type = type,
-        isFixed = isFixed
+        formattedTotalAmount = currencyManager.formatByCurrencyCode(amount, code),
+        formattedParcelInfo = null
     )
-}*/
+}
+
+fun AddTransactionUiState.toDomain(amount: Double, dateForDb: String, id: Int = 0) = Transaction(
+    id = id,
+    title = this.title,
+    amount = amount,
+    date = dateForDb,
+    category = this.category!!,
+    direction = this.direction,
+    creditCardId = this.selectedCardId,
+    isPaid = this.isPaid,
+    type = this.transactionType,
+    installmentCount = if(this.transactionType == TransactionType.INSTALLMENT) this.installmentCount else 0
+)
 
 fun TransactionEntity.toDomain(
     payments: List<PaymentStatusEntity> = emptyList(),
-    monthYear: String? = null,
-    viewedMonthMillis: Long = this.date
+    monthYear: String? = null
 ): Transaction {
+    val displayDate = this.date
 
-    val displayDate = if (this.isFixed) {
-        val calendarOriginal = java.util.Calendar.getInstance().apply { timeInMillis = this@toDomain.date }
-        val calendarViewed = java.util.Calendar.getInstance().apply { timeInMillis = viewedMonthMillis }
-
-        calendarViewed.set(java.util.Calendar.DAY_OF_MONTH, calendarOriginal.get(java.util.Calendar.DAY_OF_MONTH))
-        calendarViewed.timeInMillis
+    val isPaidResult = if (monthYear != null) {
+        payments.any { it.transactionId == this.id.toString() && it.monthYear == monthYear } || this.isPaid
     } else {
-        this.date
-    }
-
-    val isPaidThisMonth = payments.any {
-        it.transactionId == this.id.toString() && it.monthYear == monthYear
+        this.isPaid
     }
 
     return Transaction(
         id = id,
         title = title,
         amount = amount,
-        date = if (this.isFixed) displayDate else this.date,
-        isPaid = if (this.isFixed) isPaidThisMonth else this.isPaid,
+        date = displayDate,
+        isPaid = isPaidResult,
         isInstallment = isInstallment,
         installmentCount = installmentCount,
         currentInstallment = currentInstallment,
@@ -107,6 +118,5 @@ fun TransactionEntity.toDomain(
         category = category,
         direction = direction,
         type = type,
-        isFixed = isFixed
     )
 }

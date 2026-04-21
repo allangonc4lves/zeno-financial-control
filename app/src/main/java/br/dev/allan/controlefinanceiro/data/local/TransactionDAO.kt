@@ -18,62 +18,51 @@ interface TransactionDao {
     fun getAllTransactions(): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE date >= :dateCutoff ORDER BY date DESC")
-    fun getRecentTransactions(dateCutoff: Long): Flow<List<TransactionEntity>>
+    fun getRecentTransactions(dateCutoff: String): Flow<List<TransactionEntity>>
 
     @Query("""
         SELECT * FROM transactions 
-        WHERE (date BETWEEN :start AND :end) 
-        OR (isFixed = 1 AND date <= :end)
+        WHERE date BETWEEN :start AND :end
         ORDER BY date DESC
     """)
-    fun getTransactionsByMonth(start: Long, end: Long): Flow<List<TransactionEntity>>
+    fun getTransactionsByMonth(start: String, end: String): Flow<List<TransactionEntity>>
 
     @Query("""
         SELECT SUM(amount) 
         FROM transactions 
         WHERE direction = 'EXPENSE' 
-        AND (
-            (date BETWEEN :start AND :end) 
-            OR (isFixed = 1 AND date <= :end)
-        )
+        AND date BETWEEN :start AND :end
     """)
-    fun getTotalExpensesByMonth(start: Long, end: Long): Flow<Double?>
+    fun getTotalExpensesByMonth(start: String, end: String): Flow<Double?>
 
     @Query("""
         SELECT SUM(amount) 
         FROM transactions 
         WHERE direction = 'INCOME' 
-        AND (
-            (date BETWEEN :start AND :end) 
-            OR (isFixed = 1 AND date <= :end)
-        )
+        AND date BETWEEN :start AND :end
     """)
-    fun getTotalIncomesByMonth(start: Long, end: Long): Flow<Double?>
+    fun getTotalIncomesByMonth(start: String, end: String): Flow<Double?>
 
     @Query("""
-        SELECT category, SUM(amount) as total 
-        FROM transactions 
-        WHERE direction = 'EXPENSE' 
-        AND (
-            (date BETWEEN :start AND :end) 
-            OR (isFixed = 1 AND date <= :end)
-        )
-        GROUP BY category
-    """)
+    SELECT category, SUM(amount) as total 
+    FROM transactions 
+    WHERE direction = 'EXPENSE' 
+    AND date BETWEEN :start AND :end
+    GROUP BY category
+""")
     fun getExpensesByCategory(start: Long, end: Long): Flow<List<CategorySum>>
+
+    @Query("""
+    SELECT SUM(amount) FROM transactions
+    WHERE direction = 'EXPENSE' 
+    AND category = 'CREDIT_CARD_PAYMENT' 
+    AND creditCardId = :cardId
+    AND date BETWEEN :start AND :end
+""")
+    fun getTotalCardExpensesByMonth(cardId: String, start: Long, end: Long): Flow<Double?>
 
     @Query("SELECT * FROM transactions WHERE creditCardId = :cardId ORDER BY date DESC")
     fun getByCard(cardId: String): Flow<List<TransactionEntity>>
-
-    @Query("""
-        SELECT SUM(amount) FROM transactions
-        WHERE direction = 'EXPENSE' AND category = 'CREDIT_CARD_PAYMENT' AND creditCardId = :cardId
-        AND (
-            (date BETWEEN :start AND :end)
-            OR (isFixed = 1 AND date <= :end)
-        )
-    """)
-    fun getTotalCardExpensesByMonth(cardId: String, start: Long, end: Long): Flow<Double?>
 
     // --- OPERAÇÕES DE ESCRITA (WRITE) ---
 

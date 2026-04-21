@@ -8,13 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.domain.model.CreditCard
 import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateLastDigitsCreditCard
-import br.dev.allan.controlefinanceiro.domain.usecase.ValidateText
+import br.dev.allan.controlefinanceiro.utils.ValidateLastDigitsCreditCard
+import br.dev.allan.controlefinanceiro.utils.ValidateText
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.AddCreditCardUiState
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.SaveCreditCardUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -92,7 +91,9 @@ class CreditCardsViewModel @Inject constructor(
             bankName = uiState.bankName,
             brand = uiState.brand,
             lastDigits = uiState.lastDigits.toIntOrNull() ?: 0,
-            backgroundColor = uiState.backgroundColor
+            dueDate = uiState.dueDate,
+            backgroundColor = uiState.backgroundColor,
+            activated = uiState.activated
         )
 
         viewModelScope.launch {

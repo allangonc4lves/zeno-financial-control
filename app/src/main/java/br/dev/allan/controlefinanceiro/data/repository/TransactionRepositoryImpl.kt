@@ -8,6 +8,7 @@ import br.dev.allan.controlefinanceiro.data.local.mapper.toEntity
 import br.dev.allan.controlefinanceiro.domain.model.CategorySum
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
+import br.dev.allan.controlefinanceiro.utils.DateHelper
 import br.dev.allan.controlefinanceiro.utils.formatMillisToMonthYear
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -25,17 +26,6 @@ class TransactionRepositoryImpl @Inject constructor(
         return transactionDao.getTransactionsBetweenDates(startDate, endDate)
     }
 
-    override fun getTransactionsByMonth(start: Long, end: Long): Flow<List<Transaction>> {
-        return combine(
-            transactionDao.getTransactionsByMonth(start, end),
-            transactionDao.getAllPaymentStatuses()
-        ) { entities, payments ->
-            val monthYear = formatMillisToMonthYear(start)
-
-            entities.map { it.toDomain(payments, monthYear, viewedMonthMillis = start) }
-        }
-    }
-
     override suspend fun markAsPaid(transactionId: String, monthYear: String) {
         val paymentStatus = PaymentStatusEntity(
             transactionId = transactionId,
@@ -48,38 +38,64 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDao.markAsUnpaid(transactionId, monthYear)
     }
 
+
     override fun getCreditCardTransactions(monthYear: String?): Flow<List<Transaction>> {
         return combine(
             transactionDao.getAllTransactions(),
             transactionDao.getAllPaymentStatuses()
         ) { transactions, payments ->
-            transactions.map { it.toDomain(payments, monthYear, viewedMonthMillis = it.date) }
+            transactions.map { it.toDomain(payments, monthYear) } // Removido o viewedMonthMillis
         }
+    }
+
+    override fun getTotalUnpaidForCard(cardId: String): Flow<Double> {
+        return transactionDao.getByCard(cardId).map { transactions ->
+            transactions.sumOf { entity ->
+                if (!entity.isPaid) entity.amount else 0.0
+            }
+        }
+    }
+
+    override fun getRecentTransactions(): Flow<List<Transaction>> {
+        val tenDaysInMs = 10 * 24 * 60 * 60 * 1000L
+        val dateCutoffMillis = System.currentTimeMillis() - tenDaysInMs
+
+        val dateCutoffStr = DateHelper.fromMillisToDb(dateCutoffMillis)
+
+        return transactionDao.getRecentTransactions(dateCutoffStr).map { list ->
+            list.map { it.toDomain() }
+        }
+    }
+
+    override fun getTransactionsByMonth(start: Long, end: Long): Flow<List<Transaction>> {
+
+        val startDateStr = DateHelper.fromMillisToDb(start)
+        val endDateStr = DateHelper.fromMillisToDb(end)
+
+        return combine(
+            transactionDao.getTransactionsByMonth(startDateStr, endDateStr),
+            transactionDao.getAllPaymentStatuses()
+        ) { entities, payments ->
+            val monthYear = formatMillisToMonthYear(start)
+            entities.map { it.toDomain(payments, monthYear) }
+        }
+    }
+
+    override fun getTotalExpensesByMonth(start: Long, end: Long): Flow<Double?> {
+        val startDateStr = DateHelper.fromMillisToDb(start)
+        val endDateStr = DateHelper.fromMillisToDb(end)
+        return transactionDao.getTotalExpensesByMonth(startDateStr, endDateStr)
+    }
+
+    override fun getTotalIncomesByMonth(start: Long, end: Long): Flow<Double?> {
+        val startDateStr = DateHelper.fromMillisToDb(start)
+        val endDateStr = DateHelper.fromMillisToDb(end)
+        return transactionDao.getTotalIncomesByMonth(startDateStr, endDateStr)
     }
 
     override suspend fun updatePaymentStatus(id: Int, paid: Boolean) {
         transactionDao.updatePaymentStatus(id, paid)
     }
-
-    override fun getTotalUnpaidForCard(cardId: String): Flow<Double> {
-        return combine(
-            transactionDao.getByCard(cardId),
-            transactionDao.getAllPaymentStatuses()
-        ) { transactions, payments ->
-            transactions.sumOf { entity ->
-                if (entity.isFixed) {
-                    val hasAnyPayment = payments.any { it.transactionId == entity.id.toString() }
-                    if (!hasAnyPayment) entity.amount else 0.0
-                } else {
-                    if (!entity.isPaid) entity.amount else 0.0
-                }
-            }
-        }
-    }
-
-    override fun getTotalExpensesByMonth(start: Long, end: Long) = transactionDao.getTotalExpensesByMonth(start, end)
-
-    override fun getTotalIncomesByMonth(start: Long, end: Long) = transactionDao.getTotalIncomesByMonth(start, end)
 
     override suspend fun deleteTransactionGroup(groupId: String) {
         transactionDao.deleteTransactionGroup(groupId)
@@ -93,15 +109,6 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDao.getAllTransactions().map { list ->
             list.map { it.toDomain() }
         }
-
-    override fun getRecentTransactions(): Flow<List<Transaction>> {
-        val tenDaysInMs = 10 * 24 * 60 * 60 * 1000L
-        val dateCutoff = System.currentTimeMillis() - tenDaysInMs
-
-        return transactionDao.getRecentTransactions(dateCutoff).map { list ->
-            list.map { it.toDomain() }
-        }
-    }
 
     override fun getAllPaymentStatuses(): Flow<List<PaymentStatusEntity>> {
         return transactionDao.getAllPaymentStatuses()

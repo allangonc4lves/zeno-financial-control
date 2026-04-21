@@ -9,5 +9,7 @@ data class CreditCardEntity(
     val bankName: String,
     val brand: String,
     val lastDigits: Int,
-    val backgroundColor: Long
+    val dueDate: String,
+    val backgroundColor: Long,
+    val activated: Boolean
 )
