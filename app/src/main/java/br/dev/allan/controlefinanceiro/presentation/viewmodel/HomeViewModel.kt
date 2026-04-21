@@ -75,18 +75,12 @@ class HomeViewModel @Inject constructor(
             .sumOf { getMonthlyTransactionsUseCase.getAmountForMonth(it) }
 
         val paidVal = monthlyTransactions
-            .filter { it.isPaid }
-            .sumOf {
-                val amount = getMonthlyTransactionsUseCase.getAmountForMonth(it)
-                if (it.direction == TransactionDirection.INCOME) amount else -amount
-            }
+            .filter { it.isPaid && it.direction == TransactionDirection.EXPENSE }
+            .sumOf { getMonthlyTransactionsUseCase.getAmountForMonth(it) }
 
         val pendingVal = monthlyTransactions
-            .filter { !it.isPaid }
-            .sumOf {
-                val amount = getMonthlyTransactionsUseCase.getAmountForMonth(it)
-                if (it.direction == TransactionDirection.INCOME) amount else -amount
-            }
+            .filter { !it.isPaid && it.direction == TransactionDirection.EXPENSE }
+            .sumOf { getMonthlyTransactionsUseCase.getAmountForMonth(it) }
 
         val totalBalanceVal = incomeVal - expenseVal
 

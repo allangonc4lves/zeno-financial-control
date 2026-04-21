@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -213,6 +214,9 @@ class CreditCardTransactionViewModel @Inject constructor(
         map.mapValues { currencyManager.formatByCurrencyCode(it.value, code) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
+    private val _uiEvent = kotlinx.coroutines.channels.Channel<String>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
     fun markMonthAsPaid(isPaid: Boolean) {
         viewModelScope.launch {
             val cardId = _selectedCardId.value ?: return@launch
@@ -231,6 +235,30 @@ class CreditCardTransactionViewModel @Inject constructor(
                 val transactionsInMonth = allTransactions
                     .filter { it.creditCardId == cardId }
                     .filter { it.date >= startStr && it.date < endStr }
+
+                if (isPaid) {
+                    // Trava de segurança: Verificar saldo total do mês (Receitas - Despesas Pagas)
+                    val allTransactionsInMonth = transactionRepository.getTransactions().first()
+                        .filter { 
+                            val txDate = try { java.time.LocalDate.parse(it.date) } catch(e: Exception) { null }
+                            txDate?.let { date -> java.time.YearMonth.from(date).format(java.time.format.DateTimeFormatter.ofPattern("MM/yyyy")) == monthYear } ?: false
+                        }
+
+                    val totalIncome = allTransactionsInMonth
+                        .filter { it.direction == TransactionDirection.INCOME }
+                        .sumOf { it.amount }
+
+                    val totalPaidExpenses = allTransactionsInMonth
+                        .filter { it.direction == TransactionDirection.EXPENSE && it.isPaid }
+                        .sumOf { it.amount }
+
+                    val invoiceTotal = transactionsInMonth.sumOf { it.amount }
+
+                    if (totalPaidExpenses + invoiceTotal > totalIncome) {
+                        _uiEvent.send("Saldo insuficiente para pagar esta fatura!")
+                        return@launch
+                    }
+                }
 
                 transactionsInMonth.forEach { transaction ->
                     if (isPaid) {

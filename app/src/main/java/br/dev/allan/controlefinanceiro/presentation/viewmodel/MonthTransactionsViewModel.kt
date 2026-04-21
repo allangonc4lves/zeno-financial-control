@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -95,9 +96,29 @@ class MonthTransactionsViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    private val _uiEvent = kotlinx.coroutines.channels.Channel<String>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
     fun togglePayment(uiModel: TransactionUIModel) {
         viewModelScope.launch {
             val id = uiModel.id
+
+            // Se estiver marcando como PAGO (isPaid atual é false) e for uma DESPESA
+            if (!uiModel.isPaid && uiModel.direction == TransactionDirection.EXPENSE) {
+                val transactions = transactionsUiModel.value
+                val totalIncome = transactions
+                    .filter { it.direction == TransactionDirection.INCOME }
+                    .sumOf { it.amount }
+                
+                val totalPaidExpenses = transactions
+                    .filter { it.direction == TransactionDirection.EXPENSE && it.isPaid }
+                    .sumOf { it.amount }
+
+                if (totalPaidExpenses + uiModel.amount > totalIncome) {
+                    _uiEvent.send("Saldo insuficiente para pagar esta conta!")
+                    return@launch
+                }
+            }
 
             if (uiModel.type == TransactionType.DEFAULT) {
                 val monthYear = formatMillisToMonthYear(currentMonth.value)

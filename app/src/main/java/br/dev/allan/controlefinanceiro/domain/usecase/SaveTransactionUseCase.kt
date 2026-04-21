@@ -71,6 +71,7 @@ class SaveTransactionUseCase @Inject constructor(
             state.toDomain(installmentAmount, installmentDate).copy(
                 groupId = groupId,
                 currentInstallment = i + 1,
+                installmentCount = state.installmentCount,
                 isPaid = i == 0 && state.isPaid,
                 isInstallment = state.isDivideValue,
                 type = TransactionType.REPEAT
@@ -89,5 +90,5 @@ private fun AddTransactionUiState.toDomain(amount: Double, dateForDb: String, id
     creditCardId = this.selectedCardId,
     isPaid = this.isPaid,
     type = this.transactionType,
-    installmentCount = if(this.transactionType == TransactionType.INSTALLMENT) this.installmentCount else 0
+    installmentCount = if(this.transactionType == TransactionType.REPEAT) this.installmentCount else 0
 )
