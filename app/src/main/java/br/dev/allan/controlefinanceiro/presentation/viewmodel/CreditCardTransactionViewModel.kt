@@ -237,12 +237,12 @@ class CreditCardTransactionViewModel @Inject constructor(
                     .filter { it.date >= startStr && it.date < endStr }
 
                 if (isPaid) {
-                    // Trava de segurança: Verificar saldo total do mês (Receitas - Despesas Pagas)
-                    val allTransactionsInMonth = transactionRepository.getTransactions().first()
-                        .filter { 
-                            val txDate = try { java.time.LocalDate.parse(it.date) } catch(e: Exception) { null }
-                            txDate?.let { date -> java.time.YearMonth.from(date).format(java.time.format.DateTimeFormatter.ofPattern("MM/yyyy")) == monthYear } ?: false
-                        }
+                    val cal = Calendar.getInstance().apply { timeInMillis = monthMillis }
+                    val start = cal.apply { set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+                    cal.add(Calendar.MONTH, 1)
+                    val end = cal.timeInMillis
+
+                    val allTransactionsInMonth = transactionRepository.getTransactionsByMonth(start, end).first()
 
                     val totalIncome = allTransactionsInMonth
                         .filter { it.direction == TransactionDirection.INCOME }

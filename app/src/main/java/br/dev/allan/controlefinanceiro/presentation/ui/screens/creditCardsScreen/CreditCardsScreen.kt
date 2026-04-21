@@ -37,6 +37,9 @@ import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,6 +67,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScree
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
 import br.dev.allan.controlefinanceiro.utils.toSystemDayMonth
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CreditCardsScreen(
@@ -80,6 +84,14 @@ fun CreditCardsScreen(
     val categoryChartValues by viewModel.categoryChartData.collectAsState()
     val categoryChartLabels by viewModel.categoryChartLabels.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collectLatest { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
     val pagerState = rememberPagerState(pageCount = { cards.size })
 
     val selectedCardColor =
@@ -93,103 +105,109 @@ fun CreditCardsScreen(
 
     val cardWidth: Dp = 300.dp
 
-    if(cards.isNotEmpty()){
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxWidth(),
-                pageSize = PageSize.Fixed(cardWidth),
-                contentPadding = PaddingValues(horizontal = (LocalConfiguration.current.screenWidthDp.dp - cardWidth) / 2),
-                pageSpacing = 16.dp,
-            ) { page ->
-                val card = cards[page]
-                CreditCardPreview(
-                    bankName = card.bankName,
-                    brand = card.brand,
-                    lastDigits = card.lastDigits.toString(),
-                    backgroundColorLong = card.backgroundColor,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(190.dp)
-                        .clickable {
-                            navViewModel.navigateToForm(
-                                navController = navController,
-                                route = AddCreditCardRoute(id = card.id)
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { padding ->
+        if(cards.isNotEmpty()){
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth(),
+                    pageSize = PageSize.Fixed(cardWidth),
+                    contentPadding = PaddingValues(horizontal = (LocalConfiguration.current.screenWidthDp.dp - cardWidth) / 2),
+                    pageSpacing = 16.dp,
+                ) { page ->
+                    val card = cards[page]
+                    CreditCardPreview(
+                        bankName = card.bankName,
+                        brand = card.brand,
+                        lastDigits = card.lastDigits.toString(),
+                        backgroundColorLong = card.backgroundColor,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(190.dp)
+                            .clickable {
+                                navViewModel.navigateToForm(
+                                    navController = navController,
+                                    route = AddCreditCardRoute(id = card.id)
+                                )
+                            }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                MonthSelector(
+                    currentMonthMillis = currentMonth,
+                    onPreviousMonth = { viewModel.changeMonth(-1) },
+                    onNextMonth = { viewModel.changeMonth(1) }
+                )
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        if (chartData.isNotEmpty()) {
+                            CreditCardBarChart(
+                                data = chartData,
+                                barColor = selectedCardColor,
+                                totalMonth = selectedMonthTotal,
+                                totalOpenInvoices = totalOpenInvoices,
+                                modifier = Modifier.fillMaxWidth(),
+                                onStatusClick = { isPaid ->
+                                    viewModel.markMonthAsPaid(isPaid)
+                                }
                             )
                         }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MonthSelector(
-                currentMonthMillis = currentMonth,
-                onPreviousMonth = { viewModel.changeMonth(-1) },
-                onNextMonth = { viewModel.changeMonth(1) }
-            )
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    if (chartData.isNotEmpty()) {
-                        CreditCardBarChart(
-                            data = chartData,
-                            barColor = selectedCardColor,
-                            totalMonth = selectedMonthTotal,
-                            totalOpenInvoices = totalOpenInvoices,
-                            modifier = Modifier.fillMaxWidth(),
-                            onStatusClick = { isPaid ->
-                                viewModel.markMonthAsPaid(isPaid)
-                            }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        CustomTextTitle(
+                            text = "Gastos por categoria no cartão",
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            startPadding = 8
+                        )
+                        ExpensesByCategoryCard(
+                            chartDataValues = categoryChartValues,
+                            chartDataLabels = categoryChartLabels
                         )
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CustomTextTitle(
-                        text = "Gastos por categoria no cartão",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        startPadding = 8
-                    )
-                    ExpensesByCategoryCard(
-                        chartDataValues = categoryChartValues,
-                        chartDataLabels = categoryChartLabels
-                    )
-                }
-                items(transactions, key = { it.id }) { transaction ->
-                    CardTransactionItem(transaction)
+                    items(transactions, key = { it.id }) { transaction ->
+                        CardTransactionItem(transaction)
+                    }
                 }
             }
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.zeno_not_found_cards),
-                contentDescription = "zeno",
+        } else {
+            Column(
                 modifier = Modifier
-                    .size(150.dp)
-                    .padding(bottom = 8.dp),
-                contentScale = ContentScale.Inside
-            )
-            CustomTextContent(
-                text = "Nenhuma cartão encontrado!",
-                modifier = Modifier.fillMaxWidth(),
-            )
+                    .padding(padding)
+                    .padding(12.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.zeno_not_found_cards),
+                    contentDescription = "zeno",
+                    modifier = Modifier
+                        .size(150.dp)
+                        .padding(bottom = 8.dp),
+                    contentScale = ContentScale.Inside
+                )
+                CustomTextContent(
+                    text = "Nenhuma cartão encontrado!",
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 }
@@ -377,8 +395,3 @@ fun StatusCheckbox(
         )
     }
 }
-
-
-
-
-

@@ -100,7 +100,7 @@ fun AddTransactionDialog(
             text = { Text("Esta ação não pode ser desfeita.") },
             confirmButton = {
                 TextButton(onClick = {
-                    onAction(TransactionAction.Delete) // Usando Action
+                    onAction(TransactionAction.Delete)
                     showDeleteConfirm = false
                 }) {
                     Text("Excluir", color = MaterialTheme.colorScheme.error)
@@ -116,7 +116,7 @@ fun AddTransactionDialog(
 
     ZenoDialog(
         onDismiss = { onDismiss() },
-        onConfirm = { onAction(TransactionAction.Save) }, // Usando Action
+        onConfirm = { onAction(TransactionAction.Save) },
         content = {
             Box(contentAlignment = Alignment.Center) {
                 Column(
@@ -157,7 +157,7 @@ fun AddTransactionDialog(
 
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
-                            value = uiState.amount,
+                            value = uiState.amountInput,
                             label = "Valor*",
                             forceCursorAtEnd = true,
                             inputMode = InputModeCustomTextField.DIGITS,
@@ -193,16 +193,16 @@ fun AddTransactionDialog(
 
                     SwitchAddTransaction(
                         text = "Repetir",
-                        checked = uiState.transactionType == TransactionType.REPEAT,
+                        checked = uiState.type == TransactionType.REPEAT,
                         onCheckedChange = { isChecked ->
                             onAction(TransactionAction.TypeChanged(if (isChecked) TransactionType.REPEAT else TransactionType.DEFAULT))
                         },
                         quantityValue = uiState.installmentCount,
                         onQuantityChange = { onAction(TransactionAction.InstallmentCountChanged(it)) },
-                        showQuantity = uiState.transactionType == TransactionType.REPEAT
+                        showQuantity = uiState.type == TransactionType.REPEAT
                     )
 
-                    if (uiState.transactionType == TransactionType.REPEAT) {
+                    if (uiState.type == TransactionType.REPEAT) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -228,7 +228,7 @@ fun AddTransactionDialog(
                     if (uiState.isCreditCard) {
                         CardSelector(
                             cards = uiState.cards,
-                            selectedCardId = uiState.selectedCardId,
+                            selectedCardId = uiState.creditCardId,
                             onCardSelected = { onAction(TransactionAction.CardSelected(it)) }
                         )
                     }
@@ -244,7 +244,7 @@ fun AddTransactionDialog(
                     if (uiState.category == TransactionCategory.OTHERS_EXPENSE) {
                         CardSelector(
                             cards = uiState.cards,
-                            selectedCardId = uiState.selectedCardId,
+                            selectedCardId = uiState.creditCardId,
                             onCardSelected = { onAction(TransactionAction.CardSelected(it)) }
                         )
                     }

@@ -83,6 +83,7 @@ class HomeViewModel @Inject constructor(
             .sumOf { getMonthlyTransactionsUseCase.getAmountForMonth(it) }
 
         val totalBalanceVal = incomeVal - expenseVal
+        val availableBalanceVal = incomeVal - paidVal
 
         // 3. Preparar dados do gráfico
         val expensesByCategory = monthlyTransactions
@@ -101,6 +102,8 @@ class HomeViewModel @Inject constructor(
             isBalanceVisible = isVisible,
             rawBalance = totalBalanceVal,
             balance = currencyManager.formatByCurrencyCode(totalBalanceVal, code),
+            rawAvailableBalance = availableBalanceVal,
+            availableBalance = currencyManager.formatByCurrencyCode(availableBalanceVal, code),
             incomes = currencyManager.formatByCurrencyCode(incomeVal, code),
             expenses = currencyManager.formatByCurrencyCode(expenseVal, code),
             paidValue = currencyManager.formatByCurrencyCode(kotlin.math.abs(paidVal), code),

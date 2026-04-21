@@ -65,20 +65,33 @@ fun TotalExpAndIncByMonthCard(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("Saldo Total do Mês", style = MaterialTheme.typography.labelMedium)
-                Text(
-                    text = if (uiState.isBalanceVisible) formattedBalance else "R$ •••••",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (uiState.rawBalance < 0) Color(0xFFAB1A1A) else Color(0xFF4CAF50)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Balanço", style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = if (uiState.isBalanceVisible) formattedBalance else "R$ •••••",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (uiState.rawBalance < 0) Color(0xFFAB1A1A) else Color(0xFF4CAF50)
+                        )
                     )
-                )
+                }
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Saldo", style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = if (uiState.isBalanceVisible) uiState.availableBalance else "R$ •••••",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (uiState.rawAvailableBalance < 0) Color(0xFFAB1A1A) else Color(0xFF4CAF50)
+                        )
+                    )
+                }
             }
 
             IconButton(

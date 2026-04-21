@@ -4,6 +4,8 @@ import android.text.format.DateFormat
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.dev.allan.controlefinanceiro.data.local.mapper.toUi
+import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
 import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
@@ -31,6 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MonthTransactionsViewModel @Inject constructor(
     private val repository: TransactionRepository,
+    private val cardRepository: CreditCardRepository,
     private val currencyManager: CurrencyManager
 ) : ViewModel() {
 
@@ -55,39 +58,10 @@ class MonthTransactionsViewModel @Inject constructor(
                 list.filter { transaction ->
                     when {
                         transaction.date > endStr -> false
-
                         transaction.isInstallment -> !transaction.isExpired(monthMillis)
-
                         else -> true
                     }
-                }.map { transaction ->
-                    val datePattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "ddMM")
-
-                    val dateForUi = try {
-                        SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(transaction.date) ?: Date()
-                    } catch (e: Exception) {
-                        Date()
-                    }
-
-                    TransactionUIModel(
-                        id = transaction.id,
-                        title = transaction.title,
-                        amount = transaction.amount,
-                        formattedTotalAmount = currencyManager.formatByCurrencyCode(transaction.amount, "BRL"),
-                        formattedAmount = currencyManager.formatByCurrencyCode(transaction.amount, "BRL"),
-                        formattedParcelInfo = null,
-                        formattedDate = SimpleDateFormat(datePattern, Locale.getDefault()).format(dateForUi),
-                        color = if (transaction.direction == TransactionDirection.EXPENSE) Color.Red else Color.Green,
-                        category = transaction.category,
-                        type = transaction.type,
-                        direction = transaction.direction,
-                        isPaid = transaction.isPaid,
-                        isInstallment = transaction.isInstallment,
-                        currentInstallment = transaction.currentInstallment,
-                        installmentCount = transaction.installmentCount,
-                        creditCardId = transaction.creditCardId,
-                    )
-                }
+                }.map { it.toUi(currencyManager, "BRL") }
             }
         }
         .stateIn(
@@ -103,7 +77,15 @@ class MonthTransactionsViewModel @Inject constructor(
         viewModelScope.launch {
             val id = uiModel.id
 
-            // Se estiver marcando como PAGO (isPaid atual é false) e for uma DESPESA
+            // Bloqueio para compras no cartão
+            if (uiModel.creditCardId != null && uiModel.direction == TransactionDirection.EXPENSE) {
+                val card = cardRepository.getCardById(uiModel.creditCardId)
+                val cardName = card?.bankName ?: "Cartão"
+                _uiEvent.send("Esta compra foi realizada no cartão $cardName. Para dar baixa, marque a fatura correspondente como paga na tela de Cartões.")
+                return@launch
+            }
+
+            // Bloqueio por saldo insuficiente para despesas diretas (Carteira)
             if (!uiModel.isPaid && uiModel.direction == TransactionDirection.EXPENSE) {
                 val transactions = transactionsUiModel.value
                 val totalIncome = transactions

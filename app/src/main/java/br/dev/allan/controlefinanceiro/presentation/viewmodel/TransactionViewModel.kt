@@ -13,7 +13,7 @@ import br.dev.allan.controlefinanceiro.domain.usecase.SaveTransactionUseCase
 import br.dev.allan.controlefinanceiro.utils.ValidateAmount
 import br.dev.allan.controlefinanceiro.utils.ValidateCategory
 import br.dev.allan.controlefinanceiro.utils.ValidateText
-import br.dev.allan.controlefinanceiro.utils.AddTransactionUiState
+import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.SaveTransactionUiEvent
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.TransactionAction
 import br.dev.allan.controlefinanceiro.utils.DateHelper
@@ -42,7 +42,7 @@ class TransactionViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var currentId: Int? = null
-    private val _uiState = MutableStateFlow(AddTransactionUiState())
+    private val _uiState = MutableStateFlow(TransactionUIModel())
     val uiState = _uiState.asStateFlow()
 
     private val _uiEvent = Channel<SaveTransactionUiEvent>()
@@ -62,7 +62,7 @@ class TransactionViewModel @Inject constructor(
                 updateState { it.copy(title = action.value, titleError = null) }
 
             is TransactionAction.AmountChanged ->
-                updateState { it.copy(amount = action.value.formatAsCurrency(), amountError = null) }
+                updateState { it.copy(amountInput = action.value.formatAsCurrency(), amountError = null) }
 
             is TransactionAction.CategoryChanged ->
                 updateState { it.copy(category = action.value, categoryError = null) }
@@ -77,7 +77,7 @@ class TransactionViewModel @Inject constructor(
             }
 
             is TransactionAction.TypeChanged ->
-                updateState { it.copy(transactionType = action.type) }
+                updateState { it.copy(type = action.type) }
 
             is TransactionAction.DivideValueToggle ->
                 updateState { it.copy(isDivideValue = action.divide) }
@@ -86,7 +86,7 @@ class TransactionViewModel @Inject constructor(
                 updateState { it.copy(installmentCount = action.count.coerceIn(1, 360)) }
 
             is TransactionAction.CardSelected ->
-                updateState { it.copy(selectedCardId = action.cardId) }
+                updateState { it.copy(creditCardId = action.cardId) }
 
             is TransactionAction.DirectionChanged ->
                 updateState { it.copy(direction = action.dir, category = null) }
@@ -95,7 +95,7 @@ class TransactionViewModel @Inject constructor(
                 updateState { it.copy(isPaid = action.paid) }
 
             is TransactionAction.CreditCardToggle ->
-                updateState { it.copy(isCreditCard = action.isCreditCard, selectedCardId = if (!action.isCreditCard) null else it.selectedCardId) }
+                updateState { it.copy(isCreditCard = action.isCreditCard, creditCardId = if (!action.isCreditCard) null else it.creditCardId) }
 
             is TransactionAction.Save -> save()
 
@@ -111,7 +111,6 @@ class TransactionViewModel @Inject constructor(
             if (result.isSuccess) {
                 _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
             } else {
-                // Aqui você pode tratar os erros de validação voltando para o estado
                 updateState { it.copy(isLoading = false) }
             }
         }
@@ -126,7 +125,7 @@ class TransactionViewModel @Inject constructor(
         }
     }
 
-    fun updateState(transform: (AddTransactionUiState) -> AddTransactionUiState) {
+    fun updateState(transform: (TransactionUIModel) -> TransactionUIModel) {
         _uiState.update(transform)
     }
 
@@ -136,14 +135,14 @@ class TransactionViewModel @Inject constructor(
                 currentId = tx.id
                 updateState { it.copy(
                     title = tx.title,
-                    amount = formatAmountForUi(tx.amount),
+                    amountInput = formatAmountForUi(tx.amount),
                     dateDisplay = DateHelper.fromDbToUi(tx.date),
                     dateMillis = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(tx.date)?.time ?: System.currentTimeMillis(),
                     category = tx.category,
                     direction = tx.direction,
                     isPaid = tx.isPaid,
-                    selectedCardId = tx.creditCardId,
-                    transactionType = if (tx.isInstallment || tx.type == TransactionType.REPEAT) tx.type else TransactionType.DEFAULT,
+                    creditCardId = tx.creditCardId,
+                    type = if (tx.isInstallment || tx.type == TransactionType.REPEAT) tx.type else TransactionType.DEFAULT,
                     installmentCount = if (tx.isInstallment || tx.type == TransactionType.REPEAT) tx.installmentCount else 1,
                     isCreditCard = tx.creditCardId != null
                 )}
@@ -154,7 +153,7 @@ class TransactionViewModel @Inject constructor(
     fun resetState() {
         val currentCards = _uiState.value.cards
         currentId = null
-        _uiState.value = AddTransactionUiState(cards = currentCards)
+        _uiState.value = TransactionUIModel(cards = currentCards)
     }
 
 }

@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.Color
 import br.dev.allan.controlefinanceiro.data.local.PaymentStatusEntity
 import br.dev.allan.controlefinanceiro.data.local.TransactionEntity
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
-import br.dev.allan.controlefinanceiro.utils.AddTransactionUiState
 import br.dev.allan.controlefinanceiro.utils.CurrencyManager
 import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
@@ -64,6 +63,7 @@ fun Transaction.toUi(currencyManager: CurrencyManager, code: String): Transactio
         id = id,
         title = title,
         amount = amount,
+        dateMillis = dateObj.time,
         formattedAmount = prefix + currencyManager.formatByCurrencyCode(amount, code),
         formattedDate = SimpleDateFormat("dd/MM", Locale("pt", "BR")).format(dateObj),
         color = if (direction == TransactionDirection.EXPENSE) Color(0xFFAB1A1A) else Color(0xFF1B5E20),
@@ -80,17 +80,17 @@ fun Transaction.toUi(currencyManager: CurrencyManager, code: String): Transactio
     )
 }
 
-fun AddTransactionUiState.toDomain(amount: Double, dateForDb: String, id: Int = 0) = Transaction(
+fun TransactionUIModel.toDomain(amount: Double, dateForDb: String, id: Int = 0) = Transaction(
     id = id,
     title = this.title,
     amount = amount,
     date = dateForDb,
     category = this.category!!,
     direction = this.direction,
-    creditCardId = this.selectedCardId,
+    creditCardId = this.creditCardId,
     isPaid = this.isPaid,
-    type = this.transactionType,
-    installmentCount = if(this.transactionType == TransactionType.REPEAT) this.installmentCount else 0
+    type = this.type,
+    installmentCount = if(this.type == TransactionType.REPEAT) this.installmentCount else 0
 )
 
 fun TransactionEntity.toDomain(

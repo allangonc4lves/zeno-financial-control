@@ -1,9 +1,8 @@
 package br.dev.allan.controlefinanceiro.domain.usecase
 
-import br.dev.allan.controlefinanceiro.data.local.mapper.toDomain
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
-import br.dev.allan.controlefinanceiro.utils.AddTransactionUiState
+import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.utils.DateHelper
 import br.dev.allan.controlefinanceiro.utils.ValidateAmount
 import br.dev.allan.controlefinanceiro.utils.ValidateCategory
@@ -22,22 +21,22 @@ class SaveTransactionUseCase @Inject constructor(
     private val validateAmount: ValidateAmount,
     private val validateCategory: ValidateCategory
 ) {
-    suspend fun execute(state: AddTransactionUiState, id: Int?): Result<Unit> {
+    suspend fun execute(state: TransactionUIModel, id: Int?): Result<Unit> {
         val titleRes = validateText.execute(state.title)
-        val amountRes = validateAmount.execute(state.amount)
+        val amountRes = validateAmount.execute(state.amountInput)
         val catRes = validateCategory.execute(state.category)
 
         if (!titleRes.successful || !amountRes.successful || !catRes.successful) {
             return Result.failure(Exception("Validation Error"))
         }
 
-        val amount = state.amount.parseToDouble()
+        val amount = state.amountInput.parseToDouble()
 
         val dateToSave = DateHelper.fromUiToDb(state.dateDisplay)
 
         return try {
             if (id == null) {
-                if (state.transactionType == TransactionType.REPEAT) {
+                if (state.type == TransactionType.REPEAT) {
                     repository.insertTransactions(generateInstallments(state, amount, dateToSave))
                 } else {
                     repository.insertTransaction(state.toDomain(amount, dateToSave))
@@ -52,7 +51,7 @@ class SaveTransactionUseCase @Inject constructor(
     }
 
     private fun generateInstallments(
-        state: AddTransactionUiState,
+        state: TransactionUIModel,
         total: Double,
         baseDate: String
     ): List<Transaction> {
@@ -80,15 +79,15 @@ class SaveTransactionUseCase @Inject constructor(
     }
 }
 
-private fun AddTransactionUiState.toDomain(amount: Double, dateForDb: String, id: Int = 0) = Transaction(
+private fun TransactionUIModel.toDomain(amount: Double, dateForDb: String, id: Int = 0) = Transaction(
     id = id,
     title = this.title,
     amount = amount,
     date = dateForDb,
     category = this.category!!,
     direction = this.direction,
-    creditCardId = this.selectedCardId,
+    creditCardId = this.creditCardId,
     isPaid = this.isPaid,
-    type = this.transactionType,
-    installmentCount = if(this.transactionType == TransactionType.REPEAT) this.installmentCount else 0
+    type = this.type,
+    installmentCount = if(this.type == TransactionType.REPEAT) this.installmentCount else 0
 )

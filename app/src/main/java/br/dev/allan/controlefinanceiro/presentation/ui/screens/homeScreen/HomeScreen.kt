@@ -122,13 +122,12 @@ fun HomeScreen(
             }
         }
 
-        // --- CORREÇÃO AQUI: Usando uiState.transactions ---
         if (uiState.transactions.isNotEmpty()) {
             items(
                 items = uiState.transactions,
-                key = { it.id } // Boa prática adicionar uma key
+                key = { it.id }
             ) { item ->
-                val appearance = item.category.getAppearance()
+                val appearance = item.category!!.getAppearance()
 
                 Row(
                     modifier = Modifier
@@ -148,7 +147,6 @@ fun HomeScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .background(
-                                    // Usando a cor que já vem mapeada no seu UiModel!
                                     color = item.color,
                                     shape = CircleShape
                                 ),
@@ -180,8 +178,6 @@ fun HomeScreen(
                         )
 
                         CustomTextContent(
-                            // Se formattedDate já é String, você não precisa do .toSystemFormatDate()
-                            // a menos que seja uma extensão sua para Strings.
                             text = item.formattedDate,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
