@@ -21,6 +21,9 @@ import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlined
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownAddTransaction(
@@ -43,10 +46,10 @@ fun DropdownAddTransaction(
         onExpandedChange = { expanded = !expanded }
     ) {
         CustomOutlinedTextField(
-            value = selectedAppearance?.displayName ?: "Selecione a Categoria",
+            value = selectedAppearance?.displayNameRes?.let { stringResource(it) } ?: stringResource(R.string.select_category),
             onValueChange = {},
             isReadOnly = true,
-            label = "Categoria*",
+            label = stringResource(R.string.category_label),
             isError = isError,
             errorMessage = errorMessage,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -66,7 +69,7 @@ fun DropdownAddTransaction(
                 DropdownMenuItem(
                     text = {
                         CustomTextContent(
-                            text = appearance.displayName,
+                            text = stringResource(appearance.displayNameRes),
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     },
@@ -77,7 +80,7 @@ fun DropdownAddTransaction(
                     leadingIcon = {
                         Icon(
                             imageVector = appearance.icon,
-                            contentDescription = appearance.displayName
+                            contentDescription = stringResource(appearance.displayNameRes)
                         )
                     }
                 )

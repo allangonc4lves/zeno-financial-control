@@ -36,7 +36,7 @@ object DateHelper {
 
 fun String.toSystemFormatDate(): String {
     return try {
-        val date = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR")).parse(this)
+        val date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(this)
         DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault()).format(date ?: Date())
     } catch (e: Exception) {
         this
@@ -45,7 +45,7 @@ fun String.toSystemFormatDate(): String {
 
 fun String.toSystemDayMonth(): String {
     return try {
-        val inputFormatter = SimpleDateFormat("dd/MM", Locale("pt", "BR"))
+        val inputFormatter = SimpleDateFormat("dd/MM", Locale.getDefault())
         val date = inputFormatter.parse(this) ?: Date()
 
         val pattern = android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMMd")
@@ -67,10 +67,9 @@ fun formatMillisToMonthYear(millis: Long): String {
 fun String.formatAsCurrency(): String {
     val digits = this.filter { it.isDigit() }.take(9)
     val doubleValue = digits.toDoubleOrNull()?.div(100) ?: 0.0
-    val symbols = DecimalFormatSymbols(Locale("pt", "BR")).apply {
+    val symbols = DecimalFormatSymbols(Locale.getDefault()).apply {
         currencySymbol = ""
-        decimalSeparator = ','
-        groupingSeparator = '.'
+        // Use default separators or keep them as is if specific formatting is required
     }
     return DecimalFormat("#,##0.00", symbols).format(doubleValue)
 }
@@ -82,6 +81,6 @@ fun String.parseToDouble(): Double {
 }
 
 fun formatAmountForUi(amount: Double): String {
-    val formatter = DecimalFormat("#,##0.00", DecimalFormatSymbols(Locale("pt", "BR")))
+    val formatter = DecimalFormat("#,##0.00", DecimalFormatSymbols(Locale.getDefault()))
     return formatter.format(amount)
 }

@@ -147,7 +147,7 @@ class CreditCardTransactionViewModel @Inject constructor(
                 val totalForMonth = transactionsInMonth.sumOf { it.amount }
 
                 CreditCardAmountByYear(
-                    monthName = SimpleDateFormat("MMM", Locale("pt", "BR")).format(Date(monthStartMillis))
+                    monthName = SimpleDateFormat("MMM", Locale.getDefault()).format(Date(monthStartMillis))
                         .replaceFirstChar { it.uppercase() },
                     totalValue = totalForMonth,
                     isSelected = monthIndex == selectedMonth,

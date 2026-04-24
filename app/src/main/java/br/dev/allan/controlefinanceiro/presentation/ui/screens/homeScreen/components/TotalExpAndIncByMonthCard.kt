@@ -39,6 +39,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import kotlinx.coroutines.launch
 import java.time.YearMonth
 
@@ -78,7 +80,7 @@ fun TotalExpAndIncByMonthCard(
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 MainBalanceItem(
-                    label = "Balanço",
+                    label = stringResource(id = R.string.balance),
                     value = if (uiState.isBalanceVisible) formattedBalance else "•••••",
                     rawValue = uiState.rawBalance,
                     modifier = Modifier.weight(1f)
@@ -97,7 +99,7 @@ fun TotalExpAndIncByMonthCard(
                 }
 
                 MainBalanceItem(
-                    label = "Saldo",
+                    label = stringResource(id = R.string.available_balance),
                     value = if (uiState.isBalanceVisible) uiState.availableBalance else "•••••",
                     rawValue = uiState.rawAvailableBalance,
                     modifier = Modifier.weight(1f)
@@ -115,7 +117,7 @@ fun TotalExpAndIncByMonthCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SummaryItem(
-                        label = "Receitas",
+                        label = stringResource(id = R.string.incomes),
                         value = if (uiState.isBalanceVisible) formattedIncomes else "•••••",
                         icon = Icons.Outlined.ArrowUpward,
                         color = Color(0xFF2E7D32),
@@ -130,14 +132,14 @@ fun TotalExpAndIncByMonthCard(
                     ) {
                         Icon(
                             imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = "Alternar Visibilidade",
+                            contentDescription = stringResource(id = R.string.toggle_visibility),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             modifier = Modifier.size(18.dp)
                         )
                     }
 
                     SummaryItem(
-                        label = "Despesas",
+                        label = stringResource(id = R.string.expenses),
                         value = if (uiState.isBalanceVisible) formattedExpenses else "•••••",
                         icon = Icons.Outlined.ArrowDownward,
                         color = Color(0xFFC62828),
@@ -150,7 +152,7 @@ fun TotalExpAndIncByMonthCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SummaryItem(
-                        label = "Pago",
+                        label = stringResource(id = R.string.paid_filter),
                         value = if (uiState.isBalanceVisible) uiState.paidValue else "•••••",
                         icon = Icons.Outlined.AccountBalanceWallet,
                         color = Color(0xFF455A64),
@@ -160,7 +162,7 @@ fun TotalExpAndIncByMonthCard(
                     Spacer(modifier = Modifier.size(32.dp))
 
                     SummaryItem(
-                        label = "Pendente",
+                        label = stringResource(id = R.string.pending_filter),
                         value = if (uiState.isBalanceVisible) uiState.pendingValue else "•••••",
                         icon = Icons.Outlined.PendingActions,
                         color = Color(0xFFEF6C00),

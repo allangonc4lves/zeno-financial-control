@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 
 @Composable
@@ -59,7 +61,7 @@ fun SwitchAddTransaction(
                     IconButton(onClick = { if (quantityValue > 2) onQuantityChange(quantityValue - 1) }) {
                         Icon(
                             Icons.Default.Remove,
-                            contentDescription = "Diminuir",
+                            contentDescription = stringResource(id = R.string.decrease),
                             modifier = Modifier.size(14.dp))
                     }
                 },
@@ -67,7 +69,7 @@ fun SwitchAddTransaction(
                     IconButton(onClick = { if (quantityValue < 360) onQuantityChange(quantityValue + 1) }) {
                         Icon(
                             Icons.Default.Add,
-                            contentDescription = "Aumentar",
+                            contentDescription = stringResource(id = R.string.increase),
                             modifier = Modifier.size(14.dp))
                     }
                 },

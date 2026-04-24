@@ -19,8 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 
 import androidx.compose.foundation.layout.PaddingValues
@@ -56,20 +58,20 @@ fun EditTransactionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Editar Transação") },
+        title = { Text(text = stringResource(R.string.edit_transaction)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Título") },
+                    label = { Text(stringResource(R.string.title_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 OutlinedTextField(
                     value = amountStr,
                     onValueChange = { amountStr = it },
-                    label = { Text("Valor") },
+                    label = { Text(stringResource(R.string.value_label)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                     isError = isInsufficientBalance
@@ -77,7 +79,7 @@ fun EditTransactionDialog(
 
                 if (isInsufficientBalance) {
                     Text(
-                        text = "Saldo insuficiente para manter esta despesa como paga. Desmarque o pagamento para salvar.",
+                        text = stringResource(R.string.insufficient_balance_msg),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -91,7 +93,7 @@ fun EditTransactionDialog(
                             .clickable { isPaid = !isPaid }
                     ) {
                         Checkbox(checked = isPaid, onCheckedChange = { isPaid = it })
-                        Text("Marcar como pago")
+                        Text(stringResource(R.string.mark_as_paid))
                     }
                 }
 
@@ -101,7 +103,7 @@ fun EditTransactionDialog(
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     Text(
-                        text = "Opções de Edição",
+                        text = stringResource(R.string.edit_options),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -117,7 +119,7 @@ fun EditTransactionDialog(
                             onClick = { editAllInstallments = false }
                         )
                         Text(
-                            text = if (transaction.isInstallment) "Apenas esta parcela" else "Apenas este mês",
+                            text = if (transaction.isInstallment) stringResource(R.string.only_this_installment) else stringResource(R.string.only_this_month),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -133,7 +135,7 @@ fun EditTransactionDialog(
                             onClick = { editAllInstallments = true }
                         )
                         Text(
-                            text = if (transaction.isInstallment) "Todas as parcelas" else "Todos os meses",
+                            text = if (transaction.isInstallment) stringResource(R.string.all_installments) else stringResource(R.string.all_months),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -152,12 +154,12 @@ fun EditTransactionDialog(
                 },
                 enabled = !isInsufficientBalance
             ) {
-                Text("Salvar")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

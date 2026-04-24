@@ -8,12 +8,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZenoDialog(
-    dismissText: String = "Cancelar",
-    confirmText: String = "Salvar",
+    dismissText: String = stringResource(id = R.string.cancel),
+    confirmText: String = stringResource(id = R.string.save),
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     content: @Composable () -> Unit

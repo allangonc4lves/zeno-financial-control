@@ -32,10 +32,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.utils.constants.InputModeCustomTextField
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
@@ -96,19 +98,19 @@ fun AddTransactionDialog(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Excluir Transação?") },
-            text = { Text("Esta ação não pode ser desfeita.") },
+            title = { Text(stringResource(R.string.delete_transaction_q)) },
+            text = { Text(stringResource(R.string.delete_transaction_desc)) },
             confirmButton = {
                 TextButton(onClick = {
                     onAction(TransactionAction.Delete)
                     showDeleteConfirm = false
                 }) {
-                    Text("Excluir", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -132,12 +134,12 @@ fun AddTransactionDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CustomTextTitle(if (transactionId == null || transactionId == -1) "Nova transação" else "Editar transação")
+                        CustomTextTitle(if (transactionId == null || transactionId == -1) stringResource(R.string.new_transaction) else stringResource(R.string.edit_transaction))
                         if (transactionId != null && transactionId != -1) {
                             IconButton(onClick = { showDeleteConfirm = true }) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Excluir",
+                                    contentDescription = stringResource(R.string.delete),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -148,7 +150,7 @@ fun AddTransactionDialog(
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
                             value = uiState.title,
-                            label = "Título*",
+                            label = stringResource(R.string.title_label),
                             capitalization = KeyboardCapitalization.Sentences,
                             isError = uiState.titleError != null,
                             errorMessage = uiState.titleError ?: "",
@@ -158,7 +160,7 @@ fun AddTransactionDialog(
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
                             value = uiState.amountInput,
-                            label = "Valor*",
+                            label = stringResource(R.string.value_label),
                             forceCursorAtEnd = true,
                             inputMode = InputModeCustomTextField.DIGITS,
                             maxLength = 9,
@@ -172,14 +174,14 @@ fun AddTransactionDialog(
 
                     CustomOutlinedTextField(
                         value = dateFormat.format(Date(uiState.dateMillis)).toSystemFormatDate(),
-                        label = "Data*",
+                        label = stringResource(R.string.date_label),
                         isReadOnly = true,
                         isError = false,
                         errorMessage = "",
                         onValueChange = {},
                         trailingIcon = {
                             IconButton(onClick = { showDatePicker = true }) {
-                                Icon(Icons.Default.DateRange, "Data")
+                                Icon(Icons.Default.DateRange, stringResource(R.string.date_label))
                             }
                         }
                     )
@@ -192,7 +194,7 @@ fun AddTransactionDialog(
                     )
 
                     SwitchAddTransaction(
-                        text = "Repetir",
+                        text = stringResource(R.string.repeat),
                         checked = uiState.type == TransactionType.REPEAT,
                         onCheckedChange = { isChecked ->
                             onAction(TransactionAction.TypeChanged(if (isChecked) TransactionType.REPEAT else TransactionType.DEFAULT))
@@ -208,7 +210,7 @@ fun AddTransactionDialog(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            CustomTextContent(text = "Dividir valor total", color = MaterialTheme.colorScheme.primary)
+                            CustomTextContent(text = stringResource(R.string.divide_total_value), color = MaterialTheme.colorScheme.primary)
                             Checkbox(
                                 checked = uiState.isDivideValue,
                                 onCheckedChange = { onAction(TransactionAction.DivideValueToggle(it)) }
@@ -217,7 +219,7 @@ fun AddTransactionDialog(
                     }
 
                     SwitchAddTransaction(
-                        text = "Cartão de Crédito",
+                        text = stringResource(R.string.credit_card_label),
                         checked = uiState.isCreditCard,
                         onCheckedChange = { onAction(TransactionAction.CreditCardToggle(it)) },
                         quantityValue = 0,
@@ -272,7 +274,7 @@ fun AddTransactionDialog(
                         onAction(TransactionAction.DateChanged(formatted))
                     }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.ok)) }
             }
         ) {
             DatePicker(state = datePickerState)

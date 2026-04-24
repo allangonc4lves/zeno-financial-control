@@ -39,6 +39,8 @@ import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitl
 import br.dev.allan.controlefinanceiro.presentation.ui.components.Loading
 import br.dev.allan.controlefinanceiro.presentation.ui.components.ZenoDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.SaveCreditCardUiEvent
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardsViewModel
 
 @Composable
@@ -74,19 +76,19 @@ fun AddCreditCardDialog(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Excluir Cartão?") },
-            text = { Text("Esta ação não pode ser desfeita.") },
+            title = { Text(stringResource(id = R.string.delete_card_q)) },
+            text = { Text(stringResource(id = R.string.delete_card_desc)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.removeCard()
                     showDeleteConfirm = false
                 }) {
-                    Text("Excluir", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(id = R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         )
@@ -110,12 +112,12 @@ fun AddCreditCardDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CustomTextTitle(if (cardId == null) "Novo Cartão" else "Editar Cartão")
+                        CustomTextTitle(if (cardId == null) stringResource(id = R.string.new_card) else stringResource(id = R.string.edit_card))
                         if (cardId != null) {
                             IconButton(onClick = { showDeleteConfirm = true }) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Excluir",
+                                    contentDescription = stringResource(id = R.string.delete),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -123,7 +125,7 @@ fun AddCreditCardDialog(
                     }
                     CustomOutlinedTextField(
                         value = state.bankName,
-                        label = "Banco*",
+                        label = stringResource(id = R.string.bank_label),
                         capitalization = KeyboardCapitalization.Sentences,
                         isError = state.bankNameError != null,
                         errorMessage = state.bankNameError ?: "",
@@ -133,7 +135,7 @@ fun AddCreditCardDialog(
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.6f),
                             value = state.brand,
-                            label = "Bandeira*",
+                            label = stringResource(id = R.string.brand_label),
                             capitalization = KeyboardCapitalization.Sentences,
                             isError = state.brandError != null,
                             errorMessage = state.brandError ?: "",
@@ -142,7 +144,7 @@ fun AddCreditCardDialog(
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.4f),
                             value = state.lastDigits,
-                            label = "Últimos digitos",
+                            label = stringResource(id = R.string.last_digits_label),
                             inputMode = InputModeCustomTextField.DIGITS,
                             maxLength = 4,
                             capitalization = KeyboardCapitalization.None,
@@ -156,7 +158,7 @@ fun AddCreditCardDialog(
                     }
 
                     Spacer(Modifier.height(4.dp))
-                    Text("Selecione uma cor:")
+                    Text(stringResource(id = R.string.select_color))
                     ColorSelector(
                         palette = state.palette,
                         initialSelectedColor = state.backgroundColor,

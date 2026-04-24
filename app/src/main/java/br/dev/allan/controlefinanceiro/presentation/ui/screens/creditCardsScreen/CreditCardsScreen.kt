@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -171,7 +172,7 @@ fun CreditCardsScreen(
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         CustomTextTitle(
-                            text = "Gastos por categoria no cartão",
+                            text = stringResource(R.string.spending_by_category_on_card),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             startPadding = 8
                         )
@@ -203,7 +204,7 @@ fun CreditCardsScreen(
                     contentScale = ContentScale.Inside
                 )
                 CustomTextContent(
-                    text = "Nenhuma cartão encontrado!",
+                    text = stringResource(R.string.no_card_found),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -224,13 +225,13 @@ fun CardTransactionItem(item: TransactionUIModel) {
                 Text(text = item.title, style = MaterialTheme.typography.titleMedium)
                 if (item.currentInstallment > 0) {
                     Text(
-                        text = "Parcela ${item.currentInstallment} / ${item.installmentCount}",
+                        text = stringResource(R.string.installment_format, item.currentInstallment, item.installmentCount),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
                 }
                 Text(
-                    text = "Total compra: ${item.formattedTotalAmount}",
+                    text = stringResource(R.string.total_purchase_format, item.formattedTotalAmount),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray
                 )
@@ -273,7 +274,7 @@ fun CreditCardBarChart(
         ) {
             Column {
                 Text(
-                    text = "TOTAL DA FATURA",
+                    text = stringResource(R.string.total_invoice_uppercase),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray
                 )
@@ -284,7 +285,7 @@ fun CreditCardBarChart(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "FATURAS EM ABERTO",
+                    text = stringResource(R.string.pending_filter).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.Gray
                 )
@@ -376,7 +377,7 @@ fun StatusCheckbox(
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = if (isPaid) "Paga" else "Aberta",
+            text = if (isPaid) stringResource(R.string.paid) else stringResource(R.string.pending_filter),
             style = MaterialTheme.typography.labelMedium,
             color = if (isPaid) Color(0xFF2E7D32) else Color.Gray,
             fontWeight = FontWeight.Bold

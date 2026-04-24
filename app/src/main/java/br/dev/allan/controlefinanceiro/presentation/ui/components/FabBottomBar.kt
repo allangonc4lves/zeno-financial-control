@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.AddTransactionDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.components.AddCreditCardDialog
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.CreditCardsRoute
 
 @Composable
@@ -41,7 +43,7 @@ fun FabBottomBar(
     ) {
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = "Ação",
+            contentDescription = stringResource(id = R.string.add_action),
             tint = Color.White,
             modifier = Modifier.size(32.dp)
         )

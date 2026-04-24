@@ -30,6 +30,9 @@ import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import br.dev.allan.controlefinanceiro.utils.TransactionUIModel
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
 
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
+
 @Composable
 fun TransactionItemRow(
     uiModel: TransactionUIModel,
@@ -69,9 +72,10 @@ fun TransactionItemRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            val source = if (uiModel.creditCardId != null) "Cartão" else "Carteira"
+            val source = if (uiModel.creditCardId != null) stringResource(R.string.card) else stringResource(R.string.wallet)
+            val categoryName = appearance?.displayNameRes?.let { stringResource(it) } ?: stringResource(R.string.others)
             Text(
-                text = "${appearance?.displayName ?: "Outros"} | $source",
+                text = "$categoryName | $source",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )

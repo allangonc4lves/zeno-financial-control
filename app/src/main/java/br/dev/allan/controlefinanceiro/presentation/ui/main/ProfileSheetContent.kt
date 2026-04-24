@@ -25,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
 
 @Composable
@@ -35,10 +37,10 @@ fun ProfileSheetContent(
     val currentCurrency by viewModel.currencyCode.collectAsState(initial = "BRL")
 
     val currencies = listOf(
-        CurrencyOption("BRL", "Real Brasileiro", "pt-BR"),
-        CurrencyOption("USD", "Dólar Americano", "en-US"),
-        CurrencyOption("EUR", "Euro", "de-DE"),
-        CurrencyOption("ARS", "Peso Argentino", "es-AR")
+        CurrencyOption("BRL", stringResource(id = R.string.brazilian_real), "pt-BR"),
+        CurrencyOption("USD", stringResource(id = R.string.us_dollar), "en-US"),
+        CurrencyOption("EUR", stringResource(id = R.string.euro), "de-DE"),
+        CurrencyOption("ARS", stringResource(id = R.string.argentine_peso), "es-AR")
     )
 
     Column(
@@ -47,13 +49,13 @@ fun ProfileSheetContent(
             .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
     ) {
         Text(
-            text = "Configurações",
+            text = stringResource(id = R.string.settings),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
         Text(
-            text = "Selecione a moeda principal",
+            text = stringResource(id = R.string.select_main_currency),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 8.dp)

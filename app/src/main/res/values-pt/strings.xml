@@ -1,0 +1,139 @@
+<resources>
+    <string name="app_name">Zeno</string>
+
+    <!-- General -->
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="clear">Limpar</string>
+    <string name="ok">OK</string>
+    <string name="save">Salvar</string>
+    <string name="delete">Excluir</string>
+    <string name="no_records_found">Nenhum registro encontrado!</string>
+
+    <!-- Reports Screen -->
+    <string name="report">Relatório</string>
+    <string name="select_period">Selecione o período</string>
+    <string name="incomes">Receitas</string>
+    <string name="expenses">Despesas</string>
+    <string name="income">Entrada</string>
+    <string name="expense">Saída</string>
+    <string name="period_balance">Balanço do Período</string>
+    <string name="balance">Balanço</string>
+    <string name="available_balance">Saldo</string>
+    <string name="wallet">Carteira</string>
+    <string name="card">Cartão</string>
+    <string name="credit_card_label">Cartão de Crédito</string>
+    <string name="categories">Categorias</string>
+    <string name="paid_filter">Pagos</string>
+    <string name="pending_filter">Pendentes</string>
+    <string name="period_items_count">Itens do Período (%1$d)</string>
+    <string name="invoice_from">Fatura de %1$s</string>
+    <string name="paid">Paga</string>
+    <string name="pending_payment">Pagamento Pendente</string>
+    <string name="transactions">Lançamentos</string>
+    <string name="total_invoice">Total da Fatura</string>
+    <string name="filter_by_category">Filtrar por Categoria</string>
+    <string name="all_categories">Todas as Categorias</string>
+    <string name="invoice_label">Fatura: %1$s</string>
+    <string name="toggle_visibility">Alternar Visibilidade</string>
+    <string name="others">Outros</string>
+    <string name="add_action">Ação de Adicionar</string>
+    <string name="user_image">Imagem do usuário</string>
+    <string name="premium_badge">Selo Premium</string>
+    <string name="hello_user">Olá, %1$s</string>
+    <string name="search">Pesquisar</string>
+
+    <!-- Credit Cards Screen -->
+    <string name="spending_by_category_on_card">Gastos por categoria no cartão</string>
+    <string name="no_card_found">Nenhum cartão encontrado!</string>
+    <string name="installment_format">Parcela %1$d / %2$d</string>
+    <string name="total_purchase_format">Total compra: %1$s</string>
+    <string name="total_invoice_uppercase">TOTAL DA FATURA</string>
+
+    <!-- Add/Edit Transaction -->
+    <string name="delete_transaction_q">Excluir Transação?</string>
+    <string name="delete_transaction_desc">Esta ação não pode ser desfeita.</string>
+    <string name="new_transaction">Nova transação</string>
+    <string name="edit_transaction">Editar transação</string>
+    <string name="title_label">Título*</string>
+    <string name="category_label">Categoria*</string>
+    <string name="select_category">Selecione a Categoria</string>
+    <string name="value_label">Valor*</string>
+    <string name="date_label">Data*</string>
+    <string name="repeat">Repetir</string>
+    <string name="divide_total_value">Dividir valor total</string>
+    <string name="decrease">Diminuir</string>
+    <string name="increase">Aumentar</string>
+
+    <!-- Home Screen (Inferred) -->
+    <string name="total_balance">Saldo Total</string>
+    <string name="monthly_summary">Resumo Mensal</string>
+    <string name="expenses_by_category">Despesas por categoria</string>
+    <string name="recent_activities">Atividades recentes</string>
+    <string name="view_all">Ver tudo</string>
+    <string name="no_expenses_found">Nenhuma despesa encontrada!</string>
+    <string name="no_records_last_10_days">Nenhum registro nos últimos 10 dias!</string>
+    <string name="previous_month">Mês Anterior</string>
+    <string name="next_month">Próximo Mês</string>
+    <string name="insufficient_balance_msg">Saldo insuficiente para manter esta despesa como paga. Desmarque o pagamento para salvar.</string>
+    <string name="insufficient_balance_card">Saldo insuficiente para pagar esta fatura!</string>
+    <string name="mark_as_paid">Marcar como pago</string>
+    <string name="edit_options">Opções de Edição</string>
+    <string name="only_this_installment">Apenas esta parcela</string>
+    <string name="only_this_month">Apenas este mês</string>
+    <string name="all_installments">Todas as parcelas</string>
+    <string name="all_months">Todos os meses</string>
+    <string name="settings">Configurações</string>
+    <string name="select_main_currency">Selecione a moeda principal</string>
+    <string name="brazilian_real">Real Brasileiro</string>
+    <string name="us_dollar">Dólar Americano</string>
+    <string name="euro">Euro</string>
+    <string name="argentine_peso">Peso Argentino</string>
+
+    <!-- Credit Cards Add/Edit -->
+    <string name="new_card">Novo Cartão</string>
+    <string name="edit_card">Editar Cartão</string>
+    <string name="delete_card_q">Excluir Cartão?</string>
+    <string name="delete_card_desc">Esta ação não pode ser desfeita.</string>
+    <string name="bank_label">Banco*</string>
+    <string name="brand_label">Bandeira*</string>
+    <string name="last_digits_label">Últimos dígitos</string>
+    <string name="select_color">Selecione uma cor:</string>
+    <string name="no_card_registered">Nenhum cartão cadastrado</string>
+
+    <!-- Categories -->
+    <string name="cat_savings">Poupança</string>
+    <string name="cat_housing">Habitação</string>
+    <string name="cat_energy_bill">Conta de Energia</string>
+    <string name="cat_water_bill">Conta de Água</string>
+    <string name="cat_gas_bill">Conta de Gás</string>
+    <string name="cat_food">Alimentação</string>
+    <string name="cat_drink">Bebidas</string>
+    <string name="cat_transportation">Transporte</string>
+    <string name="cat_uber">Uber</string>
+    <string name="cat_groceries">Mercado</string>
+    <string name="cat_entertainment">Entretenimento e Lazer</string>
+    <string name="cat_shopping">Compras</string>
+    <string name="cat_health_personal_care">Saúde e Cuidados Pessoais</string>
+    <string name="cat_education">Educação</string>
+    <string name="cat_subscriptions">Assinaturas e Serviços</string>
+    <string name="cat_debt_repayment">Dívidas e Empréstimos</string>
+    <string name="cat_investment_out">Aporte de Investimento</string>
+    <string name="cat_travel">Viagem</string>
+    <string name="cat_pets">Pets</string>
+    <string name="cat_gifts_donation">Presentes e Doações</string>
+    <string name="cat_maintenance">Manutenção de Casa/Auto</string>
+    <string name="cat_taxes">Impostos e Taxas</string>
+    <string name="cat_insurance">Seguros</string>
+    <string name="cat_others_expense">Outras Despesas</string>
+    <string name="cat_salary">Salário</string>
+    <string name="cat_freelance">Freelance</string>
+    <string name="cat_investments">Rendimentos de Investimento</string>
+    <string name="cat_gifts_received">Presentes Recebidos</string>
+    <string name="cat_rental_income">Aluguel</string>
+    <string name="cat_refunds">Reembolsos</string>
+    <string name="cat_bonus">Bônus</string>
+    <string name="cat_grants">Subsídios e Bolsas</string>
+    <string name="cat_sales">Vendas</string>
+    <string name="cat_others_income">Outras Receitas</string>
+</resources>

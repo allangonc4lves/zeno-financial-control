@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.R
 import kotlinx.coroutines.launch
@@ -50,7 +51,7 @@ fun ZenoTopBar(onProfileClick: () -> Unit) {
                 Box(contentAlignment = Alignment.BottomEnd) {
                     Image(
                         painter = painterResource(R.drawable.user_img_test),
-                        contentDescription = "User image",
+                        contentDescription = stringResource(id = R.string.user_image),
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
@@ -58,7 +59,7 @@ fun ZenoTopBar(onProfileClick: () -> Unit) {
                     )
                     Image(
                         painter = painterResource(R.drawable.user_premium),
-                        contentDescription = "Premium Badge",
+                        contentDescription = stringResource(id = R.string.premium_badge),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -66,7 +67,7 @@ fun ZenoTopBar(onProfileClick: () -> Unit) {
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = "Olá, Allan",
+                    text = stringResource(id = R.string.hello_user, "Allan"),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f)
@@ -75,7 +76,7 @@ fun ZenoTopBar(onProfileClick: () -> Unit) {
                 IconButton(onClick = {  }) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
+                        contentDescription = stringResource(id = R.string.search),
                         tint = Color.White
                     )
                 }

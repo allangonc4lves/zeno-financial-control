@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.utils.constants.CreditCardPreviewType
 
 @Composable
@@ -163,7 +165,7 @@ fun CreditCardPreview(
 
             Column {
                 Text(
-                    text = "Credit Card".uppercase(),
+                    text = stringResource(id = R.string.credit_card_label).uppercase(),
                     color = contentColor.copy(alpha = 0.6f),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,

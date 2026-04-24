@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -99,7 +100,7 @@ fun HomeScreen(
         item {
             Spacer(modifier = Modifier.size(16.dp))
             CustomTextTitle(
-                text = "Despesas por categoria",
+                text = stringResource(R.string.expenses_by_category),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 startPadding = 8
             )
@@ -118,12 +119,12 @@ fun HomeScreen(
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.zeno_not_found),
-                        contentDescription = "Minha imagem",
+                        contentDescription = null,
                         modifier = Modifier.size(150.dp),
                         contentScale = ContentScale.Inside
                     )
                     CustomTextContent(
-                        text = "Nenhuma despesa encontrada!",
+                        text = stringResource(R.string.no_expenses_found),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -138,12 +139,12 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 CustomTextTitle(
-                    text = "Atividades recentes",
+                    text = stringResource(R.string.recent_activities),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     startPadding = 8
                 )
                 CustomTextContent(
-                    text = "Ver tudo",
+                    text = stringResource(R.string.view_all),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.clickable {
                         navViewModel.navigateWithOptions(navController, TransactionsRoute)
@@ -178,7 +179,7 @@ fun HomeScreen(
             item {
                 Spacer(modifier = Modifier.size(64.dp))
                 CustomTextContent(
-                    text = "Nenhum registro nos últimos 10 dias!",
+                    text = stringResource(R.string.no_records_last_10_days),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

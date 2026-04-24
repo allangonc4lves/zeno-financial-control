@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -136,14 +137,14 @@ fun TransactionsScreen(
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.zeno_not_found),
-                        contentDescription = "Nenhum registro",
+                        contentDescription = null,
                         modifier = Modifier
                             .size(150.dp)
                             .padding(bottom = 8.dp),
                         contentScale = ContentScale.Inside
                     )
                     CustomTextContent(
-                        text = "Nenhum registro encontrado!",
+                        text = stringResource(R.string.no_records_found),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -180,7 +181,7 @@ fun MonthSelector(
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit
 ) {
-    val monthLabel = SimpleDateFormat("MMMM yyyy", Locale("pt", "BR"))
+    val monthLabel = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         .format(Date(currentMonthMillis))
         .replaceFirstChar { it.uppercase() }
 
@@ -192,13 +193,13 @@ fun MonthSelector(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onPreviousMonth) {
-            Icon(Icons.Default.KeyboardDoubleArrowLeft, contentDescription = "Mês Anterior")
+            Icon(Icons.Default.KeyboardDoubleArrowLeft, contentDescription = stringResource(R.string.previous_month))
         }
 
         CustomTextTitle(text = monthLabel)
 
         IconButton(onClick = onNextMonth) {
-            Icon(Icons.Default.KeyboardDoubleArrowRight, contentDescription = "Próximo Mês")
+            Icon(Icons.Default.KeyboardDoubleArrowRight, contentDescription = stringResource(R.string.next_month))
         }
     }
 }

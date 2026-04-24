@@ -26,6 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.domain.model.CategoryAppearance
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
@@ -80,7 +82,7 @@ fun ExpensesByCategoryCard(
                                 )
                                 Spacer(Modifier.width(6.dp))
                                 Text(
-                                    text = category.displayName,
+                                    text = stringResource(category.displayNameRes),
                                     style = MaterialTheme.typography.labelMedium,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
@@ -105,7 +107,7 @@ fun ExpensesByCategoryCard(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     CustomTextContent(
-                        text = "Sem dados a serem exibidos",
+                        text = stringResource(R.string.no_expenses_found),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

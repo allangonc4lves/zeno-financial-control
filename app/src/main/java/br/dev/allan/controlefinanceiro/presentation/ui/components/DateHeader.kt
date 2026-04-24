@@ -17,7 +17,7 @@ import java.util.Locale
 @Composable
 fun DateHeader(dateMillis: Long, modifier: Modifier = Modifier) {
     val date = Date(dateMillis)
-    val dayOfWeek = SimpleDateFormat("EEEE", Locale("pt", "BR")).format(date)
+    val dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
         .replaceFirstChar { it.uppercase() }
     val dayOfMonth = SimpleDateFormat("dd", Locale.getDefault()).format(date)
 

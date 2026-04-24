@@ -50,7 +50,7 @@ fun MonthSelectorMenu(
     var yearInMenu by remember(expanded) { mutableStateOf(selectedMonth.year) }
 
     val currentMonthName = remember(selectedMonth) {
-        selectedMonth.month.getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
+        selectedMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
             .replaceFirstChar { it.uppercase() }
     }
 

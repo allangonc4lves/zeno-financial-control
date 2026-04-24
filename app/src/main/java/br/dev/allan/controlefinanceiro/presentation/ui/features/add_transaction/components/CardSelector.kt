@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.domain.model.CreditCard
 import br.dev.allan.controlefinanceiro.utils.constants.CreditCardPreviewType
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPreview
+import androidx.compose.ui.res.stringResource
+import br.dev.allan.controlefinanceiro.R
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -37,7 +39,7 @@ fun CardSelector(
     onCardSelected: (String?) -> Unit
 ) {
     if (cards.isEmpty()) {
-        Text("Nenhum cartão cadastrado")
+        Text(stringResource(id = R.string.no_card_registered))
         return
     }
 
