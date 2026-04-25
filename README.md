@@ -1,82 +1,80 @@
-# 🦉 Zeno - Controle Financeiro
+# Zeno - Financeiro 
+
+📱 Preview <br> (APP EM DESENVOLVIMENTO...)<br>
 
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/606ed922-07db-4860-ac2d-845c8118e662" width="250"/></td>
+    <td><img src="https://github.com/user-attachments/assets/65fab2c3-333f-4b7c-aa8b-809aafff510a" width="250"/></td>
     <td><img src="https://github.com/user-attachments/assets/d9136f56-ff86-4071-b2b7-e79bf3e6fe64" width="250"/></td>
     <td><img src="https://github.com/user-attachments/assets/ea22fc62-a949-44eb-ba82-d6ece193b76d" width="250"/></td>
   </tr>
 </table>
 
-Zeno é um aplicativo de gestão financeira pessoal moderno, desenvolvido para oferecer uma experiência fluida e segura. O projeto foca em alta performance, usabilidade e uma arquitetura robusta.
+🚀 Funcionalidades
+📊 Cadastro e acompanhamento de receitas e despesas
+📅 Histórico financeiro organizado por data
+📈 Visualização clara do saldo atual
+🔐 Autenticação de usuários (login/registro)
+☁️ Sincronização em tempo real com a nuvem
+📴 Suporte offline com sincronização automática
 
-<p align="center">
-  <img src="app/src/main/res/drawable/zeno_positive.png" width="200" alt="Zeno Logo">
-</p>
+🧠 Tecnologias e Arquitetura
+Este projeto será construído utilizando tecnologias modernas e recomendadas pelo Google:
 
-## 🚀 Funcionalidades
+Jetpack Compose → UI declarativa e reativa
+Hilt (DI) → Injeção de dependência
+Room → Persistência local (offline-first)
+Firebase Auth → Autenticação segura
+Firebase Firestore → Banco de dados em tempo real
+Kotlin Coroutines → Programação assíncrona
+ViewModel + Lifecycle → Gerenciamento de estado e ciclo de vida
+🏗️ Arquitetura
 
-- **📊 Gestão de Transações**: Cadastro e acompanhamento detalhado de receitas e despesas.
-- **💳 Gestão de Cartões de Crédito**: Controle de limites e faturas de forma integrada.
-- **📅 Histórico Inteligente**: Fluxo financeiro organizado cronologicamente.
-- **📈 Dashboard em Tempo Real**: Visualização clara do saldo atual e métricas financeiras.
-- **🔐 Autenticação Segura**: Login via Google utilizando as APIs modernas de Credential Manager e Firebase Auth.
-- **☁️ Cloud Sync**: Sincronização automática com Firebase Firestore para acesso em múltiplos dispositivos.
-- **📴 Suporte Offline**: Estratégia Offline-first com Room, permitindo uso sem internet com sincronização posterior.
-- **🌐 Internacionalização**: Suporte completo para Português (Brasil) e Inglês.
+O projeto segue o padrão MVVM + Clean Architecture:
 
-## 🧠 Tecnologias e Arquitetura
+📦 data
+ ├── local (Room)
+ ├── remote (Firebase)
+ └── repository
 
-Este projeto utiliza as tecnologias mais modernas recomendadas pelo Google:
+📦 domain
+ └── usecases
 
-- **Jetpack Compose** → UI declarativa, reativa e totalmente baseada em componentes.
-- **Hilt (DI)** → Injeção de dependência para um código desacoplado e testável.
-- **Room** → Persistência de dados local com suporte a SQLite.
-- **Firebase Auth** → Autenticação robusta e simplificada.
-- **Firebase Firestore** → Banco de dados NoSQL em tempo real para sincronização cloud.
-- **Kotlin Coroutines & Flow** → Gerenciamento de processos assíncronos e streams de dados reativos.
-- **Navigation Compose** → Navegação baseada em rotas type-safe.
+📦 presentation
+ ├── ui (Compose)
+ ├── viewmodel
 
-### 🏗️ Arquitetura
+ 📦 di
+ ├── (Hilt)
 
-O projeto segue os princípios de **Clean Architecture** aliados ao padrão **MVVM (Model-View-ViewModel)**:
+✔ Separação clara de responsabilidades
+✔ Código escalável e testável
+✔ Fácil manutenção
 
-- **📦 data**: Implementações de persistência (Local via Room, Remote via Firestore) e repositórios.
-- **📦 domain**: Modelos de negócio e casos de uso (Use Cases) que contêm a lógica central.
-- **📦 presentation**: Camada de UI (Compose) e ViewModels para gestão de estado.
-- **📦 di**: Módulos de configuração do Hilt.
+⚡ Destaques Técnicos
+🔄 Offline-first com sincronização automática (Room + Firestore)
+🔥 Realtime updates com Firestore
+🧩 Modularização lógica (camadas)
+🚀 Uso de StateFlow / LiveData para UI reativa
+🧼 Código limpo seguindo boas práticas
 
-✔ Separação clara de responsabilidades  
-✔ Código escalável e testável  
-✔ Fácil manutenção e evolução  
+📦 Como rodar o projeto
+git clone https://github.com/allangonc4lves/ControleFinanceiro.git
+Abra no Android Studio
+Configure o Firebase (google-services.json)
+Execute o app
+🔐 Configuração do Firebase
+Crie um projeto no Firebase
+Ative:
+Authentication (Email/Senha)
+Firestore Database
+Adicione o arquivo google-services.json no projeto
 
-## ⚡ Destaques Técnicos
+🎯 Objetivo do Projeto
+Este app foi desenvolvido com foco em:
+- Praticar desenvolvimento Android moderno
+- Demonstrar domínio de arquitetura escalável
+- Simular um app real pronto para produção
 
-- **🔄 Sincronização Inteligente**: IDs baseados em UUID para evitar conflitos na sincronização entre local e nuvem.
-- **🔥 Realtime Updates**: A interface reflete as mudanças do Firestore instantaneamente.
-- **🧩 Componentização**: UI modularizada com componentes reutilizáveis e customizados.
-- **🧼 Clean Code**: Segue rigorosamente os princípios de código limpo e boas práticas de desenvolvimento Android.
-
-## 📦 Como rodar o projeto
-
-1. **Clone o repositório:**
-   ```bash
-   git clone https://github.com/allangonc4lves/ControleFinanceiro.git
-   ```
-2. **Abra no Android Studio** (Ladybug ou superior recomendado).
-3. **Configure o Firebase:**
-   - Crie um projeto no [Console do Firebase](https://console.firebase.google.com/).
-   - Ative: **Authentication** (Google Sign-In) e **Cloud Firestore**.
-   - Baixe o arquivo `google-services.json` e coloque na pasta `/app`.
-4. **Execute o app** em um emulador ou dispositivo físico.
-
-## 🎯 Objetivo do Projeto
-
-Este app foi desenvolvido como um portfólio técnico, com o objetivo de:
-- Aplicar padrões de desenvolvimento Android moderno em um cenário real.
-- Demonstrar domínio de arquitetura escalável e persistência de dados complexa.
-- Simular um produto pronto para o mercado, com foco em UX e i18n.
-
----
-**👨‍💻 Autor**  
-Desenvolvido por **Allan Gonçalves** ([@allangonc4lves](https://github.com/allangonc4lves))
+👨‍💻 Autor
+Desenvolvido por allangonc4lves
