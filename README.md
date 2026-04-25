@@ -1,12 +1,13 @@
+<img width="720" height="1560" alt="Screenshot_20260425_082958" src="https://github.com/user-attachments/assets/300a72f1-f52f-4def-b2fd-86f40a50e6d7" />
 # Zeno - Controle Financeiro 
 
 📱 Preview <br> (APP EM DESENVOLVIMENTO...)<br>
 
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/5d4cc845-f62a-48ab-9495-947abcb321ba" width="250"/></td>
-    <td><img src="https://github.com/user-attachments/assets/0a7e0e19-2cc0-459f-9c1a-7f4af79cc5bf" width="250"/></td>
-    <td><img src="https://github.com/user-attachments/assets/58e55e1d-259a-4206-b5fa-98e239a1f090" width="250"/></td>
+    <td><img src="https://github.com/user-attachments/assets/65fab2c3-333f-4b7c-aa8b-809aafff510a" width="250"/></td>
+    <td><img src="https://github.com/user-attachments/assets/d9136f56-ff86-4071-b2b7-e79bf3e6fe64" width="250"/></td>
+    <td><img src="https://github.com/user-attachments/assets/ea22fc62-a949-44eb-ba82-d6ece193b76d" width="250"/></td>
   </tr>
 </table>
 
