@@ -29,12 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
+import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +47,7 @@ fun ZenoTopBar(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val userName by viewModel.userName.collectAsState()
+    val userPhotoUrl by viewModel.userPhotoUrl.collectAsState()
 
     TopAppBar(
         title = {},
@@ -56,20 +59,27 @@ fun ZenoTopBar(
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(contentAlignment = Alignment.BottomEnd) {
-                    Image(
-                        painter = painterResource(R.drawable.user_img_test),
-                        contentDescription = stringResource(id = R.string.user_image),
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .clickable { coroutineScope.launch { onProfileClick() } }
-                    )
-                    Image(
-                        painter = painterResource(R.drawable.user_premium),
-                        contentDescription = stringResource(id = R.string.premium_badge),
-                        modifier = Modifier.size(18.dp)
-                    )
+                Box(contentAlignment = Alignment.Center) {
+                    if (userPhotoUrl != null) {
+                        AsyncImage(
+                            model = userPhotoUrl,
+                            contentDescription = stringResource(id = R.string.user_image),
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .clickable { coroutineScope.launch { onProfileClick() } },
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(R.drawable.user_without_img),
+                            contentDescription = stringResource(id = R.string.user_image),
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .clickable { coroutineScope.launch { onProfileClick() } }
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(4.dp))

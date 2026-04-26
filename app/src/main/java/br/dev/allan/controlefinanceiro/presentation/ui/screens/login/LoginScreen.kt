@@ -16,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.CircleShape
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.LoginViewModel
@@ -69,25 +71,33 @@ fun LoginScreen(
             
             Spacer(modifier = Modifier.height(48.dp))
             
-            Button(
+            OutlinedButton(
                 onClick = { viewModel.signInWithGoogle(context, onLoginSuccess) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                    .height(54.dp),
+                shape = CircleShape,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color(0xFF131314),
+                    contentColor = Color.White
+                ),
+                border = BorderStroke(1.dp, Color(0xFF8E918F))
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    // Ícone do Google (opcional, se você tiver o drawable)
-                    // Image(painter = painterResource(id = R.drawable.ic_google), contentDescription = null, modifier = Modifier.size(24.dp))
-                    // Spacer(modifier = Modifier.width(12.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_google),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = stringResource(id = R.string.login_with_google),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
+                        text = "Sign in with Google",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.2.sp
                     )
                 }
             }

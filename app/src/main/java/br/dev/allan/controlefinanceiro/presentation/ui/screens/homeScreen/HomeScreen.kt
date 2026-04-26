@@ -78,7 +78,7 @@ fun HomeScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 48.dp)
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         item {
             ZenoDrawBoxTop {
@@ -96,8 +96,9 @@ fun HomeScreen(
             CustomTextTitle(
                 text = stringResource(R.string.expenses_by_category),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                startPadding = 8
+                startPadding = 8,
             )
+            Spacer(modifier = Modifier.size(8.dp))
             if (uiState.chartDataValues.isNotEmpty()) {
                 ExpensesByCategoryCard(
                     chartDataValues = uiState.chartDataValues,

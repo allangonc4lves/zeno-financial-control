@@ -47,8 +47,8 @@ fun CreditCardPreview(
     val bgColor = Color(backgroundColorLong)
     val contentColor = if (bgColor.luminance() > 0.5f) Color(0xFF1A1A1A) else Color.White
 
-    var w = 350.dp
-    var h = 190.dp
+    var w = 250.dp
+    var h = 160.dp
     var bankNameFontSize = 18.sp
     var brandFontSize = 16.sp
     var digitsFontSize = 20.sp

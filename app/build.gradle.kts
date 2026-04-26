@@ -107,6 +107,9 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
+    // Coil for Image Loading
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network)
 
     // Material Symbols
     implementation(libs.compose.material)

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.LoginViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
+import coil3.compose.AsyncImage
 
 @Composable
 fun ProfileSheetContent(
@@ -54,6 +55,7 @@ fun ProfileSheetContent(
 ) {
     val userName by viewModel.userName.collectAsState()
     val userEmail by viewModel.userEmail.collectAsState()
+    val userPhotoUrl by viewModel.userPhotoUrl.collectAsState()
     val context = LocalContext.current
     
     var showCurrencySelector by remember { mutableStateOf(false) }
@@ -70,14 +72,25 @@ fun ProfileSheetContent(
                 .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(R.drawable.user_img_test), // Por enquanto fixo
-                contentDescription = null,
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
+            if (userPhotoUrl != null) {
+                AsyncImage(
+                    model = userPhotoUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.user_without_img),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            }
             
             Spacer(modifier = Modifier.width(16.dp))
             
