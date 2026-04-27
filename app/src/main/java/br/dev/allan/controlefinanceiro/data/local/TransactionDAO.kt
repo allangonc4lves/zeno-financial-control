@@ -89,6 +89,22 @@ interface TransactionDao {
     @Query("DELETE FROM transactions WHERE groupId = :groupId")
     suspend fun deleteTransactionGroup(groupId: String)
 
+    @Query("""
+        UPDATE transactions 
+        SET title = :title, amount = :amount, category = :category, creditCardId = :creditCardId
+        WHERE groupId = :groupId
+    """)
+    suspend fun updateTransactionGroup(
+        groupId: String,
+        title: String,
+        amount: Double,
+        category: String,
+        creditCardId: String?
+    )
+
+    @Query("UPDATE transactions SET creditCardId = :cardId WHERE groupId = :groupId")
+    suspend fun updateCardIdByGroupId(groupId: String, cardId: String?)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun markAsPaid(payment: PaymentStatusEntity)
 

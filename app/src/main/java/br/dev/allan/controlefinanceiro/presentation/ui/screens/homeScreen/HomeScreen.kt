@@ -36,12 +36,11 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.compon
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
-import br.dev.allan.controlefinanceiro.presentation.ui.features.detail_transaction.EditTransactionDialog
+import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MonthTransactionsViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import br.dev.allan.controlefinanceiro.presentation.ui.state.TransactionUIState
 
 @Composable
 fun HomeScreen(
@@ -53,26 +52,12 @@ fun HomeScreen(
     val selectedMonth = viewModel.selectedMonth
     val transactionsViewModel: MonthTransactionsViewModel = hiltViewModel()
 
-    var selectedTransaction by remember { mutableStateOf<TransactionUIState?>(null) }
+    var selectedTransactionId by remember { mutableStateOf<String?>(null) }
 
-    selectedTransaction?.let { transaction ->
-        val totalIncome = uiState.transactions
-            .filter { it.direction == br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection.INCOME }
-            .sumOf { it.amount }
-
-        val totalPaidExpenses = uiState.transactions
-            .filter { it.direction == br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection.EXPENSE && it.isPaid }
-            .sumOf { it.amount }
-
-        EditTransactionDialog(
-            transaction = transaction,
-            totalIncome = totalIncome,
-            totalPaidExpenses = totalPaidExpenses,
-            onDismiss = { selectedTransaction = null },
-            onConfirm = { updated, editAll ->
-                transactionsViewModel.updateTransaction(updated, editAll)
-                selectedTransaction = null
-            }
+    selectedTransactionId?.let { id ->
+        SaveTransactionDialog(
+            transactionId = id,
+            onDismiss = { selectedTransactionId = null }
         )
     }
 
@@ -165,7 +150,7 @@ fun HomeScreen(
                     TransactionItemRow(
                         uiModel = item,
                         onClick = {
-                            selectedTransaction = item
+                            selectedTransactionId = item.id
                         }
                     )
                 }

@@ -156,6 +156,20 @@ class TransactionRepositoryImpl @Inject constructor(
         remoteDataSource.saveTransaction(transaction)
     }
 
+    override suspend fun updateTransactionGroup(
+        groupId: String,
+        title: String,
+        amount: Double,
+        category: br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory,
+        creditCardId: String?
+    ) {
+        transactionDao.updateTransactionGroup(groupId, title, amount, category.name, creditCardId)
+    }
+
+    override suspend fun updateCardIdByGroupId(groupId: String, cardId: String?) {
+        transactionDao.updateCardIdByGroupId(groupId, cardId)
+    }
+
     override suspend fun deleteTransaction(transaction: Transaction) {
         transactionDao.deleteTransaction(transaction.toEntity())
         remoteDataSource.deleteTransaction(transaction.id)

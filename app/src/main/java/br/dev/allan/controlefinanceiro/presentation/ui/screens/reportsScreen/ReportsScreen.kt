@@ -75,6 +75,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(
@@ -85,11 +87,19 @@ fun ReportsScreen(
     val filterState by viewModel.filterState.collectAsStateWithLifecycle()
     val isBalanceVisible by viewModel.isBalanceVisible.collectAsStateWithLifecycle()
     var selectedInvoice by remember { mutableStateOf<ReportItemUiModel.Invoice?>(null) }
+    var selectedTransactionId by remember { mutableStateOf<String?>(null) }
     val sheetState = rememberModalBottomSheetState()
     var showDatePicker by remember { mutableStateOf(false) }
     var showCategorySheet by remember { mutableStateOf(false) }
     val dateRangePickerState = rememberDateRangePickerState()
     val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+
+    selectedTransactionId?.let { id ->
+        SaveTransactionDialog(
+            transactionId = id,
+            onDismiss = { selectedTransactionId = null }
+        )
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -356,7 +366,7 @@ fun ReportsScreen(
                                 TransactionItemRow(
                                     uiModel = item.model,
                                     isAmountVisible = isBalanceVisible,
-                                    onClick = { }
+                                    onClick = { selectedTransactionId = item.model.id }
                                 )
                             }
                         }
@@ -509,7 +519,7 @@ fun ReportsScreen(
                                 TransactionItemRow(
                                     uiModel = tx,
                                     isAmountVisible = isBalanceVisible,
-                                    onClick = { }
+                                    onClick = { selectedTransactionId = tx.id }
                                 )
                             }
                         }

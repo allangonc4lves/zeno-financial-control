@@ -86,16 +86,16 @@ class TransactionViewModel @Inject constructor(
             is TransactionAction.CreditCardToggle ->
                 updateState { it.copy(isCreditCard = action.isCreditCard, creditCardId = if (!action.isCreditCard) null else it.creditCardId) }
 
-            is TransactionAction.Save -> save()
+            is TransactionAction.Save -> save(action.editAll)
 
             is TransactionAction.Delete -> delete()
         }
     }
 
-    fun save() {
+    fun save(editAll: Boolean = false) {
         viewModelScope.launch {
             updateState { it.copy(isLoading = true) }
-            val result = saveUseCase.execute(_uiState.value, currentId)
+            val result = saveUseCase.execute(_uiState.value, currentId, editAll)
 
             if (result.isSuccess) {
                 _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
@@ -120,7 +120,12 @@ class TransactionViewModel @Inject constructor(
     fun delete() {
         currentId?.let { id ->
             viewModelScope.launch {
-                repository.deleteTransaction(id)
+                val groupId = _uiState.value.groupId
+                if (groupId != null) {
+                    repository.deleteTransactionGroup(groupId)
+                } else {
+                    repository.deleteTransaction(id)
+                }
                 _uiEvent.send(SaveTransactionUiEvent.SaveSuccess)
             }
         }
@@ -135,6 +140,8 @@ class TransactionViewModel @Inject constructor(
             repository.getTransactionById(id)?.let { tx ->
                 currentId = tx.id
                 updateState { it.copy(
+                    id = tx.id,
+                    groupId = tx.groupId,
                     title = tx.title,
                     amountInput = formatAmountForUi(tx.amount),
                     dateDisplay = DateHelper.fromDbToUi(tx.date),
@@ -144,6 +151,7 @@ class TransactionViewModel @Inject constructor(
                     isPaid = tx.isPaid,
                     creditCardId = tx.creditCardId,
                     type = if (tx.isInstallment || tx.type == TransactionType.REPEAT) tx.type else TransactionType.DEFAULT,
+                    currentInstallment = tx.currentInstallment,
                     installmentCount = if (tx.isInstallment || tx.type == TransactionType.REPEAT) tx.installmentCount else 1,
                     isCreditCard = tx.creditCardId != null
                 )}

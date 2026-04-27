@@ -37,10 +37,9 @@ import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.ui.components.DateHeader
 import br.dev.allan.controlefinanceiro.presentation.ui.components.TransactionItemRow
-import br.dev.allan.controlefinanceiro.presentation.ui.state.TransactionUIState
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
-import br.dev.allan.controlefinanceiro.presentation.ui.features.detail_transaction.EditTransactionDialog
+import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.activity.ComponentActivity
@@ -79,26 +78,12 @@ fun TransactionsScreen(
         }
     }
 
-    var selectedTransaction by remember { mutableStateOf<TransactionUIState?>(null) }
+    var selectedTransactionId by remember { mutableStateOf<String?>(null) }
 
-    selectedTransaction?.let { transaction ->
-        val totalIncome = filteredTransactions
-            .filter { it.direction == br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection.INCOME }
-            .sumOf { it.amount }
-        
-        val totalPaidExpenses = filteredTransactions
-            .filter { it.direction == br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection.EXPENSE && it.isPaid }
-            .sumOf { it.amount }
-
-        EditTransactionDialog(
-            transaction = transaction,
-            totalIncome = totalIncome,
-            totalPaidExpenses = totalPaidExpenses,
-            onDismiss = { selectedTransaction = null },
-            onConfirm = { updated, editAll ->
-                viewModel.updateTransaction(updated, editAll)
-                selectedTransaction = null
-            }
+    selectedTransactionId?.let { id ->
+        SaveTransactionDialog(
+            transactionId = id,
+            onDismiss = { selectedTransactionId = null }
         )
     }
 
@@ -168,7 +153,7 @@ fun TransactionsScreen(
                                     viewModel.togglePayment(uiModel)
                                 },
                                 onClick = {
-                                    selectedTransaction = uiModel
+                                    selectedTransactionId = uiModel.id
                                 }
                             )
                         }

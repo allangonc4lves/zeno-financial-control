@@ -26,5 +26,13 @@ interface TransactionRepository {
     suspend fun insertTransaction(transaction: Transaction)
     suspend fun insertTransactions(transactions: List<Transaction>)
     suspend fun updateTransaction(transaction: Transaction)
+    suspend fun updateTransactionGroup(
+        groupId: String,
+        title: String,
+        amount: Double,
+        category: br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory,
+        creditCardId: String?
+    )
+    suspend fun updateCardIdByGroupId(groupId: String, cardId: String?)
     suspend fun deleteTransaction(transaction: Transaction)
 }

@@ -46,6 +46,8 @@ class HomeViewModel @Inject constructor(
         val monthYearStr = month.format(java.time.format.DateTimeFormatter.ofPattern("MM/yyyy"))
         val monthYearDbStr = month.format(java.time.format.DateTimeFormatter.ofPattern("MM-yyyy"))
 
+        val referenceDate = month.atDay(1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+
         val monthlyTransactions = getMonthlyTransactionsUseCase(allTransactions, month).map { tx ->
             val calendar = java.util.Calendar.getInstance().apply {
                 val dateObj = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).parse(tx.date)
@@ -101,7 +103,7 @@ class HomeViewModel @Inject constructor(
             expenses = currencyManager.formatByCurrencyCode(expenseVal, code),
             paidValue = currencyManager.formatByCurrencyCode(abs(paidVal), code),
             pendingValue = currencyManager.formatByCurrencyCode(abs(pendingVal), code),
-            transactions = monthlyTransactions.take(10).map { it.toUi(currencyManager, code) },
+            transactions = monthlyTransactions.take(10).map { it.toUi(currencyManager, code, referenceDate) },
             chartDataValues = expensesByCategory,
             chartDataLabels = chartLabels
         )

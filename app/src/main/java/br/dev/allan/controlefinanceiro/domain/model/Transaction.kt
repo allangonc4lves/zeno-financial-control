@@ -33,8 +33,14 @@ data class Transaction(
         }
 
         // 2. Configurar os Calendars
-        val startCal = Calendar.getInstance().apply { time = transactionDate }
-        val refCal = Calendar.getInstance().apply { timeInMillis = referenceDate }
+        val startCal = Calendar.getInstance().apply { 
+            time = transactionDate 
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val refCal = Calendar.getInstance().apply { 
+            timeInMillis = referenceDate 
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
 
         // 3. Calcular a diferença
         val yearDiff = refCal.get(Calendar.YEAR) - startCal.get(Calendar.YEAR)
@@ -43,7 +49,7 @@ data class Transaction(
         return (yearDiff * 12) + monthDiff
     }
     fun getCurrentParcelIndex(referenceDate: Long): Int {
-        if (!isInstallment) return 1
+        if (!isInstallment && type != TransactionType.REPEAT) return 1
 
         val monthsBetween = getMonthsBetween(referenceDate)
 

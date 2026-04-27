@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components
+package br.dev.allan.controlefinanceiro.presentation.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +20,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -42,23 +43,30 @@ import br.dev.allan.controlefinanceiro.utils.constants.InputModeCustomTextField
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
 import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
-import br.dev.allan.controlefinanceiro.presentation.ui.components.Loading
-import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomOutlinedTextField
-import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
-import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
-import br.dev.allan.controlefinanceiro.presentation.ui.components.ZenoDialog
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.text.font.FontWeight
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.SaveTransactionUiEvent
 import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.TransactionAction
 import br.dev.allan.controlefinanceiro.utils.toSystemFormatDate
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.CardSelector
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.DropdownAddTransaction
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.SingleChoiceButtonAddTransaction
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction.components.SwitchAddTransaction
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTransactionDialog(
+fun SaveTransactionDialog(
     transactionId: String? = null,
     onDismiss: () -> Unit,
     viewModel: TransactionViewModel = hiltViewModel()
@@ -68,10 +76,11 @@ fun AddTransactionDialog(
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    var editAllInstallments by remember { mutableStateOf(false) }
 
     val dateFormat = remember {
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
-            timeZone = java.util.TimeZone.getTimeZone("UTC")
+            timeZone = TimeZone.getTimeZone("UTC")
         }
     }
 
@@ -118,7 +127,7 @@ fun AddTransactionDialog(
 
     ZenoDialog(
         onDismiss = { onDismiss() },
-        onConfirm = { onAction(TransactionAction.Save) },
+        onConfirm = { onAction(TransactionAction.Save(editAllInstallments)) },
         content = {
             Box(contentAlignment = Alignment.Center) {
                 Column(
@@ -194,35 +203,54 @@ fun AddTransactionDialog(
                         }
                     )
 
-                    SingleChoiceButtonAddTransaction(
-                        selectedIncomeOrExpense = uiState.direction.ordinal,
-                        onSelectionChange = { index ->
-                            onAction(TransactionAction.DirectionChanged(TransactionDirection.entries[index]))
-                        }
-                    )
+                    if (transactionId == null) {
+                        SingleChoiceButtonAddTransaction(
+                            selectedIncomeOrExpense = uiState.direction.ordinal,
+                            onSelectionChange = { index ->
+                                onAction(
+                                    TransactionAction.DirectionChanged(
+                                        TransactionDirection.entries[index]
+                                    )
+                                )
+                            }
+                        )
 
-                    SwitchAddTransaction(
-                        text = stringResource(R.string.repeat),
-                        checked = uiState.type == TransactionType.REPEAT,
-                        onCheckedChange = { isChecked ->
-                            onAction(TransactionAction.TypeChanged(if (isChecked) TransactionType.REPEAT else TransactionType.DEFAULT))
-                        },
-                        quantityValue = uiState.installmentCount,
-                        onQuantityChange = { onAction(TransactionAction.InstallmentCountChanged(it)) },
-                        showQuantity = uiState.type == TransactionType.REPEAT
-                    )
+                        SwitchAddTransaction(
+                            text = stringResource(R.string.repeat),
+                            checked = uiState.type == TransactionType.REPEAT,
+                            onCheckedChange = { isChecked ->
+                                onAction(
+                                    TransactionAction.TypeChanged(
+                                        if (isChecked) TransactionType.REPEAT else TransactionType.DEFAULT
+                                    )
+                                )
+                            },
+                            quantityValue = uiState.installmentCount,
+                            onQuantityChange = {
+                                onAction(
+                                    TransactionAction.InstallmentCountChanged(
+                                        it
+                                    )
+                                )
+                            },
+                            showQuantity = uiState.type == TransactionType.REPEAT
+                        )
 
-                    if (uiState.type == TransactionType.REPEAT) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            CustomTextContent(text = stringResource(R.string.divide_total_value), color = MaterialTheme.colorScheme.primary)
-                            Checkbox(
-                                checked = uiState.isDivideValue,
-                                onCheckedChange = { onAction(TransactionAction.DivideValueToggle(it)) }
-                            )
+                        if (uiState.type == TransactionType.REPEAT) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                CustomTextContent(
+                                    text = stringResource(R.string.divide_total_value),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Checkbox(
+                                    checked = uiState.isDivideValue,
+                                    onCheckedChange = { onAction(TransactionAction.DivideValueToggle(it)) }
+                                )
+                            }
                         }
                     }
 
@@ -257,6 +285,51 @@ fun AddTransactionDialog(
                         } ?: ""
                     )
 
+                    if (transactionId != null && (uiState.groupId != null || uiState.type == TransactionType.REPEAT)) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        HorizontalDivider()
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(R.string.edit_options),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.align(Alignment.Start)
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { editAllInstallments = false }
+                        ) {
+                            RadioButton(
+                                selected = !editAllInstallments,
+                                onClick = { editAllInstallments = false }
+                            )
+                            Text(
+                                text = if (uiState.groupId != null) stringResource(R.string.only_this_installment) else stringResource(R.string.only_this_month),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { editAllInstallments = true }
+                        ) {
+                            RadioButton(
+                                selected = editAllInstallments,
+                                onClick = { editAllInstallments = true }
+                            )
+                            Text(
+                                text = if (uiState.groupId != null) stringResource(R.string.all_installments) else stringResource(R.string.all_months),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+
                     if (uiState.category == TransactionCategory.OTHERS_EXPENSE) {
                         CardSelector(
                             cards = uiState.cards,
@@ -274,7 +347,32 @@ fun AddTransactionDialog(
     )
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.dateMillis)
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = uiState.dateMillis,
+            initialDisplayedMonthMillis = if (transactionId != null) uiState.dateMillis else null,
+            selectableDates = remember(uiState.dateMillis, transactionId) {
+                object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                        if (transactionId == null) return true
+                        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                        calendar.timeInMillis = uiState.dateMillis
+                        val targetMonth = calendar.get(Calendar.MONTH)
+                        val targetYear = calendar.get(Calendar.YEAR)
+
+                        calendar.timeInMillis = utcTimeMillis
+                        return calendar.get(Calendar.MONTH) == targetMonth &&
+                                calendar.get(Calendar.YEAR) == targetYear
+                    }
+
+                    override fun isSelectableYear(year: Int): Boolean {
+                        if (transactionId == null) return true
+                        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                        calendar.timeInMillis = uiState.dateMillis
+                        return year == calendar.get(Calendar.YEAR)
+                    }
+                }
+            }
+        )
 
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -282,8 +380,8 @@ fun AddTransactionDialog(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
                         val formatted = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
-                            timeZone = java.util.TimeZone.getTimeZone("UTC")
-                        }.format(java.util.Date(millis))
+                            timeZone = TimeZone.getTimeZone("UTC")
+                        }.format(Date(millis))
 
                         onAction(TransactionAction.DateChanged(formatted))
                     }

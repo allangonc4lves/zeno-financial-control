@@ -16,6 +16,6 @@ sealed class TransactionAction {
     data class CardSelected(val cardId: String?) : TransactionAction()
     data class PaidChanged(val paid: Boolean) : TransactionAction()
     data class CreditCardToggle(val isCreditCard: Boolean) : TransactionAction()
-    object Save : TransactionAction()
+    data class Save(val editAll: Boolean = false) : TransactionAction()
     object Delete : TransactionAction()
 }

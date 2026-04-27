@@ -66,12 +66,25 @@ fun TransactionItemRow(
         Spacer(modifier = Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = uiModel.title + (uiModel.formattedParcelInfo?.let { " ($it)" } ?: ""),
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = uiModel.title,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                uiModel.formattedParcelInfo?.let { info ->
+                    Text(
+                        text = " ($info)",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                        ),
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
             val source = if (uiModel.creditCardId != null) stringResource(R.string.card) else stringResource(R.string.wallet)
             val categoryName = appearance?.displayNameRes?.let { stringResource(it) } ?: stringResource(R.string.others)
             Text(

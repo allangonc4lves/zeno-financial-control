@@ -63,7 +63,7 @@ class MonthTransactionsViewModel @Inject constructor(
                     transaction.isInstallment -> !transaction.isExpired(monthMillis)
                     else -> true
                 }
-            }.map { it.toUi(currencyManager, code) }
+            }.map { it.toUi(currencyManager, code, monthMillis) }
         }
     }.flatMapLatest { it }
         .stateIn(
