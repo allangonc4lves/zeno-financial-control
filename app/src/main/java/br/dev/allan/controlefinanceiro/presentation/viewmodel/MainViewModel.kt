@@ -38,6 +38,28 @@ class MainViewModel @Inject constructor(
     private val _logoutEvent = MutableSharedFlow<Unit>()
     val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    private val _isSearchMode = MutableStateFlow(false)
+    val isSearchMode = _isSearchMode.asStateFlow()
+
+    private val _searchOriginRoute = MutableStateFlow<Any?>(null)
+    val searchOriginRoute = _searchOriginRoute.asStateFlow()
+
+    fun onSearchQueryChange(query: String) {
+        _searchQuery.value = query
+    }
+
+    fun setSearchMode(enabled: Boolean, origin: Any? = null) {
+        _isSearchMode.value = enabled
+        if (enabled && origin != null) {
+            _searchOriginRoute.value = origin
+        } else if (!enabled) {
+            _searchOriginRoute.value = null
+        }
+    }
+
     init {
         // Atualiza as infos sempre que o estado da auth mudar ou na inicialização
         auth.addAuthStateListener { firebaseAuth ->

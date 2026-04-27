@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -35,7 +37,7 @@ fun FabBottomBar(
         onClick = {
             showDialog = true
         },
-        containerColor = MaterialTheme.colorScheme.secondary,
+        containerColor = Color(0xFF26c6da),
         shape = CircleShape,
         modifier = Modifier
             .size(64.dp)
@@ -43,10 +45,10 @@ fun FabBottomBar(
         elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
     ) {
         Icon(
-            imageVector = Icons.Default.Add,
+            imageVector = Icons.Rounded.Add,
             contentDescription = stringResource(id = R.string.add_action),
             tint = Color.White,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(48.dp)
         )
     }
 

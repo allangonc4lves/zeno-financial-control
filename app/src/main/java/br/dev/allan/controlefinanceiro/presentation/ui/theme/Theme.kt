@@ -10,33 +10,49 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+import androidx.compose.ui.graphics.Color
+
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color(0xFFD0BCFF),
+    secondary = Color(0xFFCCC2DC),
+    tertiary = Color(0xFFEFB8C8),
+    background = Color(0xFF1C1B1F),
+    surface = Color(0xFF1C1B1F),
+    onPrimary = Color(0xFF381E72),
+    onSecondary = Color(0xFF332D41),
+    onTertiary = Color(0xFF492532),
+    onBackground = Color(0xFFE6E1E5),
+    onSurface = Color(0xFFE6E1E5),
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = Color(0xFF01579b),
     onPrimary = Color.White,
+    primaryContainer = Color(0xFFD1E4FF),
+    onPrimaryContainer = Color(0xFF001D36),
+
+    secondary = Color(0xFF535F70),
     onSecondary = Color.White,
+    secondaryContainer = Color(0xFFD7E3F7),
+    onSecondaryContainer = Color(0xFF101C2B),
+
+    tertiary = Color(0xFF00796b),
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    tertiaryContainer = Color(0xFFF2DAFF),
+    onTertiaryContainer = Color(0xFF251431),
+
+    background = Color(0xFFeeeeee),
+    surface = Color(0xFFFDFBFF),
+    onBackground = Color(0xFF1A1C1E),
+    onSurface = Color(0xFF1A1C1E),
+
+    outline = Color(0xFF73777F)
 )
 
 @Composable
 fun ControleFinanceiroTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -45,7 +61,7 @@ fun ControleFinanceiroTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
+        darkTheme -> LightColorScheme
         else -> LightColorScheme
     }
 

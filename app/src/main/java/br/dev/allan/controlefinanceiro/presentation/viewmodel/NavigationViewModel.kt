@@ -17,6 +17,16 @@ class NavigationViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    fun getRouteFromDestination(destination: androidx.navigation.NavDestination?): Any? {
+        return when {
+            destination?.route?.contains("HomeRoute") == true -> br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.HomeRoute
+            destination?.route?.contains("TransactionsRoute") == true -> br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
+            destination?.route?.contains("ReportsRoute") == true -> br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.ReportsRoute
+            destination?.route?.contains("CreditCardsRoute") == true -> br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.CreditCardsRoute
+            else -> null
+        }
+    }
+
     fun navigateToForm(navController: NavHostController, route: Any) {
         navController.navigate(route)
     }

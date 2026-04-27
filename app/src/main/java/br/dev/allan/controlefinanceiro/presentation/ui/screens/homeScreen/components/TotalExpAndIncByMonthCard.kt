@@ -86,18 +86,6 @@ fun TotalExpAndIncByMonthCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                Box(
-                    modifier = Modifier.width(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(24.dp)
-                            .background(MaterialTheme.colorScheme.outlineVariant)
-                    )
-                }
-
                 MainBalanceItem(
                     label = stringResource(id = R.string.available_balance),
                     value = if (uiState.isBalanceVisible) uiState.availableBalance else "•••••",

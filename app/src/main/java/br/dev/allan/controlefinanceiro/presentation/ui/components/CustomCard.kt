@@ -23,7 +23,7 @@ fun CustomCard(
             .fillMaxWidth()
             .padding(start = 8.dp, end = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         shape = RoundedCornerShape(

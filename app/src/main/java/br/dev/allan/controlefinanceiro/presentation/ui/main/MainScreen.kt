@@ -13,13 +13,13 @@ import androidx.compose.runtime.setValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoBottomAppBar
 import br.dev.allan.controlefinanceiro.presentation.ui.components.FabBottomBar
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoTopBar
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.NavHost
 import androidx.navigation.NavDestination.Companion.hasRoute
+import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ProfileSheetContent
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.LoginRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.LoginViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
@@ -31,7 +31,6 @@ fun MainScreen(
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         mainViewModel.logoutEvent.collect {
@@ -53,7 +52,10 @@ fun MainScreen(
     Scaffold(
         topBar = {
             if (showBars) {
-                ZenoTopBar(onProfileClick = { showSheet = true })
+                ZenoTopBar(
+                    onProfileClick = { showSheet = true },
+                    navController = navController
+                )
             }
         },
         bottomBar = {

@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.presentation.ui.main
+package br.dev.allan.controlefinanceiro.presentation.ui.main.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -65,7 +65,6 @@ fun ProfileSheetContent(
             .fillMaxWidth()
             .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
     ) {
-        // Cabeçalho com informações do usuário
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,7 +110,6 @@ fun ProfileSheetContent(
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
 
         if (!showCurrencySelector) {
-            // Menu Principal
             Text(
                 text = stringResource(id = R.string.settings),
                 style = MaterialTheme.typography.labelLarge,
@@ -141,7 +139,6 @@ fun ProfileSheetContent(
                 }
             )
         } else {
-            // Seletor de Moedas (Submenu)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically

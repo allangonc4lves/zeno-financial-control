@@ -1,15 +1,9 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.main.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,34 +15,32 @@ import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.domain.model.ButtonAppBarNavigation
 
 @Composable
-fun ButtonBarNavigation(
+fun ZenoButtonBarNavigation(
     item: ButtonAppBarNavigation,
+    modifier: Modifier = Modifier,
+    iconModifier: Modifier = Modifier,
     isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
-    val color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+    val colorIcon = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.secondary
+    val colorText = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .size(70.dp, 50.dp)
+        modifier = modifier
+            .size(70.dp, 60.dp)
             .clickable { onClick() }
     ) {
-        if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .width(24.dp)
-                    .height(3.dp)
-                    .background(color, RoundedCornerShape(2.dp))
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-        }
-
-        Icon(item.icon, contentDescription = item.label, tint = color)
+        Icon(
+            imageVector = item.icon,
+            contentDescription = item.label,
+            tint = colorIcon,
+            modifier = iconModifier.size(24.dp)
+        )
         Text(
             text = item.label,
-            color = color,
+            color = colorText,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.labelSmall

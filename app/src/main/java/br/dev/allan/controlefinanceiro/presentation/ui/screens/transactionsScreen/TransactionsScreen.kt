@@ -43,7 +43,11 @@ import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextCont
 import br.dev.allan.controlefinanceiro.presentation.ui.features.detail_transaction.EditTransactionDialog
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.LocalContext
+import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MonthTransactionsViewModel
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -53,20 +57,36 @@ import java.util.Locale
 @Composable
 fun TransactionsScreen(
     navController: NavHostController,
-    viewModel: MonthTransactionsViewModel = hiltViewModel()
+    viewModel: MonthTransactionsViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
 ) {
     val transactions by viewModel.transactionsUiModel.collectAsStateWithLifecycle()
+    val searchQuery by mainViewModel.searchQuery.collectAsState()
     val currentMonthMillis by viewModel.currentMonth.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val filteredTransactions = remember(transactions, searchQuery) {
+        if (searchQuery.isBlank()) transactions
+        else {
+            val query = searchQuery.trim().lowercase()
+            transactions.filter { tx ->
+                tx.title.lowercase().contains(query) ||
+                tx.formattedAmount.lowercase().contains(query) ||
+                tx.category?.name?.lowercase()?.contains(query) == true ||
+                tx.dateDisplay.contains(query) ||
+                tx.formattedParcelInfo?.lowercase()?.contains(query) == true
+            }
+        }
+    }
 
     var selectedTransaction by remember { mutableStateOf<TransactionUIState?>(null) }
 
     selectedTransaction?.let { transaction ->
-        val totalIncome = transactions
+        val totalIncome = filteredTransactions
             .filter { it.direction == br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection.INCOME }
             .sumOf { it.amount }
         
-        val totalPaidExpenses = transactions
+        val totalPaidExpenses = filteredTransactions
             .filter { it.direction == br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection.EXPENSE && it.isPaid }
             .sumOf { it.amount }
 
@@ -82,8 +102,8 @@ fun TransactionsScreen(
         )
     }
 
-    val groupedTransactions = remember(transactions) {
-        transactions.groupBy { uiModel ->
+    val groupedTransactions = remember(filteredTransactions) {
+        filteredTransactions.groupBy { uiModel ->
             val cal = Calendar.getInstance().apply { timeInMillis = uiModel.dateMillis }
             cal.set(Calendar.HOUR_OF_DAY, 0)
             cal.set(Calendar.MINUTE, 0)
@@ -113,7 +133,7 @@ fun TransactionsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (transactions.isEmpty()) {
+            if (filteredTransactions.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,

@@ -80,6 +80,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
 import br.dev.allan.controlefinanceiro.utils.formatMillisToMonthYear
@@ -437,101 +438,104 @@ fun CreditCardBarChart(
     val maxValue = data.maxOfOrNull { it.totalValue }?.takeIf { it > 0 } ?: 1.0
     val selectedMonthData = data.find { it.isSelected }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.Gray.copy(alpha = 0.05f))
-            .clickable { onCardClick() }
-            .padding(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = stringResource(R.string.total_invoice_uppercase),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
-                Text(
-                    text = totalMonth,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Black
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.pending_filter).uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
-                Text(
-                    text = totalOpenInvoices,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            if (selectedMonthData != null && selectedMonthData.totalValue > 0) {
-                StatusCheckbox(
-                    isPaid = selectedMonthData.isPaid,
-                    onCheckChange = { onStatusClick(it) }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Row(
-            modifier = Modifier
+    CustomCard() {
+        Column(
+            modifier = modifier
                 .fillMaxWidth()
-                .height(100.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .clickable { onCardClick() }
+                .padding(8.dp)
         ) {
-            data.forEach { item ->
-                var animationTriggered by remember { mutableStateOf(false) }
-                val targetHeight = (item.totalValue / maxValue).toFloat().coerceIn(0.00f, 0.7f)
-                val animatedHeight by animateFloatAsState(
-                    targetValue = if (animationTriggered) targetHeight else 0f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    ),
-                    label = "BarHeight"
-                )
-                LaunchedEffect(item.totalValue) {
-                    animationTriggered = true
-                }
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight(animatedHeight)
-                            .width(15.dp)
-                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                            .background(
-                                if (item.isSelected) barColor
-                                else barColor.copy(alpha = 0.2f)
-                            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.total_invoice_uppercase),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
                     )
                     Text(
-                        text = item.monthName.take(3).uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontSize = 9.sp,
-                        color = if (item.isSelected) Color.Black else Color.Gray
+                        text = totalMonth,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.pending_filter).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = totalOpenInvoices,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                if (selectedMonthData != null && selectedMonthData.totalValue > 0) {
+                    StatusCheckbox(
+                        isPaid = selectedMonthData.isPaid,
+                        onCheckChange = { onStatusClick(it) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                data.forEach { item ->
+                    var animationTriggered by remember { mutableStateOf(false) }
+                    val targetHeight = (item.totalValue / maxValue).toFloat().coerceIn(0.00f, 0.7f)
+                    val animatedHeight by animateFloatAsState(
+                        targetValue = if (animationTriggered) targetHeight else 0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "BarHeight"
+                    )
+                    LaunchedEffect(item.totalValue) {
+                        animationTriggered = true
+                    }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight(animatedHeight)
+                                .width(15.dp)
+                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                .background(
+                                    if (item.isSelected) barColor
+                                    else barColor.copy(alpha = 0.2f)
+                                )
+                        )
+                        Text(
+                            text = item.monthName.take(3).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 9.sp,
+                            color = if (item.isSelected) Color.Black else Color.Gray
+                        )
+                    }
                 }
             }
         }
     }
+
 }
 
 @Composable
