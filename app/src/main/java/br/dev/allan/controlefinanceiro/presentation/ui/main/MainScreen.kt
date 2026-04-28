@@ -52,15 +52,15 @@ fun MainScreen(
     Scaffold(
         topBar = {
             if (showBars) {
-                ZenoTopBar(
-                    onProfileClick = { showSheet = true },
-                    navController = navController
-                )
+                ZenoTopBar()
             }
         },
         bottomBar = {
             if (showBars) {
-                ZenoBottomAppBar(navController = navController)
+                ZenoBottomAppBar(
+                    navController = navController,
+                    onProfileClick = { showSheet = true }
+                )
             }
         },
         floatingActionButton = {

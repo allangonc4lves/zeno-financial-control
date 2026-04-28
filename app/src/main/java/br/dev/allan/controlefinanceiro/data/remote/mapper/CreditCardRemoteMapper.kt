@@ -9,6 +9,7 @@ fun CreditCard.toDto(userId: String): CreditCardDto {
         bankName = this.bankName,
         brand = this.brand,
         lastDigits = this.lastDigits,
+        invoiceClosing = this.invoiceClosing,
         dueDate = this.dueDate,
         backgroundColor = this.backgroundColor,
         activated = this.activated,
@@ -22,6 +23,7 @@ fun CreditCardDto.toDomain(): CreditCard {
         bankName = this.bankName,
         brand = this.brand,
         lastDigits = this.lastDigits,
+        invoiceClosing = this.invoiceClosing,
         dueDate = this.dueDate,
         backgroundColor = this.backgroundColor,
         activated = this.activated

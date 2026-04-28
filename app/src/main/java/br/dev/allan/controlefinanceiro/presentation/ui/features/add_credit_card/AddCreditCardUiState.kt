@@ -4,6 +4,7 @@ data class AddCreditCardUiState (
     val bankName: String = "",
     val brand: String = "",
     val lastDigits: String = "",
+    val invoiceClosing: String = "",
     val dueDate: String = "",
     val backgroundColor: Long = 0xFF1E88E5,
     val bankNameError: String? = null,

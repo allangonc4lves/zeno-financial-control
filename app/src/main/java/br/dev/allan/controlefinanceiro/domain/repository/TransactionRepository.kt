@@ -16,7 +16,7 @@ interface TransactionRepository {
     suspend fun deleteTransactionGroup(groupId: String)
     suspend fun updatePaymentStatus(id: String, paid: Boolean)
     fun getCreditCardTransactions(monthYear: String? = null): Flow<List<Transaction>>
-    fun getTotalUnpaidForCard(cardId: String): Flow<Double>
+    fun getTotalUnpaidForCard(cardId: String, invoiceClosingDay: Int): Flow<Double>
     suspend fun markAsPaid(transactionId: String, monthYear: String)
     suspend fun markAsUnpaid(transactionId: String, monthYear: String)
     fun getTransactionsBetweenDates(startDate: Long, endDate: Long): Flow<List<TransactionEntity>>

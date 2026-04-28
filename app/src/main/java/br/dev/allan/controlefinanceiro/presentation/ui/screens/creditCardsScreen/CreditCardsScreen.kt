@@ -72,7 +72,10 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.compon
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddCreditCardRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.components.DateHeader
 import br.dev.allan.controlefinanceiro.presentation.ui.components.TransactionItemRow
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.MonthSelector
+import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceModelBottomSheet
+import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportItemUiModel
+import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
+import br.dev.allan.controlefinanceiro.presentation.ui.components.MonthSelector
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
@@ -105,6 +108,7 @@ fun CreditCardsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val sheetState = rememberModalBottomSheetState()
     var showInvoiceSheet by remember { mutableStateOf(false) }
+    var selectedTransactionId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collectLatest { message ->
@@ -277,150 +281,31 @@ fun CreditCardsScreen(
 
         if (showInvoiceSheet && selectedCard != null) {
             val selectedMonthData = chartData.find { it.isSelected }
-            
-            ModalBottomSheet(
+            val invoice = ReportItemUiModel.Invoice(
+                cardId = selectedCard.id,
+                cardName = selectedCard.bankName,
+                monthYear = formatMillisToMonthYear(currentMonth),
+                totalAmount = selectedMonthData?.totalValue ?: 0.0,
+                formattedAmount = selectedMonthTotal,
+                isPaid = selectedMonthData?.isPaid ?: false,
+                transactions = transactions,
+                dateForSorting = currentMonth
+            )
+            InvoiceModelBottomSheet(
+                invoice = invoice,
+                isAmountVisible = true,
                 onDismissRequest = { showInvoiceSheet = false },
                 sheetState = sheetState,
-                dragHandle = {
-                    Surface(
-                        modifier = Modifier.padding(top = 12.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                        shape = CircleShape
-                    ) {
-                        Box(modifier = Modifier.size(width = 32.dp, height = 4.dp))
-                    }
-                }
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 32.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = selectedCardColor.copy(alpha = 0.1f),
-                            modifier = Modifier.size(64.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.CreditCard,
-                                    contentDescription = null,
-                                    tint = selectedCardColor,
-                                    modifier = Modifier.size(32.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = selectedCard.bankName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(R.string.invoice_from, formatMillisToMonthYear(currentMonth)),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        val isPaid = selectedMonthData?.isPaid ?: false
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (isPaid) Color(0xFF1B5E20).copy(alpha = 0.1f) else Color(0xFFAB1A1A).copy(alpha = 0.1f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .background(
-                                            if (isPaid) Color(0xFF1B5E20) else Color(0xFFAB1A1A),
-                                            CircleShape
-                                        )
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (isPaid) stringResource(R.string.paid) else stringResource(R.string.pending_payment),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (selectedMonthData?.isPaid == true) Color(0xFF1B5E20) else Color(0xFFAB1A1A)
-                                )
-                            }
-                        }
-                    }
+                onTransactionClick = { selectedTransactionId = it },
+                cardColor = selectedCardColor
+            )
+        }
 
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 400.dp),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        item {
-                            Text(
-                                text = stringResource(R.string.transactions),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
-                            )
-                        }
-                        
-                        val groupedTransactions = transactions.groupBy { it.formattedDate }
-                        groupedTransactions.forEach { (date, txs) ->
-                            item {
-                                DateHeader(
-                                    dateMillis = txs.first().dateMillis,
-                                    modifier = Modifier.padding(start = 0.dp)
-                                )
-                            }
-                            items(txs) { tx ->
-                                TransactionItemRow(
-                                    uiModel = tx,
-                                    isAmountVisible = true,
-                                    onClick = { }
-                                )
-                            }
-                        }
-                        
-                        item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.total_invoice),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = selectedMonthTotal,
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Black,
-                                    color = if (selectedMonthData?.isPaid == true) Color(0xFF1B5E20) else Color(0xFFAB1A1A)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+        if (selectedTransactionId != null) {
+            SaveTransactionDialog(
+                transactionId = selectedTransactionId,
+                onDismiss = { selectedTransactionId = null }
+            )
         }
     }
 }

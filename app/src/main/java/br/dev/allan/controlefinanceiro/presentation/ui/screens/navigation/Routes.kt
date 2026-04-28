@@ -9,9 +9,6 @@ object HomeRoute
 object LoginRoute
 
 @Serializable
-object TransactionsRoute
-
-@Serializable
 data class AddTransactionRoute(val id: String? = null)
 
 @Serializable

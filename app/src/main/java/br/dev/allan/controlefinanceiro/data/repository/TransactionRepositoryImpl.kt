@@ -51,7 +51,7 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getTotalUnpaidForCard(cardId: String): Flow<Double> {
+    override fun getTotalUnpaidForCard(cardId: String, invoiceClosingDay: Int): Flow<Double> {
         return combine(
             transactionDao.getByCard(cardId),
             transactionDao.getAllPaymentStatuses()
@@ -61,13 +61,31 @@ class TransactionRepositoryImpl @Inject constructor(
                     val dateObj = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(entity.date)
                     time = dateObj ?: Date()
                 }
-                
-                val monthYear = formatMillisToMonthYear(calendar.timeInMillis)
-                
-                val isPaidInMonth = payments.any { 
+
+                val transactionDay = calendar.get(Calendar.DAY_OF_MONTH)
+                val transactionMonth = calendar.get(Calendar.MONTH)
+                val transactionYear = calendar.get(Calendar.YEAR)
+
+                val invoiceCal = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, transactionYear)
+                    set(Calendar.MONTH, transactionMonth)
+                    set(Calendar.DAY_OF_MONTH, invoiceClosingDay)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                if (transactionDay >= invoiceClosingDay) {
+                    invoiceCal.add(Calendar.MONTH, 1)
+                }
+
+                val monthYear = formatMillisToMonthYear(invoiceCal.timeInMillis)
+
+                val isPaidInMonth = payments.any {
                     it.transactionId == entity.id && it.monthYear == monthYear
                 }
-                
+
                 if (!isPaidInMonth) entity.amount else 0.0
             }
         }
@@ -115,7 +133,9 @@ class TransactionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteTransactionGroup(groupId: String) {
+        val transactionsToDelete = transactionDao.getTransactionsByGroupId(groupId)
         transactionDao.deleteTransactionGroup(groupId)
+        remoteDataSource.deleteTransactions(transactionsToDelete.map { it.id })
     }
 
     override fun getExpensesByCategory(start: Long, end: Long): Flow<List<CategorySum>> {

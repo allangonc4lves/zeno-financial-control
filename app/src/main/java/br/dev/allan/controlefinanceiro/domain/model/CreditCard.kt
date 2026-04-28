@@ -7,6 +7,7 @@ data class CreditCard(
     val bankName: String,
     val brand: String,
     val lastDigits: Int,
+    val invoiceClosing: String,
     val dueDate: String,
     val backgroundColor: Long,
     val activated: Boolean

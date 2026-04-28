@@ -58,6 +58,8 @@ class MonthTransactionsViewModel @Inject constructor(
 
         repository.getTransactionsByMonth(start, end).map { list ->
             list.filter { transaction ->
+                if (transaction.creditCardId != null) return@filter false
+
                 when {
                     transaction.date > endStr -> false
                     transaction.isInstallment -> !transaction.isExpired(monthMillis)

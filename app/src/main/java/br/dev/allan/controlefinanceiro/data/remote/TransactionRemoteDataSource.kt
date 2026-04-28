@@ -57,6 +57,21 @@ class TransactionRemoteDataSource @Inject constructor(
             .await()
     }
 
+    suspend fun deleteTransactions(transactionIds: List<String>) {
+        val userId = auth.currentUser?.uid ?: return
+        val batch = firestore.batch()
+
+        transactionIds.forEach { id ->
+            val docRef = firestore.collection("users")
+                .document(userId)
+                .collection(collectionPath)
+                .document(id)
+            batch.delete(docRef)
+        }
+
+        batch.commit().await()
+    }
+
     suspend fun syncTransactions(transactions: List<Transaction>) {
         val userId = auth.currentUser?.uid ?: return
         val batch = firestore.batch()

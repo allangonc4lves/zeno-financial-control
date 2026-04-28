@@ -50,6 +50,14 @@ class CreditCardsViewModel @Inject constructor(
             Log.i("teste", uiState.lastDigits)
     }
 
+    fun onInvoiceClosingChange(newDate: String) {
+        uiState = uiState.copy(invoiceClosing = newDate)
+    }
+
+    fun onDueDateChange(newDate: String) {
+        uiState = uiState.copy(dueDate = newDate)
+    }
+
     fun onColorSelected(color: Long) {
         uiState = uiState.copy(backgroundColor = color)
     }
@@ -65,6 +73,8 @@ class CreditCardsViewModel @Inject constructor(
                     bankName = card.bankName,
                     brand = card.brand,
                     lastDigits = card.lastDigits.toString(),
+                    invoiceClosing = card.invoiceClosing,
+                    dueDate = card.dueDate,
                     backgroundColor = card.backgroundColor
                 )
             }
@@ -93,6 +103,7 @@ class CreditCardsViewModel @Inject constructor(
             bankName = uiState.bankName,
             brand = uiState.brand,
             lastDigits = uiState.lastDigits.toIntOrNull() ?: 0,
+            invoiceClosing = uiState.invoiceClosing,
             dueDate = uiState.dueDate,
             backgroundColor = uiState.backgroundColor,
             activated = uiState.activated

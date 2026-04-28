@@ -23,26 +23,68 @@ data class Transaction(
     val direction: TransactionDirection,
     val creditCardId: String? = null
 ){
-    private fun getMonthsBetween(referenceDate: Long): Int {
-        // 1. Converter a String do banco (yyyy-MM-dd) para Date
+    fun getInvoiceMonthStart(closingDay: Int): Long {
         val dbFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         val transactionDate = try {
             dbFormat.parse(this.date) ?: Date()
         } catch (e: Exception) {
             Date()
         }
+        val cal = Calendar.getInstance().apply {
+            time = transactionDate
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        if (cal.get(Calendar.DAY_OF_MONTH) >= closingDay) {
+            cal.add(Calendar.MONTH, 1)
+        }
+        cal.set(Calendar.DAY_OF_MONTH, 1)
+        return cal.timeInMillis
+    }
 
-        // 2. Configurar os Calendars
-        val startCal = Calendar.getInstance().apply { 
-            time = transactionDate 
+    fun getParcelIndexForInvoiceMonth(referenceMonthMillis: Long, closingDay: Int): Int {
+        if (!isInstallment && type != TransactionType.REPEAT) return 1
+
+        val firstInvoiceMonthStart = getInvoiceMonthStart(closingDay)
+        
+        val refCal = Calendar.getInstance().apply {
+            timeInMillis = referenceMonthMillis
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val startCal = Calendar.getInstance().apply {
+            timeInMillis = firstInvoiceMonthStart
+        }
+
+        val yearDiff = refCal.get(Calendar.YEAR) - startCal.get(Calendar.YEAR)
+        val monthDiff = refCal.get(Calendar.MONTH) - startCal.get(Calendar.MONTH)
+        val monthsBetween = (yearDiff * 12) + monthDiff
+
+        return (monthsBetween + 1)
+    }
+
+    private fun getMonthsBetween(referenceDate: Long): Int {
+        val dbFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val transactionDate = try {
+            dbFormat.parse(this.date) ?: Date()
+        } catch (e: Exception) {
+            Date()
+        }
+        
+        val startCal = Calendar.getInstance().apply {
+            time = transactionDate
             set(Calendar.DAY_OF_MONTH, 1)
         }
-        val refCal = Calendar.getInstance().apply { 
-            timeInMillis = referenceDate 
+        val refCal = Calendar.getInstance().apply {
+            timeInMillis = referenceDate
             set(Calendar.DAY_OF_MONTH, 1)
         }
-
-        // 3. Calcular a diferença
+        
         val yearDiff = refCal.get(Calendar.YEAR) - startCal.get(Calendar.YEAR)
         val monthDiff = refCal.get(Calendar.MONTH) - startCal.get(Calendar.MONTH)
 
@@ -52,8 +94,7 @@ data class Transaction(
         if (!isInstallment && type != TransactionType.REPEAT) return 1
 
         val monthsBetween = getMonthsBetween(referenceDate)
-
-        // Retorna o índice da parcela (1, 2, 3...), limitado ao total de parcelas
+        
         return (monthsBetween + 1).coerceIn(1, installmentCount)
     }
 
@@ -61,9 +102,7 @@ data class Transaction(
         if (!isInstallment) return false
 
         val monthsBetween = getMonthsBetween(referenceDate)
-
-        // Se a diferença de meses for igual ou maior que o total de parcelas, expirou
-        // Ex: Compra em 3x. Meses entre: 0 (parc 1), 1 (parc 2), 2 (parc 3). Se >= 3, expirou.
+        
         return monthsBetween >= installmentCount
     }
 }

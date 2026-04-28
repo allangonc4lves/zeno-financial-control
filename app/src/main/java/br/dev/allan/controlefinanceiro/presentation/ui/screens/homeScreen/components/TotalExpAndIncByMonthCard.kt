@@ -1,5 +1,6 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,13 +25,14 @@ import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.PendingActions
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,120 +58,139 @@ fun TotalExpAndIncByMonthCard(
     val scope = rememberCoroutineScope()
 
     CustomCard {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        val statusImage = when {
+            uiState.rawBalance <= 0 -> R.drawable.negative
+            uiState.rawBalance <= 1000 -> R.drawable.positive2
+            else -> R.drawable.positive1
+        }
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MonthSelectorMenu(
-                    selectedMonth = selectedMonth,
-                    onMonthChange = { newMonth -> viewModel.updateMonth(newMonth) }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                MainBalanceItem(
-                    label = stringResource(id = R.string.balance),
-                    value = if (uiState.isBalanceVisible) formattedBalance else "•••••",
-                    rawValue = uiState.rawBalance,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Box(
-                    modifier = Modifier.width(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(24.dp)
-                            .background(MaterialTheme.colorScheme.surface)
-                    )
-                }
-
-                MainBalanceItem(
-                    label = stringResource(id = R.string.available_balance),
-                    value = if (uiState.isBalanceVisible) uiState.availableBalance else "•••••",
-                    rawValue = uiState.rawAvailableBalance,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SummaryItem(
-                        label = stringResource(id = R.string.incomes),
-                        value = if (uiState.isBalanceVisible) formattedIncomes else "•••••",
-                        icon = Icons.Outlined.ArrowUpward,
-                        color = Color(0xFF2E7D32),
+                    MonthSelectorMenu(
+                        selectedMonth = selectedMonth,
+                        onMonthChange = { newMonth -> viewModel.updateMonth(newMonth) }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    MainBalanceItem(
+                        label = stringResource(id = R.string.balance),
+                        value = if (uiState.isBalanceVisible) formattedBalance else "•••••",
+                        rawValue = uiState.rawBalance,
                         modifier = Modifier.weight(1f)
                     )
 
-                    IconButton(
-                        onClick = {
-                            scope.launch { viewModel.toggleBalanceVisibility(!uiState.isBalanceVisible) }
-                        },
-                        modifier = Modifier.size(32.dp)
+                    Box(
+                        modifier = Modifier.width(32.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = stringResource(id = R.string.toggle_visibility),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            modifier = Modifier.size(18.dp)
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(24.dp)
+                                .background(MaterialTheme.colorScheme.surface)
                         )
                     }
 
-                    SummaryItem(
-                        label = stringResource(id = R.string.expenses),
-                        value = if (uiState.isBalanceVisible) formattedExpenses else "•••••",
-                        icon = Icons.Outlined.ArrowDownward,
-                        color = Color(0xFFC62828),
+                    MainBalanceItem(
+                        label = stringResource(id = R.string.available_balance),
+                        value = if (uiState.isBalanceVisible) uiState.availableBalance else "•••••",
+                        rawValue = uiState.rawAvailableBalance,
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                Row(
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SummaryItem(
-                        label = stringResource(id = R.string.paid_filter),
-                        value = if (uiState.isBalanceVisible) uiState.paidValue else "•••••",
-                        icon = Icons.Outlined.AccountBalanceWallet,
-                        color = Color(0xFF455A64),
-                        modifier = Modifier.weight(1f)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SummaryItem(
+                            label = stringResource(id = R.string.incomes),
+                            value = if (uiState.isBalanceVisible) formattedIncomes else "•••••",
+                            icon = Icons.Outlined.ArrowUpward,
+                            color = Color(0xFF2E7D32),
+                            modifier = Modifier.weight(1f)
+                        )
 
-                    Spacer(modifier = Modifier.size(32.dp))
+                        Spacer(modifier = Modifier.size(32.dp))
 
-                    SummaryItem(
-                        label = stringResource(id = R.string.pending_filter),
-                        value = if (uiState.isBalanceVisible) uiState.pendingValue else "•••••",
-                        icon = Icons.Outlined.PendingActions,
-                        color = Color(0xFFEF6C00),
-                        modifier = Modifier.weight(1f)
-                    )
+                        SummaryItem(
+                            label = stringResource(id = R.string.expenses),
+                            value = if (uiState.isBalanceVisible) formattedExpenses else "•••••",
+                            icon = Icons.Outlined.ArrowDownward,
+                            color = Color(0xFFC62828),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SummaryItem(
+                            label = stringResource(id = R.string.paid_filter),
+                            value = if (uiState.isBalanceVisible) uiState.paidValue else "•••••",
+                            icon = Icons.Outlined.AccountBalanceWallet,
+                            color = Color(0xFF455A64),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        IconButton(
+                            onClick = {
+                                scope.launch { viewModel.toggleBalanceVisibility(!uiState.isBalanceVisible) }
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (uiState.isBalanceVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = stringResource(id = R.string.toggle_visibility),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        SummaryItem(
+                            label = stringResource(id = R.string.pending_filter),
+                            value = if (uiState.isBalanceVisible) uiState.pendingValue else "•••••",
+                            icon = Icons.Outlined.PendingActions,
+                            color = Color(0xFFEF6C00),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
+
+            Image(
+                painter = painterResource(id = statusImage),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(64.dp)
+                    .graphicsLayer { alpha = 1f }
+            )
         }
     }
 }

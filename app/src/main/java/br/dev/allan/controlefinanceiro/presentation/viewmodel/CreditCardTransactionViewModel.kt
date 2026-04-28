@@ -40,6 +40,49 @@ class CreditCardTransactionViewModel @Inject constructor(
     private val currencyManager: CurrencyManager
 ) : ViewModel() {
     private fun Double.round2() = Math.round(this * 100.0) / 100.0
+
+    data class CreditCardParams(
+        val cardId: String?,
+        val monthYear: String,
+        val currencyCode: String,
+        val closingDay: Int,
+        val monthMillis: Long
+    )
+
+    private fun getPeriodForMonth(monthMillis: Long, closingDate: String): Pair<String, String> {
+        val calendar = Calendar.getInstance().apply { timeInMillis = monthMillis }
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+
+        val closingDay = try {
+            if (closingDate.isEmpty()) {
+                1
+            } else {
+                val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(closingDate)
+                val cal = Calendar.getInstance().apply { time = date!! }
+                cal.get(Calendar.DAY_OF_MONTH)
+            }
+        } catch (e: Exception) {
+            1
+        }
+
+        val endCal = Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month)
+            set(Calendar.DAY_OF_MONTH, closingDay)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val startCal = (endCal.clone() as Calendar).apply {
+            add(Calendar.MONTH, -1)
+        }
+
+        return DateHelper.fromMillisToDb(startCal.timeInMillis) to DateHelper.fromMillisToDb(endCal.timeInMillis)
+    }
+
     private val _selectedCardId = MutableStateFlow<String?>(null)
     private val _currentMonth = MutableStateFlow(Calendar.getInstance().apply {
         set(Calendar.DAY_OF_MONTH, 1)
@@ -57,20 +100,26 @@ class CreditCardTransactionViewModel @Inject constructor(
     val transactionsUiState = combine(
         _selectedCardId,
         _currentMonth,
-        currencyCode
-    ) { cardId, monthMillis, code ->
+        currencyCode,
+        cards
+    ) { cardId, monthMillis, code, allCards ->
+        val card = allCards.find { it.id == cardId }
+        val closingDay = try {
+            if (card?.invoiceClosing?.isNotEmpty() == true) {
+                val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(card.invoiceClosing)
+                Calendar.getInstance().apply { time = date!! }.get(Calendar.DAY_OF_MONTH)
+            } else 1
+        } catch (e: Exception) { 1 }
+
+        val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: "")
         val monthYear = SimpleDateFormat("MM-yyyy", Locale.getDefault()).format(Date(monthMillis))
-        Triple(cardId, monthYear, code)
-    }.flatMapLatest { (cardId, monthYear, code) ->
+        val params = CreditCardParams(cardId, monthYear, code, closingDay, monthMillis)
+        Triple(params, period.first, period.second)
+    }.flatMapLatest { (params, startStr, endStr) ->
+        val (cardId, monthYear, code, closingDay, monthMillis) = params
         if (cardId == null) return@flatMapLatest flowOf(emptyList<TransactionUIState>())
 
         transactionRepository.getCreditCardTransactions(monthYear).map { allTransactions ->
-            val calendar = Calendar.getInstance().apply { timeInMillis = _currentMonth.value }
-            val startStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
-
-            calendar.add(Calendar.MONTH, 1)
-            val endStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
-
             allTransactions
                 .filter { it.creditCardId == cardId }
                 .filter { transaction ->
@@ -78,26 +127,33 @@ class CreditCardTransactionViewModel @Inject constructor(
                 }
                 .map { transaction ->
                     val roundedParcel = transaction.amount
-
+                    val dbFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                     val dateForUi = try {
-                        SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(transaction.date) ?: Date()
+                        dbFormat.parse(transaction.date) ?: Date()
                     } catch (e: Exception) {
                         Date()
+                    }
+
+                    val actualParcel = if (transaction.currentInstallment > 0) {
+                        transaction.currentInstallment
+                    } else {
+                        transaction.getParcelIndexForInvoiceMonth(monthMillis, closingDay)
                     }
 
                     TransactionUIState(
                         id = transaction.id,
                         title = transaction.title,
-                        formattedParcelInfo = if (transaction.isInstallment) {
-                            "${transaction.currentInstallment} / ${transaction.installmentCount}"
+                        formattedParcelInfo = if (transaction.isInstallment || transaction.installmentCount > 1) {
+                            "$actualParcel/${transaction.installmentCount}"
                         } else null,
                         formattedAmount = currencyManager.formatByCurrencyCode(roundedParcel, code),
                         formattedTotalAmount = currencyManager.formatByCurrencyCode(transaction.amount, code),
                         formattedDate = SimpleDateFormat("dd/MM", Locale.getDefault()).format(dateForUi),
+                        dateMillis = dateForUi.time,
                         color = if (transaction.direction == TransactionDirection.EXPENSE) Color.Red else Color.Green,
                         isPaid = transaction.isPaid,
                         isInstallment = transaction.isInstallment,
-                        currentInstallment = transaction.currentInstallment,
+                        currentInstallment = actualParcel,
                         installmentCount = transaction.installmentCount,
                         creditCardId = transaction.creditCardId,
                         category = transaction.category,
@@ -113,11 +169,14 @@ class CreditCardTransactionViewModel @Inject constructor(
     val chartDataState = combine(
         _selectedCardId,
         _currentMonth,
-        currencyCode
-    ) { cardId, monthMillis, code ->
+        currencyCode,
+        cards
+    ) { cardId, monthMillis, code, allCards ->
         val monthYear = SimpleDateFormat("MM/yyyy", Locale.getDefault()).format(Date(monthMillis))
-        Triple(cardId, monthMillis, monthYear)
-    }.flatMapLatest { (cardId, monthMillis, monthYear) ->
+        val card = allCards.find { it.id == cardId }
+        Triple(Triple(cardId, monthMillis, monthYear), card?.invoiceClosing ?: "", code)
+    }.flatMapLatest { (triple, closingDate, _) ->
+        val (cardId, monthMillis, monthYear) = triple
         if (cardId == null) return@flatMapLatest flowOf(emptyList<CreditCardAmountByYear>())
 
         transactionRepository.getCreditCardTransactions(monthYear).map { allTransactions ->
@@ -134,11 +193,10 @@ class CreditCardTransactionViewModel @Inject constructor(
                     set(Calendar.MINUTE, 0)
                 }
 
-                val monthStartStr = DateHelper.fromMillisToDb(monthCal.timeInMillis)
                 val monthStartMillis = monthCal.timeInMillis
-
-                monthCal.add(Calendar.MONTH, 1)
-                val monthEndStr = DateHelper.fromMillisToDb(monthCal.timeInMillis)
+                val period = getPeriodForMonth(monthStartMillis, closingDate)
+                val monthStartStr = period.first
+                val monthEndStr = period.second
 
                 val transactionsInMonth = allTransactions
                     .filter { it.creditCardId == cardId }
@@ -169,14 +227,23 @@ class CreditCardTransactionViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val totalOpenInvoicesState = combine(
         _selectedCardId,
-        currencyCode
-    ) { cardId, code ->
-        cardId to code
-    }.flatMapLatest { (cardId, code) ->
+        currencyCode,
+        cards
+    ) { cardId, code, allCards ->
+        Triple(cardId, code, allCards)
+    }.flatMapLatest { (cardId, code, allCards) ->
         if (cardId == null) {
             flowOf(currencyManager.formatByCurrencyCode(0.0, code))
         } else {
-            transactionRepository.getTotalUnpaidForCard(cardId).map { total ->
+            val card = allCards.find { it.id == cardId }
+            val closingDay = try {
+                if (card?.invoiceClosing?.isNotEmpty() == true) {
+                    val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(card.invoiceClosing)
+                    Calendar.getInstance().apply { time = date!! }.get(Calendar.DAY_OF_MONTH)
+                } else 1
+            } catch (e: Exception) { 1 }
+
+            transactionRepository.getTotalUnpaidForCard(cardId, closingDay).map { total ->
                 currencyManager.formatByCurrencyCode(total, code)
             }
         }
@@ -185,18 +252,18 @@ class CreditCardTransactionViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val categoryChartData = combine(
         _selectedCardId,
-        _currentMonth
-    ) { cardId, monthMillis ->
-        cardId to monthMillis
-    }.flatMapLatest { (cardId, monthMillis) ->
+        _currentMonth,
+        cards
+    ) { cardId, monthMillis, allCards ->
+        val card = allCards.find { it.id == cardId }
+        val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: "")
+        Triple(cardId, monthMillis, period)
+    }.flatMapLatest { (cardId, monthMillis, period) ->
         if (cardId == null) return@flatMapLatest flowOf(emptyMap<CategoryAppearance, Double>())
 
         val monthYear = SimpleDateFormat("MM-yyyy", Locale.getDefault()).format(Date(monthMillis))
         transactionRepository.getCreditCardTransactions(monthYear).map { allTransactions ->
-            val calendar = Calendar.getInstance().apply { timeInMillis = monthMillis }
-            val startStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
-            calendar.add(Calendar.MONTH, 1)
-            val endStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
+            val (startStr, endStr) = period
 
             allTransactions
                 .filter { it.creditCardId == cardId && it.date >= startStr && it.date < endStr }
@@ -221,14 +288,12 @@ class CreditCardTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             val cardId = _selectedCardId.value ?: return@launch
             val monthMillis = _currentMonth.value
+            
+            val card = cards.value.find { it.id == cardId }
+            val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: "")
+            val (startStr, endStr) = period
 
             val monthYear = SimpleDateFormat("MM/yyyy", Locale.getDefault()).format(Date(monthMillis))
-
-            val calendar = Calendar.getInstance().apply { timeInMillis = monthMillis }
-            val startStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
-
-            calendar.add(Calendar.MONTH, 1)
-            val endStr = DateHelper.fromMillisToDb(calendar.timeInMillis)
 
             transactionRepository.getCreditCardTransactions(monthYear).first().let { allTransactions ->
 

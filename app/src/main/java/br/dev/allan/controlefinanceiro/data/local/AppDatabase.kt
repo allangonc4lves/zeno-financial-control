@@ -10,7 +10,7 @@ import androidx.room.TypeConverters
         CreditCardEntity::class,
         PaymentStatusEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

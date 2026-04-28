@@ -56,7 +56,7 @@ class ReportViewModel @Inject constructor(
         cardRepository.getCards(),
         transactionRepository.getTransactions()
     ) { filters, code, payments, cards, allTransactions ->
-        val reportData = getReportUseCase(allTransactions, filters, payments)
+        val reportData = getReportUseCase(allTransactions, filters, payments, cards)
         mapToUiState(reportData, filters, code, cards)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReportUiState(isLoading = true))
 
@@ -83,9 +83,8 @@ class ReportViewModel @Inject constructor(
                 formattedAmount = (if (tx.direction == TransactionDirection.EXPENSE) "- " else "+ ") + currencyManager.formatByCurrencyCode(occurrence.amount, code)
             )
 
-            if (tx.creditCardId != null) {
-                val currentMonthYear = formatMillisToMonthYear(occurrence.occurrenceDate)
-                val key = "${tx.creditCardId}_$currentMonthYear"
+            if (tx.creditCardId != null && occurrence.invoiceMonthYear != null) {
+                val key = "${tx.creditCardId}_${occurrence.invoiceMonthYear}"
                 if (!creditCardGroups.containsKey(key)) {
                     creditCardGroups[key] = Pair(occurrence.occurrenceDate, mutableListOf())
                 }

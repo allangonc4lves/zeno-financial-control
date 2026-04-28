@@ -9,13 +9,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
-import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.components.AddCreditCardDialog
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.components.SaveCreditCardDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.creditCardsScreen.CreditCardsScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.HomeScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.login.LoginScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.reportsScreen.ReportsScreen
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.TransactionsScreen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -46,11 +45,7 @@ fun NavHost(
             )
         }
         composable<HomeRoute> {
-            HomeScreen(navController)
-        }
-
-        composable<TransactionsRoute> {
-            TransactionsScreen(navController)
+            HomeScreen()
         }
 
         dialog<AddTransactionRoute> { backStackEntry ->
@@ -71,7 +66,7 @@ fun NavHost(
 
         dialog< AddCreditCardRoute> { backStackEntry ->
             val route: AddCreditCardRoute = backStackEntry.toRoute()
-            AddCreditCardDialog(
+            SaveCreditCardDialog(
                 cardId = route.id,
                 onDismiss = { navController.popBackStack() }
             )

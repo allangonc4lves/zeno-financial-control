@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.components.AddCreditCardDialog
+import br.dev.allan.controlefinanceiro.presentation.ui.features.add_credit_card.components.SaveCreditCardDialog
 import androidx.compose.ui.res.stringResource
 import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.CreditCardsRoute
@@ -50,7 +50,7 @@ fun FabBottomBar(
 
     if (showDialog) {
         if(currentRoute == CreditCardsRoute::class.qualifiedName){
-            AddCreditCardDialog(
+            SaveCreditCardDialog(
                 onDismiss = { showDialog = false },
             )
         } else {

@@ -12,7 +12,7 @@ data class HomeUiState(
     val paidValue: String = "...",
     val pendingValue: String = "...",
     val isBalanceVisible: Boolean = true,
-    val transactions: List<TransactionUIState> = emptyList(),
     val chartDataValues: Map<CategoryAppearance, Double> = emptyMap(),
-    val chartDataLabels: Map<CategoryAppearance, String> = emptyMap()
+    val chartDataLabels: Map<CategoryAppearance, String> = emptyMap(),
+    val items: List<ReportItemUiModel> = emptyList()
 )

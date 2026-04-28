@@ -1,6 +1,7 @@
 package br.dev.allan.controlefinanceiro.domain.usecase
 
 import br.dev.allan.controlefinanceiro.data.local.PaymentStatusEntity
+import br.dev.allan.controlefinanceiro.domain.model.CreditCard
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportFilterState
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionStatusFilter
@@ -17,7 +18,8 @@ data class ReportTransactionOccurrence(
     val occurrenceDate: Long,
     val currentParcel: Int,
     val isPaidInMonth: Boolean,
-    val amount: Double
+    val amount: Double,
+    val invoiceMonthYear: String? = null
 )
 
 data class ReportData(
@@ -31,35 +33,60 @@ class GetReportUseCase @Inject constructor() {
     operator fun invoke(
         allTransactions: List<Transaction>,
         filters: ReportFilterState,
-        payments: List<PaymentStatusEntity>
+        payments: List<PaymentStatusEntity>,
+        cards: List<CreditCard>
     ): ReportData {
         val occurrences = mutableListOf<ReportTransactionOccurrence>()
 
         allTransactions.forEach { tx ->
             if (filters.categoryFilter != null && tx.category.name != filters.categoryFilter) return@forEach
 
-            val dates = getOccurrencesInRange(tx, filters.startDate, filters.endDate)
+            val card = cards.find { it.id == tx.creditCardId }
+            val closingDay = try {
+                if (card?.invoiceClosing?.isNotEmpty() == true) {
+                    val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(card.invoiceClosing)
+                    Calendar.getInstance().apply { time = date!! }.get(Calendar.DAY_OF_MONTH)
+                } else 1
+            } catch (e: Exception) { 1 }
 
-            dates.forEach { occurrenceDate ->
-                val currentMonthYear = formatMillisToMonthYear(occurrenceDate)
+            val dates = getOccurrencesInRange(tx, filters.startDate, filters.endDate, closingDay)
+
+            dates.forEach { occurrenceInfo ->
+                val (occurrenceDate, invoiceMonthMillis) = occurrenceInfo
+                val invoiceMonthYear = formatMillisToMonthYear(invoiceMonthMillis)
+                
                 val isPaidInMonth = if (tx.creditCardId != null) {
-                    payments.any { it.transactionId == tx.id.toString() && it.monthYear == currentMonthYear }
+                    payments.any { it.transactionId == tx.id && it.monthYear == invoiceMonthYear }
                 } else {
                     tx.isPaid
                 }
 
                 if (matchesFilters(tx, isPaidInMonth, filters)) {
                     val actualAmount = getAmountForOccurrence(tx)
-                    val actualParcel = if (tx.currentInstallment > 0) tx.currentInstallment else tx.getCurrentParcelIndex(occurrenceDate)
-                    occurrences.add(
-                        ReportTransactionOccurrence(
-                            transaction = tx,
-                            occurrenceDate = occurrenceDate,
-                            currentParcel = actualParcel,
-                            isPaidInMonth = isPaidInMonth,
-                            amount = actualAmount
+                    
+                    val actualParcel = if (tx.currentInstallment > 0) {
+                        // If it has a fixed currentInstallment, use it directly
+                        tx.currentInstallment
+                    } else if (tx.creditCardId != null) {
+                        // Dynamic calculation for credit card starting from parcel 1
+                        tx.getParcelIndexForInvoiceMonth(invoiceMonthMillis, closingDay)
+                    } else {
+                        // Dynamic calculation for wallet
+                        tx.getCurrentParcelIndex(occurrenceDate)
+                    }
+                    
+                    if (tx.creditCardId == null || actualParcel in 1..tx.installmentCount || tx.type == TransactionType.REPEAT) {
+                        occurrences.add(
+                            ReportTransactionOccurrence(
+                                transaction = tx,
+                                occurrenceDate = occurrenceDate,
+                                currentParcel = actualParcel,
+                                isPaidInMonth = isPaidInMonth,
+                                amount = actualAmount,
+                                invoiceMonthYear = if (tx.creditCardId != null) invoiceMonthYear else null
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -68,8 +95,6 @@ class GetReportUseCase @Inject constructor() {
             .filter { it.transaction.direction == TransactionDirection.INCOME }
             .sumOf { it.amount }
 
-        // Note: For expenses, we calculate the sum of all occurrences found. 
-        // In the ViewModel, these will be grouped into Invoices if they belong to a credit card.
         val totalExpense = occurrences
             .filter { it.transaction.direction == TransactionDirection.EXPENSE }
             .sumOf { it.amount }
@@ -87,32 +112,80 @@ class GetReportUseCase @Inject constructor() {
 
     private fun Double.round2() = Math.round(this * 100.0) / 100.0
 
-    private fun getOccurrencesInRange(tx: Transaction, start: Long, end: Long): List<Long> {
-        val dates = mutableListOf<Long>()
+    private fun getOccurrencesInRange(tx: Transaction, start: Long, end: Long, closingDay: Int): List<Pair<Long, Long>> {
+        val dates = mutableListOf<Pair<Long, Long>>()
         val calTx = Calendar.getInstance().apply {
             val dateObj = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(tx.date)
             time = dateObj ?: Date()
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
 
-        when {
-            tx.currentInstallment > 0 -> {
-                if (calTx.timeInMillis in start..end) {
-                    dates.add(calTx.timeInMillis)
+        if (tx.creditCardId != null) {
+            val firstInvoiceMonthMillis = tx.getInvoiceMonthStart(closingDay)
+            
+            // If it's a credit card transaction, we assume it's one single entry 
+            // that might represent a fixed installment (currentInstallment > 0)
+            // or the start of a sequence (isInstallment = true).
+            
+            if (tx.currentInstallment > 0) {
+                // Specific parcel already recorded. It only appears in its own invoice.
+                if (firstInvoiceMonthMillis in start..end) {
+                    dates.add(calTx.timeInMillis to firstInvoiceMonthMillis)
                 }
-            }
-            tx.isInstallment && tx.installmentCount > 1 -> {
+            } else if (tx.isInstallment && tx.installmentCount > 1) {
+                // Sequence of installments.
                 for (i in 0 until tx.installmentCount) {
-                    val calParcel = (calTx.clone() as Calendar).apply {
+                    val invoiceMonthCal = Calendar.getInstance().apply {
+                        timeInMillis = firstInvoiceMonthMillis
                         add(Calendar.MONTH, i)
                     }
-                    if (calParcel.timeInMillis in start..end) {
-                        dates.add(calParcel.timeInMillis)
+                    if (invoiceMonthCal.timeInMillis in start..end) {
+                        dates.add(calTx.timeInMillis to invoiceMonthCal.timeInMillis)
                     }
                 }
+            } else if (tx.type == TransactionType.REPEAT) {
+                // Fixed/Repeating transaction on credit card.
+                // We show it for up to 24 months or until the end of the selected range.
+                for (i in 0 until 24) {
+                    val invoiceMonthCal = Calendar.getInstance().apply {
+                        timeInMillis = firstInvoiceMonthMillis
+                        add(Calendar.MONTH, i)
+                    }
+                    if (invoiceMonthCal.timeInMillis > end) break
+                    if (invoiceMonthCal.timeInMillis in start..end) {
+                        dates.add(calTx.timeInMillis to invoiceMonthCal.timeInMillis)
+                    }
+                }
+            } else {
+                // Single credit card transaction.
+                if (firstInvoiceMonthMillis in start..end) {
+                    dates.add(calTx.timeInMillis to firstInvoiceMonthMillis)
+                }
             }
-            else -> {
-                if (calTx.timeInMillis in start..end) {
-                    dates.add(calTx.timeInMillis)
+        } else {
+            when {
+                tx.currentInstallment > 0 -> {
+                    if (calTx.timeInMillis in start..end) {
+                        dates.add(calTx.timeInMillis to calTx.timeInMillis)
+                    }
+                }
+                tx.isInstallment && tx.installmentCount > 1 -> {
+                    for (i in 0 until tx.installmentCount) {
+                        val calParcel = (calTx.clone() as Calendar).apply {
+                            add(Calendar.MONTH, i)
+                        }
+                        if (calParcel.timeInMillis in start..end) {
+                            dates.add(calParcel.timeInMillis to calParcel.timeInMillis)
+                        }
+                    }
+                }
+                else -> {
+                    if (calTx.timeInMillis in start..end) {
+                        dates.add(calTx.timeInMillis to calTx.timeInMillis)
+                    }
                 }
             }
         }
