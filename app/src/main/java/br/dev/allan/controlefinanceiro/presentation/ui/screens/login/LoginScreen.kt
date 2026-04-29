@@ -52,7 +52,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Image(
-                painter = painterResource(id = R.drawable.zeno_positive),
+                painter = painterResource(id = R.drawable.positive2),
                 contentDescription = "Zeno Logo",
                 modifier = Modifier
                     .size(120.dp)

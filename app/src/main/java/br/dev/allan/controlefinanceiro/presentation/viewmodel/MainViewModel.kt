@@ -35,6 +35,9 @@ class MainViewModel @Inject constructor(
     private val _userPhotoUrl = MutableStateFlow(auth.currentUser?.photoUrl?.toString())
     val userPhotoUrl = _userPhotoUrl.asStateFlow()
 
+    private val _isUserLoggedIn = MutableStateFlow(auth.currentUser != null)
+    val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
+
     private val _logoutEvent = MutableSharedFlow<Unit>()
     val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
@@ -66,10 +69,40 @@ class MainViewModel @Inject constructor(
             val user = firebaseAuth.currentUser
             _userName.value = user?.displayName ?: ""
             _userEmail.value = user?.email ?: ""
-            _userPhotoUrl.value = user?.photoUrl?.toString()
+            _isUserLoggedIn.value = user != null
+            // Não atualizamos a foto aqui para evitar loops com o refreshUserInfo
         }
         
         checkAuthIntegrity()
+        refreshUserInfo()
+    }
+
+    fun refreshUserInfo() {
+        viewModelScope.launch {
+            try {
+                auth.currentUser?.reload()?.await()
+                val user = auth.currentUser
+                _userName.value = user?.displayName ?: ""
+                _userEmail.value = user?.email ?: ""
+                _isUserLoggedIn.value = user != null
+                
+                val rawPhotoUrl = user?.photoUrl?.toString()
+                if (rawPhotoUrl != null) {
+                    // Adiciona um timestamp para forçar o Coil a recarregar a imagem ignorando o cache
+                    val timestamp = System.currentTimeMillis()
+                    val freshPhotoUrl = if (rawPhotoUrl.contains("?")) {
+                        "$rawPhotoUrl&refresh=$timestamp"
+                    } else {
+                        "$rawPhotoUrl?refresh=$timestamp"
+                    }
+                    _userPhotoUrl.value = freshPhotoUrl
+                } else {
+                    _userPhotoUrl.value = null
+                }
+            } catch (e: Exception) {
+                // Falha silenciosa
+            }
+        }
     }
 
     private fun checkAuthIntegrity() {

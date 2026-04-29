@@ -27,41 +27,20 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.compon
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoDrawBoxTop
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CreditCard
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import br.dev.allan.controlefinanceiro.presentation.ui.components.DateHeader
 import br.dev.allan.controlefinanceiro.presentation.ui.components.TransactionItemRow
-import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceModelBottomSheet
+import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceModalBottomSheet
 import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceItem
 import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportItemUiModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.HomeViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,14 +68,14 @@ fun HomeScreen(
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         item {
-            ZenoDrawBoxTop {
-                TotalExpAndIncByMonthCard(
-                    uiState.incomes,
-                    uiState.expenses,
-                    uiState.balance,
-                    selectedMonth,
-                )
-            }
+            //ZenoDrawBoxTop {//content}
+            Spacer(modifier = Modifier.size(16.dp))
+            TotalExpAndIncByMonthCard(
+                uiState.incomes,
+                uiState.expenses,
+                uiState.balance,
+                selectedMonth,
+            )
         }
 
         item {
@@ -194,7 +173,7 @@ fun HomeScreen(
     }
 
     selectedInvoice?.let { invoice ->
-        InvoiceModelBottomSheet(
+        InvoiceModalBottomSheet(
             invoice = invoice,
             isAmountVisible = isBalanceVisible,
             onDismissRequest = { selectedInvoice = null },

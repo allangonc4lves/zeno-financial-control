@@ -49,22 +49,10 @@ class CreditCardTransactionViewModel @Inject constructor(
         val monthMillis: Long
     )
 
-    private fun getPeriodForMonth(monthMillis: Long, closingDate: String): Pair<String, String> {
+    private fun getPeriodForMonth(monthMillis: Long, closingDay: Int): Pair<String, String> {
         val calendar = Calendar.getInstance().apply { timeInMillis = monthMillis }
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
-
-        val closingDay = try {
-            if (closingDate.isEmpty()) {
-                1
-            } else {
-                val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(closingDate)
-                val cal = Calendar.getInstance().apply { time = date!! }
-                cal.get(Calendar.DAY_OF_MONTH)
-            }
-        } catch (e: Exception) {
-            1
-        }
 
         val endCal = Calendar.getInstance().apply {
             set(Calendar.YEAR, year)
@@ -104,14 +92,9 @@ class CreditCardTransactionViewModel @Inject constructor(
         cards
     ) { cardId, monthMillis, code, allCards ->
         val card = allCards.find { it.id == cardId }
-        val closingDay = try {
-            if (card?.invoiceClosing?.isNotEmpty() == true) {
-                val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(card.invoiceClosing)
-                Calendar.getInstance().apply { time = date!! }.get(Calendar.DAY_OF_MONTH)
-            } else 1
-        } catch (e: Exception) { 1 }
+        val closingDay = card?.invoiceClosing ?: 1
 
-        val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: "")
+        val period = getPeriodForMonth(monthMillis, closingDay)
         val monthYear = SimpleDateFormat("MM-yyyy", Locale.getDefault()).format(Date(monthMillis))
         val params = CreditCardParams(cardId, monthYear, code, closingDay, monthMillis)
         Triple(params, period.first, period.second)
@@ -174,8 +157,8 @@ class CreditCardTransactionViewModel @Inject constructor(
     ) { cardId, monthMillis, code, allCards ->
         val monthYear = SimpleDateFormat("MM/yyyy", Locale.getDefault()).format(Date(monthMillis))
         val card = allCards.find { it.id == cardId }
-        Triple(Triple(cardId, monthMillis, monthYear), card?.invoiceClosing ?: "", code)
-    }.flatMapLatest { (triple, closingDate, _) ->
+        Triple(Triple(cardId, monthMillis, monthYear), card?.invoiceClosing ?: 1, code)
+    }.flatMapLatest { (triple, closingDay, _) ->
         val (cardId, monthMillis, monthYear) = triple
         if (cardId == null) return@flatMapLatest flowOf(emptyList<CreditCardAmountByYear>())
 
@@ -194,7 +177,7 @@ class CreditCardTransactionViewModel @Inject constructor(
                 }
 
                 val monthStartMillis = monthCal.timeInMillis
-                val period = getPeriodForMonth(monthStartMillis, closingDate)
+                val period = getPeriodForMonth(monthStartMillis, closingDay)
                 val monthStartStr = period.first
                 val monthEndStr = period.second
 
@@ -236,12 +219,7 @@ class CreditCardTransactionViewModel @Inject constructor(
             flowOf(currencyManager.formatByCurrencyCode(0.0, code))
         } else {
             val card = allCards.find { it.id == cardId }
-            val closingDay = try {
-                if (card?.invoiceClosing?.isNotEmpty() == true) {
-                    val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(card.invoiceClosing)
-                    Calendar.getInstance().apply { time = date!! }.get(Calendar.DAY_OF_MONTH)
-                } else 1
-            } catch (e: Exception) { 1 }
+            val closingDay = card?.invoiceClosing ?: 1
 
             transactionRepository.getTotalUnpaidForCard(cardId, closingDay).map { total ->
                 currencyManager.formatByCurrencyCode(total, code)
@@ -256,7 +234,7 @@ class CreditCardTransactionViewModel @Inject constructor(
         cards
     ) { cardId, monthMillis, allCards ->
         val card = allCards.find { it.id == cardId }
-        val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: "")
+        val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: 1)
         Triple(cardId, monthMillis, period)
     }.flatMapLatest { (cardId, monthMillis, period) ->
         if (cardId == null) return@flatMapLatest flowOf(emptyMap<CategoryAppearance, Double>())
@@ -281,8 +259,12 @@ class CreditCardTransactionViewModel @Inject constructor(
         map.mapValues { currencyManager.formatByCurrencyCode(it.value, code) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    private val _uiEvent = kotlinx.coroutines.channels.Channel<String>()
+    private val _uiEvent = kotlinx.coroutines.channels.Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
+
+    sealed class UiEvent {
+        data class ShowSnackbar(val messageResId: Int) : UiEvent()
+    }
 
     fun markMonthAsPaid(isPaid: Boolean) {
         viewModelScope.launch {
@@ -290,7 +272,7 @@ class CreditCardTransactionViewModel @Inject constructor(
             val monthMillis = _currentMonth.value
             
             val card = cards.value.find { it.id == cardId }
-            val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: "")
+            val period = getPeriodForMonth(monthMillis, card?.invoiceClosing ?: 1)
             val (startStr, endStr) = period
 
             val monthYear = SimpleDateFormat("MM/yyyy", Locale.getDefault()).format(Date(monthMillis))
@@ -330,7 +312,7 @@ class CreditCardTransactionViewModel @Inject constructor(
                     val invoiceTotal = transactionsInMonth.sumOf { it.amount }
 
                     if (totalPaidExpenses + otherPaidInvoices + invoiceTotal > totalIncome) {
-                        _uiEvent.send("Saldo insuficiente para pagar esta fatura!")
+                        _uiEvent.send(UiEvent.ShowSnackbar(br.dev.allan.controlefinanceiro.R.string.insufficient_balance_card))
                         return@launch
                     }
                 }

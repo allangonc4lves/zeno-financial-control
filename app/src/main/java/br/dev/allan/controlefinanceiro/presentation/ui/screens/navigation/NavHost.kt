@@ -14,7 +14,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactio
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.creditCardsScreen.CreditCardsScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.HomeScreen
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.login.LoginScreen
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.reportsScreen.ReportsScreen
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen.TransactionsScreen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -23,11 +23,9 @@ fun NavHost(
     innerPadding: PaddingValues
 ) {
     val auth = FirebaseAuth.getInstance()
-    
-    // Verifica se o usuário existe no Auth e força reload para checar se a conta ainda é válida
+
     val currentUser = auth.currentUser
-    
-    // Lógica de destino inicial baseada apenas no Auth
+
     val startDest = if (currentUser == null) LoginRoute else HomeRoute
 
     NavHost(
@@ -48,24 +46,24 @@ fun NavHost(
             HomeScreen()
         }
 
-        dialog<AddTransactionRoute> { backStackEntry ->
-            val route: AddTransactionRoute = backStackEntry.toRoute()
+        dialog<SaveTransactionRoute> { backStackEntry ->
+            val route: SaveTransactionRoute = backStackEntry.toRoute()
             SaveTransactionDialog(
                 transactionId = route.id,
                 onDismiss = { navController.popBackStack() }
             )
         }
 
-        composable<ReportsRoute> {
-            ReportsScreen(navController)
+        composable<TransactionsRoute> {
+            TransactionsScreen(navController)
         }
 
         composable< CreditCardsRoute> {
             CreditCardsScreen(navController)
         }
 
-        dialog< AddCreditCardRoute> { backStackEntry ->
-            val route: AddCreditCardRoute = backStackEntry.toRoute()
+        dialog< SaveCreditCardRoute> { backStackEntry ->
+            val route: SaveCreditCardRoute = backStackEntry.toRoute()
             SaveCreditCardDialog(
                 cardId = route.id,
                 onDismiss = { navController.popBackStack() }

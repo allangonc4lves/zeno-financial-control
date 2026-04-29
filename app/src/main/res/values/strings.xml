@@ -4,7 +4,7 @@
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_transactions">Transactions</string>
-    <string name="nav_reports">Reports</string>
+    <string name="nav_reports">Transactions</string>
     <string name="nav_credit_cards">Credit Cards</string>
 
     <!-- General -->
@@ -16,7 +16,7 @@
     <string name="delete">Delete</string>
     <string name="no_records_found">No records found!</string>
 
-    <!-- Reports Screen -->
+    <!-- Transactions Screen -->
     <string name="report">Report</string>
     <string name="select_period">Select Period</string>
     <string name="incomes">Incomes</string>

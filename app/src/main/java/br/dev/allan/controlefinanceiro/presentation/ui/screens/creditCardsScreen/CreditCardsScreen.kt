@@ -16,30 +16,22 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
-import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -69,10 +61,8 @@ import br.dev.allan.controlefinanceiro.presentation.ui.components.CreditCardPrev
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.homeScreen.components.ExpensesByCategoryCard
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.AddCreditCardRoute
-import br.dev.allan.controlefinanceiro.presentation.ui.components.DateHeader
-import br.dev.allan.controlefinanceiro.presentation.ui.components.TransactionItemRow
-import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceModelBottomSheet
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.SaveCreditCardRoute
+import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceModalBottomSheet
 import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportItemUiModel
 import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
 import br.dev.allan.controlefinanceiro.presentation.ui.components.MonthSelector
@@ -82,6 +72,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomCard
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.CreditCardTransactionViewModel
@@ -105,14 +96,19 @@ fun CreditCardsScreen(
     val categoryChartValues by viewModel.categoryChartData.collectAsState()
     val categoryChartLabels by viewModel.categoryChartLabels.collectAsState()
 
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val sheetState = rememberModalBottomSheetState()
     var showInvoiceSheet by remember { mutableStateOf(false) }
     var selectedTransactionId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        viewModel.uiEvent.collectLatest { message ->
-            snackbarHostState.showSnackbar(message)
+        viewModel.uiEvent.collectLatest { event ->
+            when (event) {
+                is CreditCardTransactionViewModel.UiEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(context.getString(event.messageResId))
+                }
+            }
         }
     }
 
@@ -200,7 +196,7 @@ fun CreditCardsScreen(
                                 .clickable {
                                     navViewModel.navigateToForm(
                                         navController = navController,
-                                        route = AddCreditCardRoute(id = card.id)
+                                        route = SaveCreditCardRoute(id = card.id)
                                     )
                                 }
                         )
@@ -291,7 +287,7 @@ fun CreditCardsScreen(
                 transactions = transactions,
                 dateForSorting = currentMonth
             )
-            InvoiceModelBottomSheet(
+            InvoiceModalBottomSheet(
                 invoice = invoice,
                 isAmountVisible = true,
                 onDismissRequest = { showInvoiceSheet = false },

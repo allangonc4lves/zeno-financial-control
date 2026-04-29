@@ -5,8 +5,8 @@ data class CreditCardDto(
     val bankName: String = "",
     val brand: String = "",
     val lastDigits: Int = 0,
-    val invoiceClosing: String = "",
-    val dueDate: String = "",
+    val invoiceClosing: Int = 1,
+    val dueDate: Int = 10,
     val backgroundColor: Long = 0xFF000000,
     @field:JvmField
     val activated: Boolean = true,

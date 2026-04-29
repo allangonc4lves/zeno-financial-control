@@ -63,8 +63,6 @@ fun SaveCreditCardDialog(
     val state = viewModel.uiState
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    var showClosingPicker by remember { mutableStateOf(false) }
-    var showDuePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(cardId) {
         if (cardId != null) {
@@ -185,30 +183,28 @@ fun SaveCreditCardDialog(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
-                            value = DateHelper.fromDbToUi(state.invoiceClosing).toSystemFormatDate(),
+                            value = state.invoiceClosing.toString(),
                             label = stringResource(id = R.string.invoice_closing_label),
-                            isReadOnly = true,
-                            isError = false,
-                            errorMessage = "",
-                            onValueChange = {},
-                            trailingIcon = {
-                                IconButton(onClick = { showClosingPicker = true }) {
-                                    Icon(Icons.Default.DateRange, stringResource(id = R.string.invoice_closing_label))
+                            inputMode = InputModeCustomTextField.DIGITS,
+                            maxLength = 2,
+                            onValueChange = {
+                                val day = it.toIntOrNull() ?: 1
+                                if (day in 1..28) {
+                                    viewModel.onInvoiceClosingChange(day)
                                 }
                             }
                         )
 
                         CustomOutlinedTextField(
                             modifier = Modifier.weight(0.5f),
-                            value = DateHelper.fromDbToUi(state.dueDate).toSystemFormatDate(),
+                            value = state.dueDate.toString(),
                             label = stringResource(id = R.string.due_date_label),
-                            isReadOnly = true,
-                            isError = false,
-                            errorMessage = "",
-                            onValueChange = {},
-                            trailingIcon = {
-                                IconButton(onClick = { showDuePicker = true }) {
-                                    Icon(Icons.Default.DateRange, stringResource(id = R.string.due_date_label))
+                            inputMode = InputModeCustomTextField.DIGITS,
+                            maxLength = 2,
+                            onValueChange = {
+                                val day = it.toIntOrNull() ?: 1
+                                if (day in 1..31) {
+                                    viewModel.onDueDateChange(day)
                                 }
                             }
                         )
@@ -229,50 +225,6 @@ fun SaveCreditCardDialog(
                         backgroundColorLong = state.backgroundColor,
                         previewType = CreditCardPreviewType.SMALL
                     )
-                }
-
-                if (showClosingPicker) {
-                    val datePickerState = rememberDatePickerState(
-                        initialSelectedDateMillis = if (state.invoiceClosing.isNotEmpty()) {
-                            SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(state.invoiceClosing)?.time
-                        } else System.currentTimeMillis()
-                    )
-
-                    DatePickerDialog(
-                        onDismissRequest = { showClosingPicker = false },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                datePickerState.selectedDateMillis?.let { millis ->
-                                    viewModel.onInvoiceClosingChange(DateHelper.fromMillisToDb(millis))
-                                }
-                                showClosingPicker = false
-                            }) { Text(stringResource(R.string.ok)) }
-                        }
-                    ) {
-                        DatePicker(state = datePickerState)
-                    }
-                }
-
-                if (showDuePicker) {
-                    val datePickerState = rememberDatePickerState(
-                        initialSelectedDateMillis = if (state.dueDate.isNotEmpty()) {
-                            SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(state.dueDate)?.time
-                        } else System.currentTimeMillis()
-                    )
-
-                    DatePickerDialog(
-                        onDismissRequest = { showDuePicker = false },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                datePickerState.selectedDateMillis?.let { millis ->
-                                    viewModel.onDueDateChange(DateHelper.fromMillisToDb(millis))
-                                }
-                                showDuePicker = false
-                            }) { Text(stringResource(R.string.ok)) }
-                        }
-                    ) {
-                        DatePicker(state = datePickerState)
-                    }
                 }
 
                 if (state.isLoading) {

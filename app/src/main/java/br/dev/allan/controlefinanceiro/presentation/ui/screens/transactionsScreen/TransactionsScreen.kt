@@ -1,8 +1,9 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.screens.transactionsScreen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,72 +14,80 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ListItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
-import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CreditCard
+import br.dev.allan.controlefinanceiro.presentation.ui.components.DateHeader
+import br.dev.allan.controlefinanceiro.presentation.ui.components.TransactionItemRow
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.R
-import br.dev.allan.controlefinanceiro.presentation.ui.components.DateHeader
-import br.dev.allan.controlefinanceiro.presentation.ui.components.TransactionItemRow
-import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextTitle
+import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
-import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.activity.ComponentActivity
-import androidx.compose.ui.platform.LocalContext
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
-import br.dev.allan.controlefinanceiro.presentation.viewmodel.MonthTransactionsViewModel
-import androidx.compose.runtime.collectAsState
-import kotlinx.coroutines.flow.collectLatest
+import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportItemUiModel
+import br.dev.allan.controlefinanceiro.presentation.viewmodel.ReportViewModel
+import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionStatusFilter
+import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionTypeFilter
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceModalBottomSheet
+import br.dev.allan.controlefinanceiro.presentation.ui.components.SaveTransactionDialog
+import br.dev.allan.controlefinanceiro.presentation.ui.components.InvoiceItem
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
     navController: NavHostController,
-    viewModel: MonthTransactionsViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel(LocalContext.current as ComponentActivity)
+    viewModel: ReportViewModel = hiltViewModel()
 ) {
-    val transactions by viewModel.transactionsUiModel.collectAsStateWithLifecycle()
-    val searchQuery by mainViewModel.searchQuery.collectAsState()
-    val currentMonthMillis by viewModel.currentMonth.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val filteredTransactions = remember(transactions, searchQuery) {
-        if (searchQuery.isBlank()) transactions
-        else {
-            val query = searchQuery.trim().lowercase()
-            transactions.filter { tx ->
-                tx.title.lowercase().contains(query) ||
-                tx.formattedAmount.lowercase().contains(query) ||
-                tx.category?.name?.lowercase()?.contains(query) == true ||
-                tx.dateDisplay.contains(query) ||
-                tx.formattedParcelInfo?.lowercase()?.contains(query) == true
-            }
-        }
-    }
-
+    val uiState by viewModel.reportUiState.collectAsStateWithLifecycle()
+    val filterState by viewModel.filterState.collectAsStateWithLifecycle()
+    val isBalanceVisible by viewModel.isBalanceVisible.collectAsStateWithLifecycle()
+    var selectedInvoice by remember { mutableStateOf<ReportItemUiModel.Invoice?>(null) }
     var selectedTransactionId by remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState()
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showCategorySheet by remember { mutableStateOf(false) }
+    val dateRangePickerState = rememberDateRangePickerState()
+    val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
 
     selectedTransactionId?.let { id ->
         SaveTransactionDialog(
@@ -87,121 +96,383 @@ fun TransactionsScreen(
         )
     }
 
-    val groupedTransactions = remember(filteredTransactions) {
-        filteredTransactions.groupBy { uiModel ->
-            val cal = Calendar.getInstance().apply { timeInMillis = uiModel.dateMillis }
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            cal.timeInMillis
-        }.toSortedMap(compareByDescending { it })
-    }
-
-    val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        viewModel.uiEvent.collectLatest { event ->
-            when (event) {
-                is MonthTransactionsViewModel.UiEvent.ShowSnackbar -> {
-                    val message = context.getString(event.messageResId, *event.formatArgs.toTypedArray())
-                    snackbarHostState.showSnackbar(message)
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val start = dateRangePickerState.selectedStartDateMillis
+                    val end = dateRangePickerState.selectedEndDateMillis
+                    if (start != null && end != null) {
+                        viewModel.updateDateRange(start, end)
+                    }
+                    showDatePicker = false
+                }) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
+        ) {
+            DateRangePicker(
+                state = dateRangePickerState,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp),
+                title = { Text(stringResource(R.string.select_period), modifier = Modifier.padding(16.dp)) },
+                showModeToggle = false
+            )
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = stringResource(R.string.report), style = MaterialTheme.typography.titleLarge)
+            OutlinedButton(onClick = { showDatePicker = true }) {
+                Text(
+                    text = "${dateFormat.format(Date(filterState.startDate))} - ${
+                        dateFormat.format(
+                            Date(filterState.endDate)
+                        )
+                    }",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SummaryCard(
+                title = stringResource(R.string.incomes),
+                value = if (isBalanceVisible) uiState.formattedTotalIncome else "••••",
+                color = Color(0xFF1B5E20),
+                modifier = Modifier.weight(1f)
+            )
+            SummaryCard(
+                title = stringResource(R.string.expenses),
+                value = if (isBalanceVisible) uiState.formattedTotalExpense else "••••",
+                color = Color(0xFFAB1A1A),
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            MonthSelector(
-                currentMonthMillis = currentMonthMillis,
-                onPreviousMonth = { viewModel.changeMonth(-1) },
-                onNextMonth = { viewModel.changeMonth(1) }
+            SummaryCard(
+                title = stringResource(R.string.period_balance),
+                value = if (isBalanceVisible) uiState.formattedBalance else "••••",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f)
             )
+        }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (filteredTransactions.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.zeno_not_found),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(bottom = 8.dp),
-                        contentScale = ContentScale.Inside
-                    )
-                    CustomTextContent(
-                        text = stringResource(R.string.no_records_found),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 8.dp)
-                ) {
-                    groupedTransactions.forEach { (dateMillis, items) ->
-                        item {
-                            DateHeader(dateMillis = dateMillis)
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            item {
+                FilterChip(
+                    selected = filterState.typeFilter == TransactionTypeFilter.WALLET_ONLY,
+                    onClick = {
+                        val newFilter =
+                            if (filterState.typeFilter == TransactionTypeFilter.WALLET_ONLY)
+                                TransactionTypeFilter.ALL else TransactionTypeFilter.WALLET_ONLY
+                        viewModel.updateTypeFilter(newFilter)
+                    },
+                    label = { Text(stringResource(R.string.wallet)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.AccountBalanceWallet,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+            }
+            item {
+                FilterChip(
+                    selected = filterState.typeFilter == TransactionTypeFilter.INVOICES_ONLY,
+                    onClick = {
+                        val newFilter =
+                            if (filterState.typeFilter == TransactionTypeFilter.INVOICES_ONLY)
+                                TransactionTypeFilter.ALL else TransactionTypeFilter.INVOICES_ONLY
+                        viewModel.updateTypeFilter(newFilter)
+                    },
+                    label = { Text(stringResource(R.string.credit_card_label)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.CreditCard,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+            }
+            item {
+                val selectedCategory = filterState.categoryFilter
+                FilterChip(
+                    selected = filterState.categoryFilter != null,
+                    onClick = {
+                        if (filterState.categoryFilter != null) {
+                            viewModel.updateCategoryFilter(null)
+                        } else {
+                            showCategorySheet = true
                         }
-                        items(items, key = { it.id }) { uiModel ->
-                            TransactionItemRow(
-                                uiModel = uiModel,
-                                onTogglePayment = {
-                                    viewModel.togglePayment(uiModel)
-                                },
-                                onClick = {
-                                    selectedTransactionId = uiModel.id
-                                }
+                    },
+                    label = {
+                        val categoryName = if (selectedCategory != null) {
+                            TransactionCategory.entries.find { it.name == selectedCategory }
+                                ?.getAppearance()?.displayNameRes?.let { stringResource(it) } ?: selectedCategory
+                        } else {
+                            stringResource(R.string.categories)
+                        }
+                        Text(categoryName)
+                    },
+                    leadingIcon = {
+                        if (selectedCategory != null) {
+                            val appearance =
+                                TransactionCategory.entries.find { it.name == selectedCategory }
+                                    ?.getAppearance()
+                            appearance?.let {
+                                Icon(
+                                    it.icon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        } else {
+                            Icon(
+                                Icons.Default.Category,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
+                    },
+                    trailingIcon = {
+                        if (selectedCategory != null) {
+                            IconButton(
+                                onClick = { viewModel.updateCategoryFilter(null) },
+                                modifier = Modifier.size(18.dp)
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
+                            }
+                        }
+                    }
+                )
+            }
+            item {
+                FilterChip(
+                    selected = filterState.typeFilter == TransactionTypeFilter.INCOME,
+                    onClick = {
+                        val newFilter =
+                            if (filterState.typeFilter == TransactionTypeFilter.INCOME) TransactionTypeFilter.ALL else TransactionTypeFilter.INCOME
+                        viewModel.updateTypeFilter(newFilter)
+                    },
+                    label = { Text(stringResource(R.string.incomes)) }
+                )
+            }
+            item {
+                FilterChip(
+                    selected = filterState.typeFilter == TransactionTypeFilter.EXPENSE,
+                    onClick = {
+                        val newFilter =
+                            if (filterState.typeFilter == TransactionTypeFilter.EXPENSE) TransactionTypeFilter.ALL else TransactionTypeFilter.EXPENSE
+                        viewModel.updateTypeFilter(newFilter)
+                    },
+                    label = { Text(stringResource(R.string.expenses)) }
+                )
+            }
+            item {
+                FilterChip(
+                    selected = filterState.statusFilter == TransactionStatusFilter.PAID,
+                    onClick = {
+                        val newFilter =
+                            if (filterState.statusFilter == TransactionStatusFilter.PAID) TransactionStatusFilter.ALL else TransactionStatusFilter.PAID
+                        viewModel.updateStatusFilter(newFilter)
+                    },
+                    label = { Text(stringResource(R.string.paid_filter)) }
+                )
+            }
+            item {
+                FilterChip(
+                    selected = filterState.statusFilter == TransactionStatusFilter.UNPAID,
+                    onClick = {
+                        val newFilter =
+                            if (filterState.statusFilter == TransactionStatusFilter.UNPAID) TransactionStatusFilter.ALL else TransactionStatusFilter.UNPAID
+                        viewModel.updateStatusFilter(newFilter)
+                    },
+                    label = { Text(stringResource(R.string.pending_filter)) }
+                )
+            }
+        }
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Text(
+                    text = stringResource(R.string.period_items_count, uiState.items.size),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            if (uiState.items.isNotEmpty()) {
+                uiState.items.forEachIndexed { index, item ->
+                    when (item) {
+                        is ReportItemUiModel.Transaction -> {
+                            val previousItem = if (index > 0) uiState.items[index - 1] else null
+                            val showHeader = previousItem == null || 
+                                (previousItem is ReportItemUiModel.Transaction && previousItem.model.formattedDate != item.model.formattedDate) ||
+                                (previousItem is ReportItemUiModel.Invoice)
+                            if (showHeader) {
+                                item {
+                                    DateHeader(dateMillis = item.model.dateMillis)
+                                }
+                            }
+                            item {
+                                TransactionItemRow(
+                                    uiModel = item.model,
+                                    isAmountVisible = isBalanceVisible,
+                                    onClick = { selectedTransactionId = item.model.id }
+                                )
+                            }
+                        }
+                        is ReportItemUiModel.Invoice -> {
+                            item {
+                                InvoiceItem(
+                                    invoice = item,
+                                    isAmountVisible = isBalanceVisible,
+                                    onClick = { selectedInvoice = item }
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.zeno_not_found),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(150.dp)
+                                .padding(bottom = 8.dp),
+                            contentScale = ContentScale.Inside
+                        )
+                        CustomTextContent(
+                            text = stringResource(R.string.no_records_found),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
             }
         }
 
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 80.dp) // Ajuste para não sobrepor a bottom bar da MainScreen
-        )
+        selectedInvoice?.let { invoice ->
+            InvoiceModalBottomSheet(
+                invoice = invoice,
+                isAmountVisible = isBalanceVisible,
+                onDismissRequest = { selectedInvoice = null },
+                sheetState = sheetState,
+                onTransactionClick = { selectedTransactionId = it }
+            )
+        }
+
+        if (showCategorySheet) {
+            ModalBottomSheet(onDismissRequest = { showCategorySheet = false }) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 32.dp)
+                ) {
+                    item {
+                        Text(
+                            stringResource(R.string.filter_by_category),
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    item {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.all_categories)) },
+                            modifier = Modifier.clickable {
+                                viewModel.updateCategoryFilter(null)
+                                showCategorySheet = false
+                            }
+                        )
+                    }
+                    items(TransactionCategory.entries) { category ->
+                        val appearance = category.getAppearance()
+                        ListItem(
+                            headlineContent = { Text(stringResource(appearance.displayNameRes)) },
+                            leadingContent = {
+                                Icon(
+                                    appearance.icon,
+                                    contentDescription = null,
+                                    tint = appearance.color
+                                )
+                            },
+                            modifier = Modifier.clickable {
+                                viewModel.updateCategoryFilter(category.name)
+                                showCategorySheet = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun MonthSelector(
-    currentMonthMillis: Long,
-    onPreviousMonth: () -> Unit,
-    onNextMonth: () -> Unit
-) {
-    val monthLabel = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-        .format(Date(currentMonthMillis))
-        .replaceFirstChar { it.uppercase() }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+fun SummaryCard(title: String, value: String, color: Color, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        IconButton(onClick = onPreviousMonth) {
-            Icon(Icons.Default.KeyboardDoubleArrowLeft, contentDescription = stringResource(R.string.previous_month))
-        }
-
-        CustomTextTitle(text = monthLabel)
-
-        IconButton(onClick = onNextMonth) {
-            Icon(Icons.Default.KeyboardDoubleArrowRight, contentDescription = stringResource(R.string.next_month))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = title, style = MaterialTheme.typography.labelMedium, color = color)
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
         }
     }
 }

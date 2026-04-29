@@ -50,11 +50,11 @@ class CreditCardsViewModel @Inject constructor(
             Log.i("teste", uiState.lastDigits)
     }
 
-    fun onInvoiceClosingChange(newDate: String) {
+    fun onInvoiceClosingChange(newDate: Int) {
         uiState = uiState.copy(invoiceClosing = newDate)
     }
 
-    fun onDueDateChange(newDate: String) {
+    fun onDueDateChange(newDate: Int) {
         uiState = uiState.copy(dueDate = newDate)
     }
 

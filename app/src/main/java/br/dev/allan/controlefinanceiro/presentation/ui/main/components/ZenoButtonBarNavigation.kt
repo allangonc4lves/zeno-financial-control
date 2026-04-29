@@ -36,7 +36,7 @@ fun ZenoButtonBarNavigation(
             imageVector = item.icon,
             contentDescription = item.label,
             tint = colorIcon,
-            modifier = iconModifier.size(24.dp)
+            modifier = iconModifier.size(32.dp)
         )
         Text(
             text = item.label,

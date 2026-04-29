@@ -39,7 +39,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportItemUiModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InvoiceModelBottomSheet(
+fun InvoiceModalBottomSheet(
     invoice: ReportItemUiModel.Invoice,
     isAmountVisible: Boolean,
     onDismissRequest: () -> Unit,

@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Analytics
+import androidx.compose.material.icons.rounded.CompareArrows
 import androidx.compose.material.icons.rounded.CreditCard
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.*
@@ -39,7 +39,7 @@ import br.dev.allan.controlefinanceiro.R
 import br.dev.allan.controlefinanceiro.domain.model.ButtonAppBarNavigation
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.NavigationViewModel
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.HomeRoute
-import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.ReportsRoute
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.TransactionsRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.CreditCardsRoute
 import androidx.navigation.NavDestination.Companion.hasRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
@@ -59,7 +59,7 @@ fun ZenoBottomAppBar(
 
     val buttonsAppBarList = listOf(
         ButtonAppBarNavigation(stringResource(R.string.nav_home), Icons.Rounded.Home, HomeRoute),
-        ButtonAppBarNavigation(stringResource(R.string.nav_reports), Icons.Rounded.Analytics, ReportsRoute),
+        ButtonAppBarNavigation(stringResource(R.string.nav_reports), Icons.Rounded.CompareArrows, TransactionsRoute),
         ButtonAppBarNavigation(stringResource(R.string.nav_credit_cards), Icons.Rounded.CreditCard, CreditCardsRoute)
     )
 
@@ -115,14 +115,14 @@ fun ZenoBottomAppBar(
                 Box(
                     modifier = Modifier
                         .offset(
-                            x = with(density) { (animatedX - (14.dp.toPx())).toDp() },
-                            y = with(density) { (animatedY - (14.dp.toPx())).toDp() }
+                            x = with(density) { (animatedX - (18.dp.toPx())).toDp() },
+                            y = with(density) { (animatedY - (18.dp.toPx())).toDp() }
                         )
                         .graphicsLayer {
                             scaleX = animatedScale
                             scaleY = animatedScale
                         }
-                        .size(28.dp)
+                        .size(36.dp)
                         .background(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 1f),
                             shape = CircleShape
@@ -171,7 +171,7 @@ fun ZenoBottomAppBar(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(33.dp)
                             .clip(CircleShape),
                         contentAlignment = Alignment.Center
                     ) {

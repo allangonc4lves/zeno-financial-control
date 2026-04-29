@@ -14,6 +14,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoBottomAppBar
 import br.dev.allan.controlefinanceiro.presentation.ui.components.FabBottomBar
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ZenoTopBar
@@ -21,6 +22,7 @@ import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.NavHos
 import androidx.navigation.NavDestination.Companion.hasRoute
 import br.dev.allan.controlefinanceiro.presentation.ui.main.components.ProfileSheetContent
 import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.LoginRoute
+import br.dev.allan.controlefinanceiro.presentation.ui.screens.navigation.HomeRoute
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.LoginViewModel
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.MainViewModel
 
@@ -31,6 +33,18 @@ fun MainScreen(
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
+    val isUserLoggedIn by mainViewModel.isUserLoggedIn.collectAsState()
+
+    LaunchedEffect(isUserLoggedIn) {
+        if (isUserLoggedIn) {
+            val currentRoute = navController.currentBackStackEntry?.destination?.route
+            if (currentRoute == LoginRoute::class.qualifiedName || currentRoute == null) {
+                navController.navigate(HomeRoute) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         mainViewModel.logoutEvent.collect {
@@ -50,11 +64,13 @@ fun MainScreen(
     val showBars = currentDestination?.hasRoute<LoginRoute>() == false
 
     Scaffold(
+        /*
         topBar = {
             if (showBars) {
                 ZenoTopBar()
             }
         },
+        */
         bottomBar = {
             if (showBars) {
                 ZenoBottomAppBar(

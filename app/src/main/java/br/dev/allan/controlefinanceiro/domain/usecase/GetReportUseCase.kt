@@ -42,12 +42,7 @@ class GetReportUseCase @Inject constructor() {
             if (filters.categoryFilter != null && tx.category.name != filters.categoryFilter) return@forEach
 
             val card = cards.find { it.id == tx.creditCardId }
-            val closingDay = try {
-                if (card?.invoiceClosing?.isNotEmpty() == true) {
-                    val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(card.invoiceClosing)
-                    Calendar.getInstance().apply { time = date!! }.get(Calendar.DAY_OF_MONTH)
-                } else 1
-            } catch (e: Exception) { 1 }
+            val closingDay = card?.invoiceClosing ?: 1
 
             val dates = getOccurrencesInRange(tx, filters.startDate, filters.endDate, closingDay)
 
@@ -65,13 +60,10 @@ class GetReportUseCase @Inject constructor() {
                     val actualAmount = getAmountForOccurrence(tx)
                     
                     val actualParcel = if (tx.currentInstallment > 0) {
-                        // If it has a fixed currentInstallment, use it directly
                         tx.currentInstallment
                     } else if (tx.creditCardId != null) {
-                        // Dynamic calculation for credit card starting from parcel 1
                         tx.getParcelIndexForInvoiceMonth(invoiceMonthMillis, closingDay)
                     } else {
-                        // Dynamic calculation for wallet
                         tx.getCurrentParcelIndex(occurrenceDate)
                     }
                     
@@ -126,17 +118,11 @@ class GetReportUseCase @Inject constructor() {
         if (tx.creditCardId != null) {
             val firstInvoiceMonthMillis = tx.getInvoiceMonthStart(closingDay)
             
-            // If it's a credit card transaction, we assume it's one single entry 
-            // that might represent a fixed installment (currentInstallment > 0)
-            // or the start of a sequence (isInstallment = true).
-            
             if (tx.currentInstallment > 0) {
-                // Specific parcel already recorded. It only appears in its own invoice.
                 if (firstInvoiceMonthMillis in start..end) {
                     dates.add(calTx.timeInMillis to firstInvoiceMonthMillis)
                 }
             } else if (tx.isInstallment && tx.installmentCount > 1) {
-                // Sequence of installments.
                 for (i in 0 until tx.installmentCount) {
                     val invoiceMonthCal = Calendar.getInstance().apply {
                         timeInMillis = firstInvoiceMonthMillis
@@ -147,8 +133,6 @@ class GetReportUseCase @Inject constructor() {
                     }
                 }
             } else if (tx.type == TransactionType.REPEAT) {
-                // Fixed/Repeating transaction on credit card.
-                // We show it for up to 24 months or until the end of the selected range.
                 for (i in 0 until 24) {
                     val invoiceMonthCal = Calendar.getInstance().apply {
                         timeInMillis = firstInvoiceMonthMillis
@@ -160,7 +144,6 @@ class GetReportUseCase @Inject constructor() {
                     }
                 }
             } else {
-                // Single credit card transaction.
                 if (firstInvoiceMonthMillis in start..end) {
                     dates.add(calTx.timeInMillis to firstInvoiceMonthMillis)
                 }

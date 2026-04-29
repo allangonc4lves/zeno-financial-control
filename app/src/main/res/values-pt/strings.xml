@@ -4,7 +4,7 @@
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_transactions">Transações</string>
-    <string name="nav_reports">Relatórios</string>
+    <string name="nav_reports">Transações</string>
     <string name="nav_credit_cards">Cartões</string>
 
     <!-- General -->
@@ -16,7 +16,7 @@
     <string name="delete">Excluir</string>
     <string name="no_records_found">Nenhum registro encontrado!</string>
 
-    <!-- Reports Screen -->
+    <!-- Transactions Screen -->
     <string name="report">Relatório</string>
     <string name="select_period">Selecione o período</string>
     <string name="incomes">Receitas</string>
@@ -119,6 +119,8 @@
     <string name="bank_label">Banco*</string>
     <string name="brand_label">Bandeira*</string>
     <string name="last_digits_label">Últimos dígitos</string>
+    <string name="invoice_closing_label">Data de fechamento*</string>
+    <string name="due_date_label">Data de vencimento*</string>
     <string name="select_color">Selecione uma cor:</string>
     <string name="no_card_registered">Nenhum cartão cadastrado</string>
 
