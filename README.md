@@ -2,9 +2,9 @@
 
 <table>
   <tr>
-    <td><img src="app/src/main/res/drawable/app1.png" width="250"/></td>
-    <td><img src="app/src/main/res/drawable/app2.gif" width="250"/></td>
-    <td><img src="app/src/main/res/drawable/app3.png" width="250"/></td>
+    <td><img src="app/src/main/res/drawable/a.png" width="250"/></td>
+    <td><img src="app/src/main/res/drawable/b.gif" width="250"/></td>
+    <td><img src="app/src/main/res/drawable/c.png" width="250"/></td>
   </tr>
 </table>
 
