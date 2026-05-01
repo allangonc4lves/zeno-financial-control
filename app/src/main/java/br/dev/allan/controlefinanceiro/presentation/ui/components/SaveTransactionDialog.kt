@@ -269,6 +269,23 @@ fun SaveTransactionDialog(
                                 selectedCardId = uiState.creditCardId,
                                 onCardSelected = { onAction(TransactionAction.CardSelected(it)) }
                             )
+                        } else {
+                            if (transactionId != null) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    CustomTextContent(
+                                        text = stringResource(R.string.mark_as_paid),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Checkbox(
+                                        checked = uiState.isPaid,
+                                        onCheckedChange = { onAction(TransactionAction.PaidChanged(it)) }
+                                    )
+                                }
+                            }
                         }
                     }
 
