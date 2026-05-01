@@ -10,10 +10,6 @@
 
 Zeno é um aplicativo de gestão financeira pessoal moderno, desenvolvido para oferecer uma experiência fluida e segura. O projeto foca em alta performance, usabilidade e uma arquitetura robusta.
 
-<p align="center">
-  <img src="app/src/main/res/drawable/zeno_positive.png" width="200" alt="Zeno Logo">
-</p>
-
 ## 🚀 Funcionalidades
 
 - **📊 Gestão de Transações**: Cadastro e acompanhamento detalhado de receitas e despesas.
