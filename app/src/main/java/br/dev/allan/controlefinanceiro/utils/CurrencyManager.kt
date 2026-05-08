@@ -7,11 +7,6 @@ import javax.inject.Singleton
 
 @Singleton
 class CurrencyManager @Inject constructor() {
-
-    fun getFormatter(locale: Locale): NumberFormat {
-        return NumberFormat.getCurrencyInstance(locale)
-    }
-
     fun formatByCurrencyCode(amount: Double, code: String): String {
         val locale = when (code) {
             "USD" -> Locale.US

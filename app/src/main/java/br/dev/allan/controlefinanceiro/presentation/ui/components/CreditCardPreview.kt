@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import br.dev.allan.controlefinanceiro.R
-import br.dev.allan.controlefinanceiro.utils.constants.CreditCardPreviewType
+import br.dev.allan.controlefinanceiro.constants.CreditCardPreviewType
 
 @Composable
 fun CreditCardPreview(

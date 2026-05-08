@@ -50,28 +50,6 @@ class MainViewModel @Inject constructor(
     private val _logoutEvent = MutableSharedFlow<Unit>()
     val logoutEvent: SharedFlow<Unit> = _logoutEvent.asSharedFlow()
 
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery = _searchQuery.asStateFlow()
-
-    private val _isSearchMode = MutableStateFlow(false)
-    val isSearchMode = _isSearchMode.asStateFlow()
-
-    private val _searchOriginRoute = MutableStateFlow<Any?>(null)
-    val searchOriginRoute = _searchOriginRoute.asStateFlow()
-
-    fun onSearchQueryChange(query: String) {
-        _searchQuery.value = query
-    }
-
-    fun setSearchMode(enabled: Boolean, origin: Any? = null) {
-        _isSearchMode.value = enabled
-        if (enabled && origin != null) {
-            _searchOriginRoute.value = origin
-        } else if (!enabled) {
-            _searchOriginRoute.value = null
-        }
-    }
-
     init {
         // Observa a URL persistida no DataStore para garantir UX offline consistente
         viewModelScope.launch {
@@ -142,10 +120,6 @@ class MainViewModel @Inject constructor(
                 // Se falhar (ex: offline), o estado já foi inicializado com o DataStore no init
             }
         }
-    }
-
-    private fun updatePhotoState(rawPhotoUrl: String?, forceRefresh: Boolean) {
-        // Este método pode ser removido pois a lógica foi movida para refreshUserInfo
     }
 
     private fun isOnline(): Boolean {

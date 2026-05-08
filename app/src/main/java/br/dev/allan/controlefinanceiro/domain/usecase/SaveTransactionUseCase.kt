@@ -7,7 +7,7 @@ import br.dev.allan.controlefinanceiro.utils.DateHelper
 import br.dev.allan.controlefinanceiro.utils.ValidateAmount
 import br.dev.allan.controlefinanceiro.utils.ValidateCategory
 import br.dev.allan.controlefinanceiro.utils.ValidateText
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 import br.dev.allan.controlefinanceiro.utils.parseToDouble
 import java.text.SimpleDateFormat
 import java.util.Calendar

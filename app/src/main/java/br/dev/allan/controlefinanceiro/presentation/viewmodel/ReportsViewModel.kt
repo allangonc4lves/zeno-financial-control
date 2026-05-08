@@ -9,13 +9,12 @@ import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportItemUiModel
 import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportUiState
 import br.dev.allan.controlefinanceiro.presentation.ui.state.TransactionUIState
 import br.dev.allan.controlefinanceiro.data.local.mapper.toUi
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
 import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository
 import br.dev.allan.controlefinanceiro.domain.usecase.GetReportUseCase
 import br.dev.allan.controlefinanceiro.domain.usecase.ReportData
 import br.dev.allan.controlefinanceiro.utils.CurrencyManager
-import br.dev.allan.controlefinanceiro.utils.formatMillisToMonthYear
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*

@@ -2,9 +2,9 @@ package br.dev.allan.controlefinanceiro.presentation.ui.state
 
 import androidx.compose.ui.graphics.Color
 import br.dev.allan.controlefinanceiro.domain.model.CreditCard
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

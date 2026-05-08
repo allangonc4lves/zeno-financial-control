@@ -6,8 +6,8 @@ import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportFilterState
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionStatusFilter
 import br.dev.allan.controlefinanceiro.presentation.viewmodel.TransactionTypeFilter
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 import br.dev.allan.controlefinanceiro.utils.formatMillisToMonthYear
 import java.text.SimpleDateFormat
 import java.util.*

@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.dev.allan.controlefinanceiro.data.dataStore.SettingsManager
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
 import br.dev.allan.controlefinanceiro.presentation.ui.state.TransactionUIState
 import br.dev.allan.controlefinanceiro.domain.repository.CreditCardRepository
 import br.dev.allan.controlefinanceiro.domain.repository.TransactionRepository

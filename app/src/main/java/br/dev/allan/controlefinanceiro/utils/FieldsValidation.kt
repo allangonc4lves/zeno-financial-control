@@ -1,6 +1,6 @@
 package br.dev.allan.controlefinanceiro.utils
 
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
 
 import br.dev.allan.controlefinanceiro.R
 
@@ -72,7 +72,6 @@ class ValidateLastDigitsCreditCard{
             )
         }
 
-        // Regex: apenas dígitos e exatamente 4 caracteres
         val regex = Regex("^\\d{4}$")
 
         if (!regex.matches(input)) {

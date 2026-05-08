@@ -2,9 +2,9 @@ package br.dev.allan.controlefinanceiro.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 
 @Entity(tableName = "transactions")
 data class TransactionEntity(

@@ -6,8 +6,8 @@ import br.dev.allan.controlefinanceiro.data.local.TransactionEntity
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
 import br.dev.allan.controlefinanceiro.utils.CurrencyManager
 import br.dev.allan.controlefinanceiro.presentation.ui.state.TransactionUIState
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

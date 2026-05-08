@@ -53,7 +53,7 @@ fun HomeScreen(
 
     var selectedInvoice by remember { mutableStateOf<ReportItemUiModel.Invoice?>(null) }
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
+    //val scope = rememberCoroutineScope()
     var selectedTransactionId by remember { mutableStateOf<String?>(null) }
 
     selectedTransactionId?.let { id ->

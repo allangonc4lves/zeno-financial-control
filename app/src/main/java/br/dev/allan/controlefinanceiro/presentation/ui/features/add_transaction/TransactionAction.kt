@@ -1,8 +1,8 @@
 package br.dev.allan.controlefinanceiro.presentation.ui.features.add_transaction
 
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 
 sealed class TransactionAction {
     data class TitleChanged(val value: String) : TransactionAction()

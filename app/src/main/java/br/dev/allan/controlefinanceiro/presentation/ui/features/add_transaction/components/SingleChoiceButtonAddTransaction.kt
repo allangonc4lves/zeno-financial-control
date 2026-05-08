@@ -7,7 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import br.dev.allan.controlefinanceiro.R
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
 
 @Composable
 fun SingleChoiceButtonAddTransaction(

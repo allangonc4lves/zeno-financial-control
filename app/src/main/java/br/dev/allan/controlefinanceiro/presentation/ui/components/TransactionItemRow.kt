@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import br.dev.allan.controlefinanceiro.presentation.ui.state.TransactionUIState
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
 
 import androidx.compose.ui.res.stringResource
 import br.dev.allan.controlefinanceiro.R

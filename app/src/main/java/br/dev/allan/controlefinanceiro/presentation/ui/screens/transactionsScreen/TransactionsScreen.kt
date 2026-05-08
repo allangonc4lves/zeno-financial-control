@@ -57,7 +57,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import br.dev.allan.controlefinanceiro.R
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
 import br.dev.allan.controlefinanceiro.domain.model.getAppearance
 import br.dev.allan.controlefinanceiro.presentation.ui.components.CustomTextContent
 import br.dev.allan.controlefinanceiro.presentation.ui.state.ReportItemUiModel

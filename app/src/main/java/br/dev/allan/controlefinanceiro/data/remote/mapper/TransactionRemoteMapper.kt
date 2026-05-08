@@ -3,9 +3,9 @@ package br.dev.allan.controlefinanceiro.data.remote.mapper
 import android.util.Log
 import br.dev.allan.controlefinanceiro.data.remote.model.TransactionDto
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 
 fun Transaction.toDto(userId: String): TransactionDto {
     return TransactionDto(

@@ -1,5 +1,6 @@
 package br.dev.allan.controlefinanceiro.domain.repository
 
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
 import br.dev.allan.controlefinanceiro.data.local.PaymentStatusEntity
 import br.dev.allan.controlefinanceiro.data.local.TransactionEntity
 import br.dev.allan.controlefinanceiro.domain.model.CategorySum
@@ -32,7 +33,7 @@ interface TransactionRepository {
         groupId: String,
         title: String,
         amount: Double,
-        category: br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory,
+        category: TransactionCategory,
         creditCardId: String?
     )
     suspend fun updateCardIdByGroupId(groupId: String, cardId: String?)

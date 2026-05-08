@@ -1,4 +1,4 @@
-package br.dev.allan.controlefinanceiro.utils.constants
+package br.dev.allan.controlefinanceiro.constants
 
 enum class InputModeCustomTextField {
     DIGITS, TEXT

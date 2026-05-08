@@ -1,7 +1,7 @@
 package br.dev.allan.controlefinanceiro.domain.usecase
 
 import br.dev.allan.controlefinanceiro.domain.model.Transaction
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
+import br.dev.allan.controlefinanceiro.constants.TransactionType
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit

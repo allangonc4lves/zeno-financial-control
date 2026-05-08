@@ -13,7 +13,6 @@ import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.BusinessCenter
 import androidx.compose.material.icons.outlined.CardGiftcard
 import androidx.compose.material.icons.outlined.CompareArrows
-import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material.icons.outlined.Fastfood
@@ -36,8 +35,8 @@ import androidx.compose.material.icons.outlined.Subscriptions
 import androidx.compose.material.icons.outlined.TheaterComedy
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.ui.graphics.Color
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
+import br.dev.allan.controlefinanceiro.constants.TransactionDirection
 
 import androidx.annotation.StringRes
 import br.dev.allan.controlefinanceiro.R
@@ -51,7 +50,6 @@ data class CategoryAppearance(
 
 fun TransactionCategory.getAppearance(): CategoryAppearance {
     return when (this) {
-        //TransactionCategory.CREDIT_CARD_PAYMENT -> CategoryAppearance(R.string.credit_card_label, Icons.Outlined.CreditCard, TransactionDirection.EXPENSE, Color(0xFFFF0000))
         TransactionCategory.SAVINGS -> CategoryAppearance(R.string.cat_savings, Icons.Outlined.Savings, TransactionDirection.EXPENSE, Color(0xFF22FF00))
         TransactionCategory.HOUSING -> CategoryAppearance(R.string.cat_housing, Icons.Outlined.House, TransactionDirection.EXPENSE, Color(0xFFD000FF))
         TransactionCategory.ENERGY_BILL -> CategoryAppearance(R.string.cat_energy_bill, Icons.Outlined.ElectricalServices, TransactionDirection.EXPENSE, Color(0xFF5E35B1))

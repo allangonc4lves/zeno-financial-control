@@ -1,9 +1,5 @@
 package br.dev.allan.controlefinanceiro.data.remote.model
 
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionDirection
-import br.dev.allan.controlefinanceiro.utils.constants.TransactionType
-
 data class TransactionDto(
     val id: String = "",
     val groupId: String? = null,

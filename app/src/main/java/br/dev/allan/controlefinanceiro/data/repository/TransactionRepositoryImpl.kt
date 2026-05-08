@@ -1,6 +1,7 @@
 package br.dev.allan.controlefinanceiro.data.repository
 
 import androidx.work.*
+import br.dev.allan.controlefinanceiro.constants.TransactionCategory
 import br.dev.allan.controlefinanceiro.data.local.PaymentStatusEntity
 import br.dev.allan.controlefinanceiro.data.local.TransactionDao
 import br.dev.allan.controlefinanceiro.data.local.TransactionEntity
@@ -191,7 +192,7 @@ class TransactionRepositoryImpl @Inject constructor(
         groupId: String,
         title: String,
         amount: Double,
-        category: br.dev.allan.controlefinanceiro.utils.constants.TransactionCategory,
+        category: TransactionCategory,
         creditCardId: String?
     ) {
         transactionDao.updateTransactionGroup(groupId, title, amount, category.name, creditCardId)

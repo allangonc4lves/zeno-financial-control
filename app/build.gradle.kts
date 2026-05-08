@@ -40,7 +40,7 @@ android {
         compose = true
     }
 
-    // Inclui o código gerado pelo KSP nos sourceSets
+    //código gerado pelo KSP nos sourceSets
     sourceSets {
         named("debug") {
             kotlin.directories.addAll(
